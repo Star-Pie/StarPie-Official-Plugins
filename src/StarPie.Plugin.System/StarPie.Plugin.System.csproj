@@ -1,0 +1,76 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    StarPie 随包动作包：系统控制
+    ==================================================================
+    单动作包 —— 认领一个顶层动作类型（见下面的 StarPiePluginTypeClaims），
+    用户在配置里写的 Type="System" 由本程序集执行。
+
+    **为什么一个动作单独占一个包**：拆包的唯一正当理由是「用户会想单独关掉它」。
+    它与「截屏识字」原本同属一个包，要关就得两个一起关。
+    拆开之后，想留着一个、关掉另一个的用户终于说得出口。
+
+    **它是最后一批里唯一需要新开宿主服务面的动作**：
+    「最小化 / 任务视图 / 音量 / 关机」这一族在 SDK 里原本没有任何对应物 ——
+    IHostActionInvoker 只能发单个组合键，而这族动作里有相当一部分根本不是快捷键
+    （任务管理器、计算器、关机都是起进程，打开设置与快速搜索是让宿主弹自己的窗口）。
+    所以 1.4 新增了 IHostSystemService，语义是「宿主，请替我执行这个系统功能」。
+
+    三条与社区插件完全相同的约束（照抄自 samples/HelloAction）：
+      1. TargetFramework 不得高于宿主；
+      2. ProjectReference 必须 Private=false —— 否则产物里会多出一份
+         StarPie.Plugin.Abstractions.dll，两份类型身份会让所有强转失败；
+      3. 只能引用 SDK 与 BCL，**绝不引用主程序 StarPie.dll**。
+
+    第 3 条对这个包尤其有意义：整个系统功能表（含全部历史别名）都在宿主里，
+    插件只传一个键过去，自己一行 P/Invoke、一次 Process.Start 都没有。
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12.0</LangVersion>
+
+    <AssemblyName>StarPie.Plugin.System</AssemblyName>
+    <RootNamespace>StarPie.Plugin.System</RootNamespace>
+
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Product>StarPie 系统控制</Product>
+    <Company>StarPie Studio</Company>
+    <Description>随 StarPie 分发的内置动作：最小化 / 任务视图 / 音量 / 锁屏 / 关机等系统功能。可在「插件」页单独停用。</Description>
+
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Private=false：不把 SDK 程序集复制到输出目录。生产物里必须只有这一枚 dll。 -->
+    <ProjectReference Include="..\..\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="StarPiePluginId" Value="starpie.builtin.system" />
+    <!-- 插件名与动作显示名刻意一致：用户停用的是这个动作，插件页里那一行若叫别的名字，他还得自己建立对应关系。 -->
+    <AssemblyMetadata Include="StarPiePluginName" Value="系统控制" />
+    <!--
+      两项能力，各有各的真实后果，所以都声明：
+        · InputSimulation —— 绝大多数预设是往当前前台窗口投递按键（最小化 = Win+Down、
+          任务视图 = Win+Tab、音量 / 媒体键），而且是 RunPreset 的门禁，未声明直接拒绝；
+        · Process —— 少数预设确实会起进程（任务管理器 / 计算器 / 关机 / 重启 / 睡眠）。
+      Process 在本包里没有强制点，但它仍然是对用户说的真话，不是凑数：
+      安装确认页上「启动进程」这一条，对着 shutdown.exe 是成立的。
+    -->
+    <AssemblyMetadata Include="StarPiePluginCapabilities" Value="InputSimulation;Process" />
+    <AssemblyMetadata Include="StarPiePluginLicense" Value="MIT" />
+    <AssemblyMetadata Include="StarPiePluginHomepage" Value="https://github.com/SoftBlack42/StarPie" />
+
+    <!-- 右侧的短 ID 必须与 SystemPlugin.Initialize 里注册的 Descriptor.Id 逐字一致，自检 [3i] 守这条。 -->
+    <AssemblyMetadata Include="StarPiePluginTypeClaims" Value="System=system" />
+  </ItemGroup>
+
+</Project>

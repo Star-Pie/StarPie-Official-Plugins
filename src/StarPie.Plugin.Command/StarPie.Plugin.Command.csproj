@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    StarPie 随包动作包：运行命令
+    ==================================================================
+    单动作包 —— 认领一个顶层动作类型（见下面的 StarPiePluginTypeClaims），
+    用户在配置里写的 Type="Command" 由本程序集执行。
+
+    **为什么一个动作单独占一个包**：拆包的唯一正当理由是「用户会想单独关掉它」。
+    它与「启动程序 / 打开网址 / 打开文件夹 / 系统与右键工具」原本同属一个包，
+    要关就得五个一起关；拆开之后停用粒度精确到动作。
+
+    对这个动作来说粒度尤其有意义：它的后果是**执行任意命令行**，
+    是这几个动作里用户最可能想单独关掉的一类。
+
+    三条与社区插件完全相同的约束（照抄自 samples/HelloAction）：
+      1. TargetFramework 不得高于宿主；
+      2. ProjectReference 必须 Private=false —— 否则产物里会多出一份
+         StarPie.Plugin.Abstractions.dll，两份类型身份会让所有强转失败；
+      3. 只能引用 SDK 与 BCL，**绝不引用主程序 StarPie.dll**。
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12.0</LangVersion>
+
+    <AssemblyName>StarPie.Plugin.Command</AssemblyName>
+    <RootNamespace>StarPie.Plugin.Command</RootNamespace>
+
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Product>StarPie 运行命令</Product>
+    <Company>StarPie Studio</Company>
+    <Description>随 StarPie 分发的内置动作：在指定终端中执行命令行。可在「插件」页单独停用。</Description>
+
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Private=false：不把 SDK 程序集复制到输出目录。生产物里必须只有这一枚 dll。 -->
+    <ProjectReference Include="..\..\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="StarPiePluginId" Value="starpie.builtin.command" />
+    <!-- 插件名与动作显示名刻意一致：用户停用的是这个动作，插件页里那一行若叫别的名字，他还得自己建立对应关系。 -->
+    <AssemblyMetadata Include="StarPiePluginName" Value="运行命令" />
+    <!-- 这一项能力有真实强制点：执行走 IHostCommandService.Run，未声明 Process 会被直接拒绝。 -->
+    <AssemblyMetadata Include="StarPiePluginCapabilities" Value="Process" />
+    <AssemblyMetadata Include="StarPiePluginLicense" Value="MIT" />
+    <AssemblyMetadata Include="StarPiePluginHomepage" Value="https://github.com/SoftBlack42/StarPie" />
+
+    <!-- 右侧的短 ID 必须与 CommandPlugin.Initialize 里注册的 Descriptor.Id 逐字一致，自检 [3i] 守这条。 -->
+    <AssemblyMetadata Include="StarPiePluginTypeClaims" Value="Command=command" />
+  </ItemGroup>
+
+</Project>
