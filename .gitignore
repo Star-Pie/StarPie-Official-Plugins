@@ -21,7 +21,7 @@ artifacts/*
 *.log
 
 # Release metadata produced by workflows
-release-metadata/*.json
+release-metadata/**
 !release-metadata/.gitkeep
 
 # OS files
