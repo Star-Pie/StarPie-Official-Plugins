@@ -1,11 +1,13 @@
 <Project>
   <!--
-    Every official module must share the host SDK contract instead of carrying a private copy.
-    A second StarPie.Plugin.Abstractions.dll causes type-identity split and makes casts fail.
+    官方插件输出不得携带 StarPie.Plugin.Abstractions.dll。
+    SDK 项目自身不参与这条检查，因为它的构建产物本来就是该程序集。
   -->
-  <Target Name="ValidateOfficialPluginOutput" AfterTargets="Build">
+  <Target Name="ValidateOfficialPluginOutput"
+          AfterTargets="Build"
+          Condition="'$(MSBuildProjectName)' != 'StarPie.Plugin.Abstractions'">
     <Error
       Condition="Exists('$(TargetDir)StarPie.Plugin.Abstractions.dll')"
-      Text="StarPie.Plugin.Abstractions.dll must not be copied into an official plugin output: $(TargetDir)" />
+      Text="官方插件输出目录不能包含 StarPie.Plugin.Abstractions.dll：$(TargetDir)" />
   </Target>
 </Project>
