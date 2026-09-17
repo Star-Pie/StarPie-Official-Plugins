@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "catalogVersion": "2026.09.18.1",
+  "releaseTag": "modules-2026.09.18.1",
+  "releaseChannel": "beta",
+  "sdkApiVersion": "1.4",
+  "minimumHostVersion": "1.8.0-beta.1",
+  "generatedAt": "2026-09-18T00:00:00Z",
+  "modules": [
+    {
+      "id": "starpie.builtin.launch",
+      "name": "Launch",
+      "version": "1.0.0",
+      "releaseTag": "modules-2026.09.17.1",
+      "assetName": "StarPie.Plugin.Launch-1.0.0.spkg",
+      "packageUrl": "https://github.com/Star-Pie/StarPie-Official-Plugins/releases/download/modules-2026.09.17.1/StarPie.Plugin.Launch-1.0.0.spkg",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "size": 10240,
+      "apiVersion": "1.4",
+      "minHostVersion": "1.8.0-beta.1",
+      "maxHostVersion": null,
+      "typeClaims": ["Launch"],
+      "capabilities": ["Process"],
+      "signature": null
+    },
+    {
+      "id": "starpie.builtin.ocr",
+      "name": "Ocr",
+      "version": "1.0.1",
+      "releaseTag": "modules-2026.09.18.1",
+      "assetName": "StarPie.Plugin.Ocr-1.0.1.spkg",
+      "packageUrl": "https://github.com/Star-Pie/StarPie-Official-Plugins/releases/download/modules-2026.09.18.1/StarPie.Plugin.Ocr-1.0.1.spkg",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "size": 11264,
+      "apiVersion": "1.4",
+      "minHostVersion": "1.8.0-beta.1",
+      "maxHostVersion": null,
+      "typeClaims": ["Ocr", "ScreenOcr"],
+      "capabilities": ["ScreenCapture"],
+      "signature": null
+    }
+  ]
+}

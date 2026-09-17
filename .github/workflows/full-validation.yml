@@ -1,0 +1,105 @@
+name: Full Official Module Validation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 18 * * 0'
+  push:
+    branches:
+      - main
+    paths:
+      - 'Directory.Build.props'
+      - 'Directory.Build.targets'
+      - 'global.json'
+      - 'NuGet.config'
+      - 'module-registry.json'
+      - 'build/**'
+      - 'catalog/**'
+      - '.github/workflows/full-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  configure:
+    name: Configure full matrix
+    runs-on: windows-latest
+    outputs:
+      has_modules: ${{ steps.modules.outputs.has_modules }}
+      matrix: ${{ steps.modules.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Build full module matrix
+        id: modules
+        shell: pwsh
+        run: |
+          ./build/Get-ChangedModules.ps1 -BaseRef HEAD -HeadRef HEAD -ForceAll
+
+  validate:
+    name: Validate / ${{ matrix.module.name }}
+    needs: configure
+    if: needs.configure.outputs.has_modules == 'true'
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJson(needs.configure.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Build and test module
+        shell: pwsh
+        run: |
+          ./build/Build-Modules.ps1 -ModuleIds '${{ matrix.module.id }}' -Configuration Release -RunTests
+
+      - name: Pack and verify module
+        shell: pwsh
+        run: |
+          $metadataPath = "release-metadata/full/${{ matrix.module.id }}.json"
+          ./build/Pack-Module.ps1 `
+            -ModuleId '${{ matrix.module.id }}' `
+            -Configuration Release `
+            -OutputDirectory 'artifacts/full-validation' `
+            -ReleaseTag 'full-validation-${{ github.run_id }}' `
+            -OutputMetadataPath $metadataPath `
+            -Clean
+          $metadata = Get-Content $metadataPath -Raw | ConvertFrom-Json
+          ./build/Verify-ModulePackage.ps1 -PackagePath $metadata.packagePath -ModuleId '${{ matrix.module.id }}'
+
+      - name: Upload validation package
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-validation-${{ matrix.module.id }}-${{ github.run_number }}
+          path: artifacts/full-validation/*.spkg
+          if-no-files-found: error
+
+  gate:
+    name: Full validation gate
+    if: always()
+    needs: [configure, validate]
+    runs-on: windows-latest
+    steps:
+      - name: Check job results
+        shell: pwsh
+        env:
+          CONFIGURE_RESULT: ${{ needs.configure.result }}
+          VALIDATE_RESULT: ${{ needs.validate.result }}
+        run: |
+          if ($env:CONFIGURE_RESULT -ne 'success') { throw "configure failed: $env:CONFIGURE_RESULT" }
+          if ($env:VALIDATE_RESULT -notin @('success', 'skipped')) { throw "validate failed: $env:VALIDATE_RESULT" }
+          Write-Host "Full validation gate passed. validate=$env:VALIDATE_RESULT"

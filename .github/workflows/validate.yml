@@ -1,0 +1,122 @@
+name: Validate Official Modules
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  affected:
+    name: Resolve affected modules
+    runs-on: windows-latest
+    outputs:
+      has_modules: ${{ steps.detect.outputs.has_modules }}
+      matrix: ${{ steps.detect.outputs.matrix }}
+      reason: ${{ steps.detect.outputs.reason }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Detect affected modules
+        id: detect
+        shell: pwsh
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
+          HEAD_REF: ${{ github.sha }}
+        run: |
+          $base = $env:BASE_REF
+          if ([string]::IsNullOrWhiteSpace($base) -or $base -match '^0+$') {
+            ./build/Get-ChangedModules.ps1 -BaseRef HEAD -HeadRef HEAD -ForceAll
+          }
+          else {
+            git rev-parse --verify "$base^{commit}" *> $null
+            if ($LASTEXITCODE -ne 0) {
+              ./build/Get-ChangedModules.ps1 -BaseRef HEAD -HeadRef HEAD -ForceAll
+            }
+            else {
+              ./build/Get-ChangedModules.ps1 -BaseRef $base -HeadRef $env:HEAD_REF
+            }
+          }
+
+  build:
+    name: Build / ${{ matrix.module.name }}
+    needs: affected
+    if: needs.affected.outputs.has_modules == 'true'
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJson(needs.affected.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Build and test module
+        shell: pwsh
+        run: |
+          ./build/Build-Modules.ps1 -ModuleIds '${{ matrix.module.id }}' -Configuration Release -RunTests
+
+      - name: Pack module
+        shell: pwsh
+        run: |
+          ./build/Pack-Module.ps1 `
+            -ModuleId '${{ matrix.module.id }}' `
+            -Configuration Release `
+            -OutputDirectory 'artifacts/packages' `
+            -ReleaseTag 'ci-${{ github.run_id }}' `
+            -OutputMetadataPath 'release-metadata/packages/${{ matrix.module.id }}.json' `
+            -Clean
+
+      - name: Verify module package
+        shell: pwsh
+        run: |
+          $metadata = Get-Content 'release-metadata/packages/${{ matrix.module.id }}.json' -Raw | ConvertFrom-Json
+          ./build/Verify-ModulePackage.ps1 -PackagePath $metadata.packagePath -ModuleId '${{ matrix.module.id }}'
+
+      - name: Upload module package
+        uses: actions/upload-artifact@v4
+        with:
+          name: module-${{ matrix.module.id }}-${{ github.run_number }}
+          path: |
+            artifacts/packages/*.spkg
+            release-metadata/packages/${{ matrix.module.id }}.json
+          if-no-files-found: error
+
+  gate:
+    name: Validation gate
+    if: always()
+    needs: [affected, build]
+    runs-on: windows-latest
+    steps:
+      - name: Check job results
+        shell: pwsh
+        env:
+          AFFECTED_RESULT: ${{ needs.affected.result }}
+          BUILD_RESULT: ${{ needs.build.result }}
+        run: |
+          if ($env:AFFECTED_RESULT -ne 'success') {
+            throw "affected job failed: $env:AFFECTED_RESULT"
+          }
+          if ($env:BUILD_RESULT -notin @('success', 'skipped')) {
+            throw "build job failed: $env:BUILD_RESULT"
+          }
+          Write-Host "Validation gate passed. build=$env:BUILD_RESULT"

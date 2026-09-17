@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://starpie.app/schemas/module-catalog.schema.json",
+  "title": "StarPie Official Module Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "catalogVersion",
+    "releaseTag",
+    "releaseChannel",
+    "sdkApiVersion",
+    "minimumHostVersion",
+    "generatedAt",
+    "modules"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "catalogVersion": { "type": "string", "minLength": 1 },
+    "releaseTag": { "type": "string", "minLength": 1 },
+    "releaseChannel": { "type": "string", "enum": ["stable", "beta", "dev"] },
+    "sdkApiVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
+    "minimumHostVersion": { "type": "string", "minLength": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "version",
+          "releaseTag",
+          "assetName",
+          "packageUrl",
+          "sha256",
+          "size",
+          "apiVersion",
+          "minHostVersion",
+          "maxHostVersion",
+          "typeClaims",
+          "capabilities"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^starpie\\." },
+          "name": { "type": "string", "minLength": 1 },
+          "version": { "type": "string", "minLength": 1 },
+          "releaseTag": { "type": "string", "minLength": 1 },
+          "assetName": { "type": "string", "pattern": "\\.spkg$" },
+          "packageUrl": { "type": "string", "format": "uri", "pattern": "^https://" },
+          "sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+          "size": { "type": "integer", "minimum": 1 },
+          "apiVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
+          "minHostVersion": { "type": "string", "minLength": 1 },
+          "maxHostVersion": { "type": ["string", "null"] },
+          "typeClaims": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "capabilities": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "signature": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

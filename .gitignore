@@ -1,0 +1,30 @@
+# Build output
+bin/
+obj/
+artifacts/*
+!artifacts/.gitkeep
+
+# Local tooling
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.nupkg
+*.snupkg
+*.pdb
+*.spkg
+*.spkg.sig
+*.sig
+*.bundle
+*.zip
+*.log
+
+# Release metadata produced by workflows
+release-metadata/*.json
+!release-metadata/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini

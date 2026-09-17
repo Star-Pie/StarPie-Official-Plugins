@@ -1,0 +1,297 @@
+name: Release Official Module Set
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Immutable release tag, for example modules-2026.09.18.1'
+        required: true
+        type: string
+      release_channel:
+        description: 'Release channel'
+        required: true
+        default: beta
+        type: choice
+        options:
+          - stable
+          - beta
+          - dev
+      module_ids:
+        description: 'Optional comma-separated module IDs to consider; empty means all version changes'
+        required: false
+        default: ''
+        type: string
+      dry_run:
+        description: 'Build and validate a catalog without creating a GitHub release'
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  select:
+    name: Resolve version changes
+    runs-on: windows-latest
+    outputs:
+      has_modules: ${{ steps.select.outputs.has_modules }}
+      matrix: ${{ steps.select.outputs.matrix }}
+      changed_ids: ${{ steps.select.outputs.changed_ids }}
+      previous_catalog: ${{ steps.previous.outputs.catalog_path }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Download latest released catalog when available
+        id: previous
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $outDir = 'artifacts/previous-catalog'
+          New-Item -ItemType Directory -Path $outDir -Force | Out-Null
+          $catalogPath = Join-Path $outDir 'module-catalog.json'
+
+          $tags = gh release list --repo '${{ github.repository }}' --exclude-drafts --limit 1 --json tagName --jq '.[].tagName'
+          if ($LASTEXITCODE -eq 0 -and $tags) {
+            $latestTag = @($tags)[0].Trim()
+            gh release download $latestTag --repo '${{ github.repository }}' --pattern 'module-catalog.json' --dir $outDir --clobber
+            if ($LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $catalogPath)) {
+              "catalog_path=$catalogPath" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
+              Write-Host "Using previous catalog from release $latestTag"
+              exit 0
+            }
+          }
+
+          if (Test-Path -LiteralPath 'catalog/module-catalog.json') {
+            Copy-Item -LiteralPath 'catalog/module-catalog.json' -Destination $catalogPath -Force
+            "catalog_path=$catalogPath" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
+            Write-Host 'Using repository bootstrap catalog/module-catalog.json'
+          }
+          else {
+            "catalog_path=" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
+            Write-Host 'No previous catalog found; all registered modules are eligible.'
+          }
+          exit 0
+
+      - name: Resolve modules
+        id: select
+        shell: pwsh
+        env:
+          MODULE_IDS: ${{ inputs.module_ids }}
+          PREVIOUS_CATALOG: ${{ steps.previous.outputs.catalog_path }}
+        run: |
+          $ids = @($env:MODULE_IDS -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+          $args = @()
+          if ($ids.Count -gt 0) { $args += @('-ModuleIds', ($ids -join ',')) }
+          if ($env:PREVIOUS_CATALOG -and (Test-Path -LiteralPath $env:PREVIOUS_CATALOG)) {
+            $args += @('-PreviousCatalogPath', $env:PREVIOUS_CATALOG)
+          }
+
+          if ($args.Count -gt 0) {
+            $raw = & ./build/Get-VersionChanges.ps1 @args
+          }
+          else {
+            $raw = & ./build/Get-VersionChanges.ps1
+          }
+          $result = $raw | ConvertFrom-Json -Depth 100
+
+          "has_modules=$($result.hasModules.ToString().ToLowerInvariant())" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "matrix=$($result.matrix | ConvertTo-Json -Compress -Depth 100)" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "changed_ids=$($result.changed -join ',')" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+          if (-not $result.hasModules) {
+            throw 'No module version changes were detected. Nothing to release.'
+          }
+
+  build:
+    name: Build / ${{ matrix.module.name }}
+    needs: select
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJson(needs.select.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Build and test module
+        shell: pwsh
+        run: |
+          ./build/Build-Modules.ps1 -ModuleIds '${{ matrix.module.id }}' -Configuration Release -RunTests
+
+      - name: Pack and verify module
+        shell: pwsh
+        run: |
+          ./build/Pack-Module.ps1 `
+            -ModuleId '${{ matrix.module.id }}' `
+            -Configuration Release `
+            -OutputDirectory 'artifacts/packages' `
+            -ReleaseTag '${{ inputs.release_tag }}' `
+            -OutputMetadataPath 'release-metadata/packages/${{ matrix.module.id }}.json' `
+            -Clean
+          $metadata = Get-Content 'release-metadata/packages/${{ matrix.module.id }}.json' -Raw | ConvertFrom-Json
+          ./build/Verify-ModulePackage.ps1 -PackagePath $metadata.packagePath -ModuleId '${{ matrix.module.id }}'
+
+      - name: Upload module release inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-module-${{ matrix.module.id }}-${{ github.run_number }}
+          path: |
+            artifacts/packages/*.spkg
+            release-metadata/packages/${{ matrix.module.id }}.json
+          if-no-files-found: error
+
+  compose:
+    name: Compose release
+    needs: [select, build]
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Download module release inputs
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: release-module-*-${{ github.run_number }}
+          merge-multiple: true
+
+      - name: Merge package metadata
+        shell: pwsh
+        run: |
+          ./build/Merge-PackageMetadata.ps1 `
+            -MetadataDirectory 'release-metadata/packages' `
+            -OutputPath 'release-metadata/packages.json'
+
+      - name: Generate catalog
+        shell: pwsh
+        env:
+          PREVIOUS_CATALOG: ${{ needs.select.outputs.previous_catalog }}
+        run: |
+          $catalogArgs = @(
+            '-ReleaseTag', '${{ inputs.release_tag }}',
+            '-ReleaseChannel', '${{ inputs.release_channel }}',
+            '-PackagesJson', 'release-metadata/packages.json',
+            '-Repository', '${{ github.repository }}',
+            '-OutputPath', 'release-metadata/module-catalog.json'
+          )
+          if ($env:PREVIOUS_CATALOG -and (Test-Path -LiteralPath $env:PREVIOUS_CATALOG)) {
+            $catalogArgs += @('-PreviousCatalogPath', $env:PREVIOUS_CATALOG)
+          }
+          ./build/Generate-ModuleCatalog.ps1 @catalogArgs
+          ./build/Verify-Catalog.ps1 -CatalogPath 'release-metadata/module-catalog.json'
+
+      - name: Generate release notes
+        shell: pwsh
+        env:
+          CHANGED_IDS: ${{ needs.select.outputs.changed_ids }}
+        run: |
+          $ids = @($env:CHANGED_IDS -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+          ./build/New-ReleaseNotes.ps1 `
+            -CatalogPath 'release-metadata/module-catalog.json' `
+            -ChangedModuleIds $ids `
+            -ReleaseTag '${{ inputs.release_tag }}' `
+            -ReleaseChannel '${{ inputs.release_channel }}' `
+            -OutputPath 'release-metadata/release-notes.md'
+
+      - name: Install cosign
+        if: ${{ !inputs.dry_run && vars.SIGNING_ENABLED == 'true' }}
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign catalog
+        if: ${{ !inputs.dry_run && vars.SIGNING_ENABLED == 'true' }}
+        shell: pwsh
+        run: |
+          ./build/Sign-Artifact.ps1 `
+            -Path 'release-metadata/module-catalog.json' `
+            -Mode cosign `
+            -OutputPath 'release-metadata/module-catalog.sigstore.json'
+
+      - name: Require signing for non-dry-run release
+        if: ${{ !inputs.dry_run && vars.SIGNING_ENABLED != 'true' }}
+        shell: pwsh
+        run: |
+          throw 'Non-dry-run releases require repository variable SIGNING_ENABLED=true and a configured cosign identity.'
+
+      - name: Attest package provenance
+        if: ${{ !inputs.dry_run }}
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: artifacts/packages/*.spkg
+
+      - name: Create draft release
+        if: ${{ !inputs.dry_run }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $assets = @(Get-ChildItem -LiteralPath 'artifacts/packages' -Filter '*.spkg' -File | ForEach-Object FullName)
+          if ($assets.Count -eq 0) { throw 'No module packages were produced.' }
+
+          gh release create '${{ inputs.release_tag }}' `
+            --repo '${{ github.repository }}' `
+            --title "Official modules ${{ inputs.release_tag }}" `
+            --notes-file 'release-metadata/release-notes.md' `
+            --draft `
+            $assets
+          if ($LASTEXITCODE -ne 0) { throw 'gh release create failed.' }
+
+          gh release upload '${{ inputs.release_tag }}' `
+            'release-metadata/module-catalog.json' `
+            --repo '${{ github.repository }}' `
+            --clobber
+          if ($LASTEXITCODE -ne 0) { throw 'gh release upload catalog failed.' }
+
+          if (Test-Path -LiteralPath 'release-metadata/module-catalog.sigstore.json') {
+            gh release upload '${{ inputs.release_tag }}' `
+              'release-metadata/module-catalog.sigstore.json' `
+              --repo '${{ github.repository }}' `
+              --clobber
+            if ($LASTEXITCODE -ne 0) { throw 'gh release upload catalog signature failed.' }
+          }
+
+      - name: Publish release
+        if: ${{ !inputs.dry_run }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release edit '${{ inputs.release_tag }}' --draft=false --repo '${{ github.repository }}'
+          if ($LASTEXITCODE -ne 0) { throw 'gh release edit failed.' }
+
+      - name: Upload dry-run outputs
+        if: ${{ inputs.dry_run }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-dry-run-${{ github.run_number }}
+          path: |
+            artifacts/packages/*.spkg
+            release-metadata/module-catalog.json
+            release-metadata/release-notes.md
+          if-no-files-found: error

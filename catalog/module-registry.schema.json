@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://starpie.app/schemas/module-registry.schema.json",
+  "title": "StarPie Official Module Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "sdkApiVersion", "minimumHostVersion", "modules"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "sdkApiVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
+    "minimumHostVersion": { "type": "string", "minLength": 1 },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "project",
+          "assembly",
+          "targetFramework",
+          "version",
+          "pluginId",
+          "typeClaims",
+          "capabilities",
+          "contributionId",
+          "releaseDirectory"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^starpie\\.builtin\\.[a-z0-9.-]+$" },
+          "name": { "type": "string", "minLength": 1 },
+          "project": { "type": "string", "pattern": "\\.csproj$" },
+          "assembly": { "type": "string", "pattern": "\\.dll$" },
+          "targetFramework": { "type": "string", "minLength": 1 },
+          "version": { "type": "string", "minLength": 1 },
+          "pluginId": { "type": "string", "pattern": "^starpie\\." },
+          "typeClaims": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "capabilities": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "contributionId": { "type": "string", "minLength": 1 },
+          "releaseDirectory": { "type": "string", "minLength": 1 },
+          "entryType": { "type": "string" },
+          "apiVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
+          "minHostVersion": { "type": "string" },
+          "maxHostVersion": { "type": ["string", "null"] },
+          "author": { "type": "string" },
+          "license": { "type": "string" },
+          "homepage": { "type": "string" },
+          "icon": { "type": ["string", "null"] },
+          "description": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "enabled": { "type": "boolean", "default": true }
+        }
+      }
+    }
+  }
+}

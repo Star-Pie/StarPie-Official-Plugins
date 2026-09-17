@@ -1,0 +1,20 @@
+{
+  "id": "starpie.builtin.example",
+  "name": "Example",
+  "project": "src/StarPie.Plugin.Example/StarPie.Plugin.Example.csproj",
+  "assembly": "StarPie.Plugin.Example.dll",
+  "targetFramework": "net8.0-windows",
+  "version": "1.0.0",
+  "pluginId": "starpie.builtin.example",
+  "contributionId": "example",
+  "entryType": "StarPie.Plugin.Example.ExamplePlugin",
+  "typeClaims": ["Example", "ExampleAlias"],
+  "capabilities": ["Process"],
+  "releaseDirectory": "example",
+  "description": "Official example module.",
+  "author": "StarPie Studio",
+  "license": "MIT",
+  "homepage": "https://github.com/Star-Pie/StarPie",
+  "icon": null,
+  "tags": ["official", "example"]
+}
