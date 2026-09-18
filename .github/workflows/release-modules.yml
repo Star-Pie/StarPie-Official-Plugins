@@ -57,31 +57,26 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $outDir = 'artifacts/previous-catalog'
-          New-Item -ItemType Directory -Path $outDir -Force | Out-Null
-          $catalogPath = Join-Path $outDir 'module-catalog.json'
+          $catalogPath = [string](& ./build/Get-PreviousCatalog.ps1 `
+            -Channel '${{ inputs.release_channel }}' `
+            -Repository '${{ github.repository }}')
+          $catalogPath = $catalogPath.Trim()
 
-          $tags = gh release list --repo '${{ github.repository }}' --exclude-drafts --limit 1 --json tagName --jq '.[].tagName'
-          if ($LASTEXITCODE -eq 0 -and $tags) {
-            $latestTag = @($tags)[0].Trim()
-            gh release download $latestTag --repo '${{ github.repository }}' --pattern 'module-catalog.json' --dir $outDir --clobber
-            if ($LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $catalogPath)) {
-              "catalog_path=$catalogPath" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
-              Write-Host "Using previous catalog from release $latestTag"
-              exit 0
-            }
-          }
-
-          if (Test-Path -LiteralPath 'catalog/module-catalog.json') {
-            Copy-Item -LiteralPath 'catalog/module-catalog.json' -Destination $catalogPath -Force
-            "catalog_path=$catalogPath" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
-            Write-Host 'Using repository bootstrap catalog/module-catalog.json'
+          "catalog_path=$catalogPath" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          if ($catalogPath) {
+            Write-Host "Using previous catalog for channel '${{ inputs.release_channel }}': $catalogPath"
           }
           else {
-            "catalog_path=" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
-            Write-Host 'No previous catalog found; all registered modules are eligible.'
+            Write-Host "No previous catalog found for channel '${{ inputs.release_channel }}'; all registered modules are eligible."
           }
-          exit 0
+
+      - name: Upload previous catalog
+        if: ${{ hashFiles('artifacts/previous-catalog/module-catalog.json') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: previous-catalog-${{ github.run_number }}
+          path: artifacts/previous-catalog/module-catalog.json
+          if-no-files-found: error
 
       - name: Resolve modules
         id: select
@@ -179,6 +174,13 @@ jobs:
         with:
           pattern: release-module-*-${{ github.run_number }}
           merge-multiple: true
+
+      - name: Download previous catalog
+        if: ${{ needs.select.outputs.previous_catalog != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: previous-catalog-${{ github.run_number }}
+          path: artifacts/previous-catalog
 
       - name: Merge package metadata
         shell: pwsh
