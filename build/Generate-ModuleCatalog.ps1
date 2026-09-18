@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
   [Parameter(Mandatory)][string]$ReleaseTag,
-  [Parameter(Mandatory)][ValidateSet('stable','beta','dev')][string]$ReleaseChannel,
+  [Parameter(Mandatory)][ValidateSet('stable','beta')][string]$ReleaseChannel,
   [Parameter(Mandatory)][string]$PackagesJson,
   [string]$PreviousCatalogPath = 'catalog/module-catalog.json',
   [Parameter(Mandatory)][string]$Repository,

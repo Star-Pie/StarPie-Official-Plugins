@@ -24,7 +24,7 @@ The client must verify the catalog signature before trusting any package URL or 
 - Verify assembly SHA-256 from `module.manifest.json`.
 - Verify `PluginApi` and host compatibility.
 - Verify no private `StarPie.Plugin.Abstractions.dll` is packaged.
-- Reject unsigned production releases unless a development channel explicitly permits them.
+- Reject unsigned `stable` and `beta` releases; dry-run artifacts are never publishable releases.
 
 ## Non-goals
 

@@ -15,7 +15,6 @@ on:
         options:
           - stable
           - beta
-          - dev
       module_ids:
         description: 'Optional comma-separated module IDs to consider; empty means all version changes'
         required: false
@@ -178,7 +177,6 @@ jobs:
       - name: Download module release inputs
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
           pattern: release-module-*-${{ github.run_number }}
           merge-multiple: true
 
@@ -232,6 +230,17 @@ jobs:
             -Path 'release-metadata/module-catalog.json' `
             -Mode cosign `
             -OutputPath 'release-metadata/module-catalog.sigstore.json'
+
+      - name: Verify catalog signature
+        if: ${{ !inputs.dry_run && vars.SIGNING_ENABLED == 'true' }}
+        shell: pwsh
+        run: |
+          cosign verify-blob `
+            --bundle 'release-metadata/module-catalog.sigstore.json' `
+            --certificate-identity "${{ github.server_url }}/${{ github.repository }}/.github/workflows/release-modules.yml@${{ github.ref }}" `
+            --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' `
+            'release-metadata/module-catalog.json'
+          if ($LASTEXITCODE -ne 0) { throw 'Catalog signature verification failed.' }
 
       - name: Require signing for non-dry-run release
         if: ${{ !inputs.dry_run && vars.SIGNING_ENABLED != 'true' }}

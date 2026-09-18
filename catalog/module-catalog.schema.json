@@ -18,7 +18,7 @@
     "schemaVersion": { "type": "integer", "const": 1 },
     "catalogVersion": { "type": "string", "minLength": 1 },
     "releaseTag": { "type": "string", "minLength": 1 },
-    "releaseChannel": { "type": "string", "enum": ["stable", "beta", "dev"] },
+    "releaseChannel": { "type": "string", "enum": ["stable", "beta"] },
     "sdkApiVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
     "minimumHostVersion": { "type": "string", "minLength": 1 },
     "generatedAt": { "type": "string", "format": "date-time" },

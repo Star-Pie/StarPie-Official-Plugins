@@ -3,7 +3,7 @@ param(
   [Parameter(Mandatory)][string]$CatalogPath,
   [string[]]$ChangedModuleIds = @(),
   [Parameter(Mandatory)][string]$ReleaseTag,
-  [Parameter(Mandatory)][string]$ReleaseChannel,
+  [Parameter(Mandatory)][ValidateSet('stable','beta')][string]$ReleaseChannel,
   [Parameter(Mandatory)][string]$OutputPath
 )
 
