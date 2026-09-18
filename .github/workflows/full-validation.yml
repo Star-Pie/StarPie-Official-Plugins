@@ -15,7 +15,6 @@ on:
       - 'src/StarPie.Plugin.Abstractions/**'
       - 'build/**'
       - 'catalog/**'
-      - '.github/workflows/full-validation.yml'
 
 permissions:
   contents: read
