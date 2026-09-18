@@ -263,12 +263,18 @@ jobs:
           $assets = @(Get-ChildItem -LiteralPath 'artifacts/packages' -Filter '*.spkg' -File | ForEach-Object FullName)
           if ($assets.Count -eq 0) { throw 'No module packages were produced.' }
 
-          gh release create '${{ inputs.release_tag }}' `
-            --repo '${{ github.repository }}' `
-            --title "Official modules ${{ inputs.release_tag }}" `
-            --notes-file 'release-metadata/release-notes.md' `
-            --draft `
-            $assets
+          $releaseArgs = @(
+            'release', 'create', '${{ inputs.release_tag }}',
+            '--repo', '${{ github.repository }}',
+            '--title', "Official modules ${{ inputs.release_tag }}",
+            '--notes-file', 'release-metadata/release-notes.md',
+            '--draft'
+          )
+          if ('${{ inputs.release_channel }}' -eq 'beta') {
+            $releaseArgs += '--prerelease'
+          }
+          $releaseArgs += $assets
+          gh @releaseArgs
           if ($LASTEXITCODE -ne 0) { throw 'gh release create failed.' }
 
           gh release upload '${{ inputs.release_tag }}' `

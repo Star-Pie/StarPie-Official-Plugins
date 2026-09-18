@@ -36,18 +36,6 @@ foreach ($module in @($catalog.modules | Sort-Object name)) {
     $status = if ($changed.ContainsKey($module.id)) { 'Updated in this release' } else { "Referenced from ``$($module.releaseTag)``" }
     $lines.Add("| $($module.name) | $($module.version) | $status |")
 }
-$lines.Add('')
-$lines.Add('### Assets')
-$lines.Add('')
-$lines.Add('- `module-catalog.json`')
-if ($changed.Count -gt 0) {
-    foreach ($module in @($catalog.modules | Where-Object { $changed.ContainsKey($_.id) } | Sort-Object name)) {
-        $lines.Add("- ``$($module.assetName)``")
-    }
-}
-else {
-    $lines.Add('- No module package changes')
-}
 
 Write-Utf8NoBom -Path $OutputPath -Content ($lines -join [Environment]::NewLine)
 
