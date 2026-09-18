@@ -2,9 +2,15 @@ name: Validate Official Modules
 
 on:
   pull_request:
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.json'
   push:
     branches:
       - main
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.json'
   workflow_dispatch:
 
 permissions:

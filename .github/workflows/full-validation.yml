@@ -12,7 +12,7 @@ on:
       - 'Directory.Build.targets'
       - 'global.json'
       - 'NuGet.config'
-      - 'module-registry.json'
+      - 'src/StarPie.Plugin.Abstractions/**'
       - 'build/**'
       - 'catalog/**'
       - '.github/workflows/full-validation.yml'
