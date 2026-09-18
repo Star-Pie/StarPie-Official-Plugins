@@ -91,14 +91,14 @@ jobs:
           PREVIOUS_CATALOG: ${{ steps.previous.outputs.catalog_path }}
         run: |
           $ids = @($env:MODULE_IDS -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-          $args = @()
-          if ($ids.Count -gt 0) { $args += @('-ModuleIds', ($ids -join ',')) }
+          $selectArgs = @{}
+          if ($ids.Count -gt 0) { $selectArgs.ModuleIds = ($ids -join ',') }
           if ($env:PREVIOUS_CATALOG -and (Test-Path -LiteralPath $env:PREVIOUS_CATALOG)) {
-            $args += @('-PreviousCatalogPath', $env:PREVIOUS_CATALOG)
+            $selectArgs.PreviousCatalogPath = $env:PREVIOUS_CATALOG
           }
 
-          if ($args.Count -gt 0) {
-            $raw = & ./build/Get-VersionChanges.ps1 @args
+          if ($selectArgs.Count -gt 0) {
+            $raw = & ./build/Get-VersionChanges.ps1 @selectArgs
           }
           else {
             $raw = & ./build/Get-VersionChanges.ps1
@@ -192,15 +192,15 @@ jobs:
         env:
           PREVIOUS_CATALOG: ${{ needs.select.outputs.previous_catalog }}
         run: |
-          $catalogArgs = @(
-            '-ReleaseTag', '${{ inputs.release_tag }}',
-            '-ReleaseChannel', '${{ inputs.release_channel }}',
-            '-PackagesJson', 'release-metadata/packages.json',
-            '-Repository', '${{ github.repository }}',
-            '-OutputPath', 'release-metadata/module-catalog.json'
-          )
+          $catalogArgs = @{
+            ReleaseTag = '${{ inputs.release_tag }}'
+            ReleaseChannel = '${{ inputs.release_channel }}'
+            PackagesJson = 'release-metadata/packages.json'
+            Repository = '${{ github.repository }}'
+            OutputPath = 'release-metadata/module-catalog.json'
+          }
           if ($env:PREVIOUS_CATALOG -and (Test-Path -LiteralPath $env:PREVIOUS_CATALOG)) {
-            $catalogArgs += @('-PreviousCatalogPath', $env:PREVIOUS_CATALOG)
+            $catalogArgs.PreviousCatalogPath = $env:PREVIOUS_CATALOG
           }
           ./build/Generate-ModuleCatalog.ps1 @catalogArgs
           ./build/Verify-Catalog.ps1 -CatalogPath 'release-metadata/module-catalog.json'
