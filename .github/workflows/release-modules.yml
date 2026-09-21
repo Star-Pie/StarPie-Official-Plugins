@@ -100,8 +100,13 @@ jobs:
           }
           $result = $raw | ConvertFrom-Json -Depth 100
 
+          $matrixJson = $result.matrix | ConvertTo-Json -Compress -Depth 100
+          if ($matrixJson -and -not $matrixJson.Trim().StartsWith('[')) {
+            $matrixJson = "[$matrixJson]"
+          }
+
           "has_modules=$($result.hasModules.ToString().ToLowerInvariant())" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "matrix=$($result.matrix | ConvertTo-Json -Compress -Depth 100)" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "matrix=$matrixJson" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
           "changed_ids=$($result.changed -join ',')" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
           if (-not $result.hasModules) {
