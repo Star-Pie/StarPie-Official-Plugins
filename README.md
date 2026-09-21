@@ -52,7 +52,7 @@ StarPie 运行时实际加载的仍然是 DLL 程序集。`.spkg` 只是分发�
 
 | 插件 | 插件 ID | 动作类型 | 基本功能 |
 |---|---|---|---|
-| CAD 模拟按键与命令输入 | `starpie.builtin.cadcommand` | `CadCommand` | 专为 CAD 设计师优化的命令与按键输入工具：内置 Unicode 防输入法拦截、^C^C 前置取消与空格/回车提交。 |
+| CAD 模拟按键与命令输入 | `starpie.plugin.cadcommand` | `Plugin`（`cadCommand`） | 专为 CAD 设计师优化的命令与按键输入工具：内置 Unicode 防输入法拦截、^C^C 前置取消与空格/回车提交。 |
 
 ## 仓库结构
 

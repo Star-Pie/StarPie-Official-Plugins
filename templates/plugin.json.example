@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "starpie.builtin.example",
+  "id": "starpie.plugin.example",
   "name": "Example",
   "description": "Official example module.",
   "author": "StarPie Studio",
@@ -15,16 +15,7 @@
   "assembly": "StarPie.Plugin.Example.dll",
   "entryType": "StarPie.Plugin.Example.ExamplePlugin",
   "capabilities": ["Process"],
-  "claimedTypes": [
-    {
-      "typeName": "Example",
-      "contributionId": "example"
-    },
-    {
-      "typeName": "ExampleAlias",
-      "contributionId": "example"
-    }
-  ],
+  "claimedTypes": [],
   "contributions": {
     "actions": true,
     "icons": false,
