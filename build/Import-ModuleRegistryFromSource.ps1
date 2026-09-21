@@ -51,7 +51,8 @@ foreach ($moduleDirectory in Get-ChildItem -LiteralPath $sourceRoot -Directory |
     $capabilities = @(([string]$metadata['StarPiePluginCapabilities']) -split ';' |
         ForEach-Object { $_.Trim() } | Where-Object { $_ })
 
-    $modules += [ordered]@{
+    $moduleKind = if ([string]$metadata['StarPiePluginId'] -like 'starpie.builtin.*') { 'builtin' } else { 'plugin' }
+    $moduleEntry = [ordered]@{
         id = [string]$metadata['StarPiePluginId']
         name = [string]$metadata['StarPiePluginName']
         project = (ConvertTo-NormalizedRelativePath -BasePath $root -Path $projectFile.FullName)
@@ -69,9 +70,21 @@ foreach ($moduleDirectory in Get-ChildItem -LiteralPath $sourceRoot -Directory |
         license = if ($metadata['StarPiePluginLicense']) { [string]$metadata['StarPiePluginLicense'] } else { 'MIT' }
         homepage = [string]$metadata['StarPiePluginHomepage']
         icon = $null
-        tags = @('official', 'builtin')
+        tags = @('official', $moduleKind)
         enabled = $true
     }
+
+    $moduleApiVersion = [string]$metadata['StarPiePluginApiVersion']
+    if (-not [string]::IsNullOrWhiteSpace($moduleApiVersion)) {
+        $moduleEntry.apiVersion = $moduleApiVersion
+    }
+
+    $moduleMinHostVersion = [string]$metadata['StarPiePluginMinHostVersion']
+    if (-not [string]::IsNullOrWhiteSpace($moduleMinHostVersion)) {
+        $moduleEntry.minHostVersion = $moduleMinHostVersion
+    }
+
+    $modules += $moduleEntry
 }
 
 $registry = [ordered]@{

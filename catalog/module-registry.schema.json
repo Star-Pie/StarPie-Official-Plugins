@@ -28,13 +28,13 @@
           "releaseDirectory"
         ],
         "properties": {
-          "id": { "type": "string", "pattern": "^starpie\\.builtin\\.[a-z0-9.-]+$" },
+          "id": { "type": "string", "pattern": "^starpie\\.(builtin|plugin)\\.[a-z0-9.-]+$" },
           "name": { "type": "string", "minLength": 1 },
           "project": { "type": "string", "pattern": "\\.csproj$" },
           "assembly": { "type": "string", "pattern": "\\.dll$" },
           "targetFramework": { "type": "string", "minLength": 1 },
           "version": { "type": "string", "minLength": 1 },
-          "pluginId": { "type": "string", "pattern": "^starpie\\." },
+          "pluginId": { "type": "string", "pattern": "^starpie\\.(builtin|plugin)\\.[a-z0-9.-]+$" },
           "typeClaims": {
             "type": "array",
             "items": { "type": "string", "minLength": 1 },

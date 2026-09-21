@@ -4,13 +4,13 @@
     "minimumHostVersion":  "1.8.0-beta.1",
     "modules":  [
                     {
-                        "id":  "starpie.builtin.cadcommand",
+                        "id":  "starpie.plugin.cadcommand",
                         "name":  "CAD 模拟按键与命令输入",
                         "project":  "src/StarPie.Plugin.CadCommand/StarPie.Plugin.CadCommand.csproj",
                         "assembly":  "StarPie.Plugin.CadCommand.dll",
                         "targetFramework":  "net8.0-windows",
-                        "version":  "1.0.1",
-                        "pluginId":  "starpie.builtin.cadcommand",
+                        "version":  "1.0.2",
+                        "pluginId":  "starpie.plugin.cadcommand",
                         "contributionId":  "cadCommand",
                         "entryType":  "StarPie.Plugin.CadCommand.CadCommandPlugin",
                         "typeClaims":  [
@@ -19,16 +19,18 @@
                                              "InputSimulation"
                                          ],
                         "releaseDirectory":  "StarPie.Plugin.CadCommand",
-                        "description":  "随 StarPie 分发的内置动作：专为 CAD 设计师优化的文本与模拟按键输入工具。可在「插件」页单独停用。",
+                        "description":  "StarPie 官方插件：专为 CAD 设计师优化的文本与模拟按键输入工具。可在「插件」页单独停用。",
                         "author":  "StarPie Studio",
                         "license":  "MIT",
                         "homepage":  "https://github.com/Star-Pie/StarPie",
                         "icon":  null,
                         "tags":  [
                                      "official",
-                                     "builtin"
+                                     "plugin"
                                  ],
-                        "enabled":  true
+                        "enabled":  true,
+                        "apiVersion":  "1.4",
+                        "minHostVersion":  "1.8.0-beta.1"
                     },
                     {
                         "id":  "starpie.builtin.command",
