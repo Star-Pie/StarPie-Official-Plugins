@@ -22,6 +22,10 @@ on:
         default: true
         type: boolean
 
+concurrency:
+  group: release-modules
+  cancel-in-progress: false
+
 permissions:
   contents: write
   id-token: write
@@ -78,9 +82,28 @@ jobs:
       - name: Generate release tag
         id: tag
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           $date = [DateTimeOffset]::UtcNow.ToString('yyyy.MM.dd')
-          $releaseTag = "modules-$date.${{ github.run_number }}"
+          $prefix = "modules-$date."
+          $pattern = '^' + [regex]::Escape($prefix) + '(\d+)$'
+          $releaseTags = @(gh api --paginate "repos/${{ github.repository }}/releases?per_page=100" --jq '.[].tag_name')
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to list existing GitHub releases.' }
+
+          $usedNumbers = @(
+            foreach ($tag in $releaseTags) {
+              if ([string]$tag -match $pattern) { [int64]$Matches[1] }
+            }
+          )
+          $nextNumber = if ($usedNumbers.Count -gt 0) {
+            ([int64](($usedNumbers | Measure-Object -Maximum).Maximum)) + 1
+          }
+          else {
+            1
+          }
+
+          $releaseTag = "$prefix$nextNumber"
           "release_tag=$releaseTag" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
           Write-Host "Generated release tag: $releaseTag"
 
