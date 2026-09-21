@@ -3,10 +3,6 @@ name: Release Official Module Set
 on:
   workflow_dispatch:
     inputs:
-      release_tag:
-        description: 'Immutable release tag, for example modules-2026.09.18.1'
-        required: true
-        type: string
       release_channel:
         description: 'Release channel'
         required: true
@@ -36,6 +32,7 @@ jobs:
     name: Resolve version changes
     runs-on: windows-latest
     outputs:
+      release_tag: ${{ steps.tag.outputs.release_tag }}
       has_modules: ${{ steps.select.outputs.has_modules }}
       matrix: ${{ steps.select.outputs.matrix }}
       changed_ids: ${{ steps.select.outputs.changed_ids }}
@@ -77,6 +74,15 @@ jobs:
           name: previous-catalog-${{ github.run_number }}
           path: artifacts/previous-catalog/module-catalog.json
           if-no-files-found: error
+
+      - name: Generate release tag
+        id: tag
+        shell: pwsh
+        run: |
+          $date = [DateTimeOffset]::UtcNow.ToString('yyyy.MM.dd')
+          $releaseTag = "modules-$date.${{ github.run_number }}"
+          "release_tag=$releaseTag" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          Write-Host "Generated release tag: $releaseTag"
 
       - name: Resolve modules
         id: select
@@ -144,7 +150,7 @@ jobs:
             -ModuleId '${{ matrix.module.id }}' `
             -Configuration Release `
             -OutputDirectory 'artifacts/packages' `
-            -ReleaseTag '${{ inputs.release_tag }}' `
+            -ReleaseTag '${{ needs.select.outputs.release_tag }}' `
             -OutputMetadataPath 'release-metadata/packages/${{ matrix.module.id }}.json' `
             -Clean
           $metadata = Get-Content 'release-metadata/packages/${{ matrix.module.id }}.json' -Raw | ConvertFrom-Json
@@ -200,7 +206,7 @@ jobs:
           PREVIOUS_CATALOG: ${{ needs.select.outputs.previous_catalog }}
         run: |
           $catalogArgs = @{
-            ReleaseTag = '${{ inputs.release_tag }}'
+            ReleaseTag = '${{ needs.select.outputs.release_tag }}'
             ReleaseChannel = '${{ inputs.release_channel }}'
             PackagesJson = 'release-metadata/packages.json'
             Repository = '${{ github.repository }}'
@@ -221,8 +227,9 @@ jobs:
           ./build/New-ReleaseNotes.ps1 `
             -CatalogPath 'release-metadata/module-catalog.json' `
             -ChangedModuleIds $ids `
-            -ReleaseTag '${{ inputs.release_tag }}' `
+            -ReleaseTag '${{ needs.select.outputs.release_tag }}' `
             -ReleaseChannel '${{ inputs.release_channel }}' `
+            -RepositoryUrl '${{ github.server_url }}/${{ github.repository }}' `
             -OutputPath 'release-metadata/release-notes.md'
 
       - name: Install cosign
@@ -271,9 +278,9 @@ jobs:
           if ($assets.Count -eq 0) { throw 'No module packages were produced.' }
 
           $releaseArgs = @(
-            'release', 'create', '${{ inputs.release_tag }}',
+            'release', 'create', '${{ needs.select.outputs.release_tag }}',
             '--repo', '${{ github.repository }}',
-            '--title', "Official modules ${{ inputs.release_tag }}",
+            '--title', "Official modules ${{ needs.select.outputs.release_tag }}",
             '--notes-file', 'release-metadata/release-notes.md',
             '--draft'
           )
@@ -284,14 +291,14 @@ jobs:
           gh @releaseArgs
           if ($LASTEXITCODE -ne 0) { throw 'gh release create failed.' }
 
-          gh release upload '${{ inputs.release_tag }}' `
+          gh release upload '${{ needs.select.outputs.release_tag }}' `
             'release-metadata/module-catalog.json' `
             --repo '${{ github.repository }}' `
             --clobber
           if ($LASTEXITCODE -ne 0) { throw 'gh release upload catalog failed.' }
 
           if (Test-Path -LiteralPath 'release-metadata/module-catalog.sigstore.json') {
-            gh release upload '${{ inputs.release_tag }}' `
+            gh release upload '${{ needs.select.outputs.release_tag }}' `
               'release-metadata/module-catalog.sigstore.json' `
               --repo '${{ github.repository }}' `
               --clobber
@@ -304,7 +311,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release edit '${{ inputs.release_tag }}' --draft=false --repo '${{ github.repository }}'
+          gh release edit '${{ needs.select.outputs.release_tag }}' --draft=false --repo '${{ github.repository }}'
           if ($LASTEXITCODE -ne 0) { throw 'gh release edit failed.' }
 
       - name: Upload dry-run outputs
