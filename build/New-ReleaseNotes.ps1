@@ -4,6 +4,7 @@ param(
   [string[]]$ChangedModuleIds = @(),
   [Parameter(Mandatory)][string]$ReleaseTag,
   [Parameter(Mandatory)][ValidateSet('stable','beta')][string]$ReleaseChannel,
+  [Parameter(Mandatory)][uri]$RepositoryUrl,
   [Parameter(Mandatory)][string]$OutputPath
 )
 
@@ -33,7 +34,14 @@ $lines.Add('')
 $lines.Add('| Module | Version | Release status |')
 $lines.Add('|---|---:|---|')
 foreach ($module in @($catalog.modules | Sort-Object name)) {
-    $status = if ($changed.ContainsKey($module.id)) { 'Updated in this release' } else { "Referenced from ``$($module.releaseTag)``" }
+    if ($changed.ContainsKey($module.id)) {
+        $status = 'Updated in this release'
+    }
+    else {
+        $encodedReleaseTag = [uri]::EscapeDataString([string]$module.releaseTag)
+        $releaseUrl = "$($RepositoryUrl.AbsoluteUri.TrimEnd('/'))/releases/tag/$encodedReleaseTag"
+        $status = "Referenced from [``$($module.releaseTag)``]($releaseUrl)"
+    }
     $lines.Add("| $($module.name) | $($module.version) | $status |")
 }
 
