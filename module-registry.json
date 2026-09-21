@@ -1,347 +1,375 @@
 {
-  "schemaVersion": 1,
-  "sdkApiVersion": "1.4",
-  "minimumHostVersion": "1.8.0-beta.1",
-  "modules": [
-    {
-      "id": "starpie.builtin.command",
-      "name": "运行命令",
-      "project": "src/StarPie.Plugin.Command/StarPie.Plugin.Command.csproj",
-      "assembly": "StarPie.Plugin.Command.dll",
-      "targetFramework": "net8.0-windows",
-      "version": "1.0.0",
-      "pluginId": "starpie.builtin.command",
-      "contributionId": "command",
-      "entryType": "StarPie.Plugin.Command.CommandPlugin",
-      "typeClaims": [
-        "Command"
-      ],
-      "capabilities": [
-        "Process"
-      ],
-      "releaseDirectory": "StarPie.Plugin.Command",
-      "description": "随 StarPie 分发的内置动作：在指定终端中执行命令行。可在「插件」页单独停用。",
-      "author": "StarPie Studio",
-      "license": "MIT",
-      "homepage": "https://github.com/SoftBlack42/StarPie",
-      "icon": null,
-      "tags": [
-        "official",
-        "builtin"
-      ],
-      "enabled": true
-    },
-    {
-      "id": "starpie.builtin.folder",
-      "name": "打开文件夹",
-      "project": "src/StarPie.Plugin.Folder/StarPie.Plugin.Folder.csproj",
-      "assembly": "StarPie.Plugin.Folder.dll",
-      "targetFramework": "net8.0-windows",
-      "version": "1.0.0",
-      "pluginId": "starpie.builtin.folder",
-      "contributionId": "folder",
-      "entryType": "StarPie.Plugin.Folder.FolderPlugin",
-      "typeClaims": [
-        "Folder",
-        "OpenFolder"
-      ],
-      "capabilities": [
-        "Process"
-      ],
-      "releaseDirectory": "StarPie.Plugin.Folder",
-      "description": "随 StarPie 分发的内置动作：打开文件夹或定位到文件。可在「插件」页单独停用。",
-      "author": "StarPie Studio",
-      "license": "MIT",
-      "homepage": "https://github.com/SoftBlack42/StarPie",
-      "icon": null,
-      "tags": [
-        "official",
-        "builtin"
-      ],
-      "enabled": true
-    },
-    {
-      "id": "starpie.builtin.launch",
-      "name": "启动程序",
-      "project": "src/StarPie.Plugin.Launch/StarPie.Plugin.Launch.csproj",
-      "assembly": "StarPie.Plugin.Launch.dll",
-      "targetFramework": "net8.0-windows",
-      "version": "1.0.0",
-      "pluginId": "starpie.builtin.launch",
-      "contributionId": "launch",
-      "entryType": "StarPie.Plugin.Launch.LaunchPlugin",
-      "typeClaims": [
-        "Launch"
-      ],
-      "capabilities": [
-        "Process"
-      ],
-      "releaseDirectory": "StarPie.Plugin.Launch",
-      "description": "随 StarPie 分发的内置动作：启动程序或应用。可在「插件」页单独停用。",
-      "author": "StarPie Studio",
-      "license": "MIT",
-      "homepage": "https://github.com/SoftBlack42/StarPie",
-      "icon": null,
-      "tags": [
-        "official",
-        "builtin"
-      ],
-      "enabled": true
-    },
-    {
-      "id": "starpie.builtin.movemonitor",
-      "name": "窗口移到下一屏",
-      "project": "src/StarPie.Plugin.MoveMonitor/StarPie.Plugin.MoveMonitor.csproj",
-      "assembly": "StarPie.Plugin.MoveMonitor.dll",
-      "targetFramework": "net8.0-windows",
-      "version": "1.0.0",
-      "pluginId": "starpie.builtin.movemonitor",
-      "contributionId": "moveMonitor",
-      "entryType": "StarPie.Plugin.MoveMonitor.MoveMonitorPlugin",
-      "typeClaims": [
-        "MoveMonitor"
-      ],
-      "capabilities": [
-        "WindowControl"
-      ],
-      "releaseDirectory": "StarPie.Plugin.MoveMonitor",
-      "description": "随 StarPie 分发的内置动作：窗口移到下一屏。可在「插件」页单独停用。",
-      "author": "StarPie Studio",
-      "license": "MIT",
-      "homepage": "https://github.com/SoftBlack42/StarPie",
-      "icon": null,
-      "tags": [
-        "official",
-        "builtin"
-      ],
-      "enabled": true
-    },
-    {
-      "id": "starpie.builtin.ocr",
-      "name": "截屏识字 (OCR)",
-      "project": "src/StarPie.Plugin.Ocr/StarPie.Plugin.Ocr.csproj",
-      "assembly": "StarPie.Plugin.Ocr.dll",
-      "targetFramework": "net8.0-windows",
-      "version": "1.0.0",
-      "pluginId": "starpie.builtin.ocr",
-      "contributionId": "ocr",
-      "entryType": "StarPie.Plugin.Ocr.OcrPlugin",
-      "typeClaims": [
-        "Ocr",
-        "ScreenOcr"
-      ],
-      "capabilities": [
-        "ScreenCapture"
-      ],
-      "releaseDirectory": "StarPie.Plugin.Ocr",
-      "description": "随 StarPie 分发的内置动作：框选屏幕区域并识别其中的文字。可在「插件」页单独停用。",
-      "author": "StarPie Studio",
-      "license": "MIT",
-      "homepage": "https://github.com/SoftBlack42/StarPie",
-      "icon": null,
-      "tags": [
-        "official",
-        "builtin"
-      ],
-      "enabled": true
-    },
-    {
-      "id": "starpie.builtin.shelltool",
-      "name": "系统与右键工具",
-      "project": "src/StarPie.Plugin.ShellTool/StarPie.Plugin.ShellTool.csproj",
-      "assembly": "StarPie.Plugin.ShellTool.dll",
-      "targetFramework": "net8.0-windows",
-      "version": "1.0.0",
-      "pluginId": "starpie.builtin.shelltool",
-      "contributionId": "shellTool",
-      "entryType": "StarPie.Plugin.ShellTool.ShellToolPlugin",
-      "typeClaims": [
-        "ShellTool"
-      ],
-      "capabilities": [
-        "Process"
-      ],
-      "releaseDirectory": "StarPie.Plugin.ShellTool",
-      "description": "随 StarPie 分发的内置动作：执行系统工具与右键菜单功能。可在「插件」页单独停用。",
-      "author": "StarPie Studio",
-      "license": "MIT",
-      "homepage": "https://github.com/SoftBlack42/StarPie",
-      "icon": null,
-      "tags": [
-        "official",
-        "builtin"
-      ],
-      "enabled": true
-    },
-    {
-      "id": "starpie.builtin.switchwindow",
-      "name": "切换窗口",
-      "project": "src/StarPie.Plugin.SwitchWindow/StarPie.Plugin.SwitchWindow.csproj",
-      "assembly": "StarPie.Plugin.SwitchWindow.dll",
-      "targetFramework": "net8.0-windows",
-      "version": "1.0.0",
-      "pluginId": "starpie.builtin.switchwindow",
-      "contributionId": "switchWindow",
-      "entryType": "StarPie.Plugin.SwitchWindow.SwitchWindowPlugin",
-      "typeClaims": [
-        "SwitchWindow"
-      ],
-      "capabilities": [
-        "WindowControl"
-      ],
-      "releaseDirectory": "StarPie.Plugin.SwitchWindow",
-      "description": "随 StarPie 分发的内置动作：切换到任务栏指定位置的窗口。可在「插件」页单独停用。",
-      "author": "StarPie Studio",
-      "license": "MIT",
-      "homepage": "https://github.com/SoftBlack42/StarPie",
-      "icon": null,
-      "tags": [
-        "official",
-        "builtin"
-      ],
-      "enabled": true
-    },
-    {
-      "id": "starpie.builtin.system",
-      "name": "系统控制",
-      "project": "src/StarPie.Plugin.System/StarPie.Plugin.System.csproj",
-      "assembly": "StarPie.Plugin.System.dll",
-      "targetFramework": "net8.0-windows",
-      "version": "1.0.0",
-      "pluginId": "starpie.builtin.system",
-      "contributionId": "system",
-      "entryType": "StarPie.Plugin.System.SystemPlugin",
-      "typeClaims": [
-        "System"
-      ],
-      "capabilities": [
-        "InputSimulation",
-        "Process"
-      ],
-      "releaseDirectory": "StarPie.Plugin.System",
-      "description": "随 StarPie 分发的内置动作：最小化 / 任务视图 / 音量 / 锁屏 / 关机等系统功能。可在「插件」页单独停用。",
-      "author": "StarPie Studio",
-      "license": "MIT",
-      "homepage": "https://github.com/SoftBlack42/StarPie",
-      "icon": null,
-      "tags": [
-        "official",
-        "builtin"
-      ],
-      "enabled": true
-    },
-    {
-      "id": "starpie.builtin.tile",
-      "name": "平铺窗口",
-      "project": "src/StarPie.Plugin.Tile/StarPie.Plugin.Tile.csproj",
-      "assembly": "StarPie.Plugin.Tile.dll",
-      "targetFramework": "net8.0-windows",
-      "version": "1.0.0",
-      "pluginId": "starpie.builtin.tile",
-      "contributionId": "tile",
-      "entryType": "StarPie.Plugin.Tile.TilePlugin",
-      "typeClaims": [
-        "Tile"
-      ],
-      "capabilities": [
-        "WindowControl"
-      ],
-      "releaseDirectory": "StarPie.Plugin.Tile",
-      "description": "随 StarPie 分发的内置动作：平铺窗口。可在「插件」页单独停用。",
-      "author": "StarPie Studio",
-      "license": "MIT",
-      "homepage": "https://github.com/SoftBlack42/StarPie",
-      "icon": null,
-      "tags": [
-        "official",
-        "builtin"
-      ],
-      "enabled": true
-    },
-    {
-      "id": "starpie.builtin.toggletopmost",
-      "name": "窗口置顶/取消置顶",
-      "project": "src/StarPie.Plugin.ToggleTopmost/StarPie.Plugin.ToggleTopmost.csproj",
-      "assembly": "StarPie.Plugin.ToggleTopmost.dll",
-      "targetFramework": "net8.0-windows",
-      "version": "1.0.0",
-      "pluginId": "starpie.builtin.toggletopmost",
-      "contributionId": "toggleTopmost",
-      "entryType": "StarPie.Plugin.ToggleTopmost.ToggleTopmostPlugin",
-      "typeClaims": [
-        "ToggleTopmost"
-      ],
-      "capabilities": [
-        "WindowControl"
-      ],
-      "releaseDirectory": "StarPie.Plugin.ToggleTopmost",
-      "description": "随 StarPie 分发的内置动作：窗口置顶/取消置顶。可在「插件」页单独停用。",
-      "author": "StarPie Studio",
-      "license": "MIT",
-      "homepage": "https://github.com/SoftBlack42/StarPie",
-      "icon": null,
-      "tags": [
-        "official",
-        "builtin"
-      ],
-      "enabled": true
-    },
-    {
-      "id": "starpie.builtin.weburl",
-      "name": "打开网址",
-      "project": "src/StarPie.Plugin.WebUrl/StarPie.Plugin.WebUrl.csproj",
-      "assembly": "StarPie.Plugin.WebUrl.dll",
-      "targetFramework": "net8.0-windows",
-      "version": "1.0.0",
-      "pluginId": "starpie.builtin.weburl",
-      "contributionId": "webUrl",
-      "entryType": "StarPie.Plugin.WebUrl.WebUrlPlugin",
-      "typeClaims": [
-        "Url",
-        "WebUrl"
-      ],
-      "capabilities": [
-        "Process"
-      ],
-      "releaseDirectory": "StarPie.Plugin.WebUrl",
-      "description": "随 StarPie 分发的内置动作：用默认或指定浏览器打开网址。可在「插件」页单独停用。",
-      "author": "StarPie Studio",
-      "license": "MIT",
-      "homepage": "https://github.com/SoftBlack42/StarPie",
-      "icon": null,
-      "tags": [
-        "official",
-        "builtin"
-      ],
-      "enabled": true
-    },
-    {
-      "id": "starpie.builtin.windowopacity",
-      "name": "窗口透明度",
-      "project": "src/StarPie.Plugin.WindowOpacity/StarPie.Plugin.WindowOpacity.csproj",
-      "assembly": "StarPie.Plugin.WindowOpacity.dll",
-      "targetFramework": "net8.0-windows",
-      "version": "1.0.0",
-      "pluginId": "starpie.builtin.windowopacity",
-      "contributionId": "windowOpacity",
-      "entryType": "StarPie.Plugin.WindowOpacity.WindowOpacityPlugin",
-      "typeClaims": [
-        "WindowOpacity"
-      ],
-      "capabilities": [
-        "WindowControl"
-      ],
-      "releaseDirectory": "StarPie.Plugin.WindowOpacity",
-      "description": "随 StarPie 分发的内置动作：窗口透明度。可在「插件」页单独停用。",
-      "author": "StarPie Studio",
-      "license": "MIT",
-      "homepage": "https://github.com/SoftBlack42/StarPie",
-      "icon": null,
-      "tags": [
-        "official",
-        "builtin"
-      ],
-      "enabled": true
-    }
-  ]
+    "schemaVersion":  1,
+    "sdkApiVersion":  "1.4",
+    "minimumHostVersion":  "1.8.0-beta.1",
+    "modules":  [
+                    {
+                        "id":  "starpie.builtin.cadcommand",
+                        "name":  "CAD 模拟按键与命令输入",
+                        "project":  "src/StarPie.Plugin.CadCommand/StarPie.Plugin.CadCommand.csproj",
+                        "assembly":  "StarPie.Plugin.CadCommand.dll",
+                        "targetFramework":  "net8.0-windows",
+                        "version":  "1.0.0",
+                        "pluginId":  "starpie.builtin.cadcommand",
+                        "contributionId":  "cadCommand",
+                        "entryType":  "StarPie.Plugin.CadCommand.CadCommandPlugin",
+                        "typeClaims":  [
+                                           "CadCommand"
+                                       ],
+                        "capabilities":  [
+                                             "InputSimulation"
+                                         ],
+                        "releaseDirectory":  "StarPie.Plugin.CadCommand",
+                        "description":  "随 StarPie 分发的内置动作：专为 CAD 设计师优化的文本与模拟按键输入工具。可在「插件」页单独停用。",
+                        "author":  "StarPie Studio",
+                        "license":  "MIT",
+                        "homepage":  "https://github.com/Star-Pie/StarPie",
+                        "icon":  null,
+                        "tags":  [
+                                     "official",
+                                     "builtin"
+                                 ],
+                        "enabled":  true
+                    },
+                    {
+                        "id":  "starpie.builtin.command",
+                        "name":  "运行命令",
+                        "project":  "src/StarPie.Plugin.Command/StarPie.Plugin.Command.csproj",
+                        "assembly":  "StarPie.Plugin.Command.dll",
+                        "targetFramework":  "net8.0-windows",
+                        "version":  "1.0.0",
+                        "pluginId":  "starpie.builtin.command",
+                        "contributionId":  "command",
+                        "entryType":  "StarPie.Plugin.Command.CommandPlugin",
+                        "typeClaims":  [
+                                           "Command"
+                                       ],
+                        "capabilities":  [
+                                             "Process"
+                                         ],
+                        "releaseDirectory":  "StarPie.Plugin.Command",
+                        "description":  "随 StarPie 分发的内置动作：在指定终端中执行命令行。可在「插件」页单独停用。",
+                        "author":  "StarPie Studio",
+                        "license":  "MIT",
+                        "homepage":  "https://github.com/SoftBlack42/StarPie",
+                        "icon":  null,
+                        "tags":  [
+                                     "official",
+                                     "builtin"
+                                 ],
+                        "enabled":  true
+                    },
+                    {
+                        "id":  "starpie.builtin.folder",
+                        "name":  "打开文件夹",
+                        "project":  "src/StarPie.Plugin.Folder/StarPie.Plugin.Folder.csproj",
+                        "assembly":  "StarPie.Plugin.Folder.dll",
+                        "targetFramework":  "net8.0-windows",
+                        "version":  "1.0.0",
+                        "pluginId":  "starpie.builtin.folder",
+                        "contributionId":  "folder",
+                        "entryType":  "StarPie.Plugin.Folder.FolderPlugin",
+                        "typeClaims":  [
+                                           "Folder",
+                                           "OpenFolder"
+                                       ],
+                        "capabilities":  [
+                                             "Process"
+                                         ],
+                        "releaseDirectory":  "StarPie.Plugin.Folder",
+                        "description":  "随 StarPie 分发的内置动作：打开文件夹或定位到文件。可在「插件」页单独停用。",
+                        "author":  "StarPie Studio",
+                        "license":  "MIT",
+                        "homepage":  "https://github.com/SoftBlack42/StarPie",
+                        "icon":  null,
+                        "tags":  [
+                                     "official",
+                                     "builtin"
+                                 ],
+                        "enabled":  true
+                    },
+                    {
+                        "id":  "starpie.builtin.launch",
+                        "name":  "启动程序",
+                        "project":  "src/StarPie.Plugin.Launch/StarPie.Plugin.Launch.csproj",
+                        "assembly":  "StarPie.Plugin.Launch.dll",
+                        "targetFramework":  "net8.0-windows",
+                        "version":  "1.0.0",
+                        "pluginId":  "starpie.builtin.launch",
+                        "contributionId":  "launch",
+                        "entryType":  "StarPie.Plugin.Launch.LaunchPlugin",
+                        "typeClaims":  [
+                                           "Launch"
+                                       ],
+                        "capabilities":  [
+                                             "Process"
+                                         ],
+                        "releaseDirectory":  "StarPie.Plugin.Launch",
+                        "description":  "随 StarPie 分发的内置动作：启动程序或应用。可在「插件」页单独停用。",
+                        "author":  "StarPie Studio",
+                        "license":  "MIT",
+                        "homepage":  "https://github.com/SoftBlack42/StarPie",
+                        "icon":  null,
+                        "tags":  [
+                                     "official",
+                                     "builtin"
+                                 ],
+                        "enabled":  true
+                    },
+                    {
+                        "id":  "starpie.builtin.movemonitor",
+                        "name":  "窗口移到下一屏",
+                        "project":  "src/StarPie.Plugin.MoveMonitor/StarPie.Plugin.MoveMonitor.csproj",
+                        "assembly":  "StarPie.Plugin.MoveMonitor.dll",
+                        "targetFramework":  "net8.0-windows",
+                        "version":  "1.0.0",
+                        "pluginId":  "starpie.builtin.movemonitor",
+                        "contributionId":  "moveMonitor",
+                        "entryType":  "StarPie.Plugin.MoveMonitor.MoveMonitorPlugin",
+                        "typeClaims":  [
+                                           "MoveMonitor"
+                                       ],
+                        "capabilities":  [
+                                             "WindowControl"
+                                         ],
+                        "releaseDirectory":  "StarPie.Plugin.MoveMonitor",
+                        "description":  "随 StarPie 分发的内置动作：窗口移到下一屏。可在「插件」页单独停用。",
+                        "author":  "StarPie Studio",
+                        "license":  "MIT",
+                        "homepage":  "https://github.com/SoftBlack42/StarPie",
+                        "icon":  null,
+                        "tags":  [
+                                     "official",
+                                     "builtin"
+                                 ],
+                        "enabled":  true
+                    },
+                    {
+                        "id":  "starpie.builtin.ocr",
+                        "name":  "截屏识字 (OCR)",
+                        "project":  "src/StarPie.Plugin.Ocr/StarPie.Plugin.Ocr.csproj",
+                        "assembly":  "StarPie.Plugin.Ocr.dll",
+                        "targetFramework":  "net8.0-windows",
+                        "version":  "1.0.0",
+                        "pluginId":  "starpie.builtin.ocr",
+                        "contributionId":  "ocr",
+                        "entryType":  "StarPie.Plugin.Ocr.OcrPlugin",
+                        "typeClaims":  [
+                                           "Ocr",
+                                           "ScreenOcr"
+                                       ],
+                        "capabilities":  [
+                                             "ScreenCapture"
+                                         ],
+                        "releaseDirectory":  "StarPie.Plugin.Ocr",
+                        "description":  "随 StarPie 分发的内置动作：框选屏幕区域并识别其中的文字。可在「插件」页单独停用。",
+                        "author":  "StarPie Studio",
+                        "license":  "MIT",
+                        "homepage":  "https://github.com/SoftBlack42/StarPie",
+                        "icon":  null,
+                        "tags":  [
+                                     "official",
+                                     "builtin"
+                                 ],
+                        "enabled":  true
+                    },
+                    {
+                        "id":  "starpie.builtin.shelltool",
+                        "name":  "系统与右键工具",
+                        "project":  "src/StarPie.Plugin.ShellTool/StarPie.Plugin.ShellTool.csproj",
+                        "assembly":  "StarPie.Plugin.ShellTool.dll",
+                        "targetFramework":  "net8.0-windows",
+                        "version":  "1.0.0",
+                        "pluginId":  "starpie.builtin.shelltool",
+                        "contributionId":  "shellTool",
+                        "entryType":  "StarPie.Plugin.ShellTool.ShellToolPlugin",
+                        "typeClaims":  [
+                                           "ShellTool"
+                                       ],
+                        "capabilities":  [
+                                             "Process"
+                                         ],
+                        "releaseDirectory":  "StarPie.Plugin.ShellTool",
+                        "description":  "随 StarPie 分发的内置动作：执行系统工具与右键菜单功能。可在「插件」页单独停用。",
+                        "author":  "StarPie Studio",
+                        "license":  "MIT",
+                        "homepage":  "https://github.com/SoftBlack42/StarPie",
+                        "icon":  null,
+                        "tags":  [
+                                     "official",
+                                     "builtin"
+                                 ],
+                        "enabled":  true
+                    },
+                    {
+                        "id":  "starpie.builtin.switchwindow",
+                        "name":  "切换窗口",
+                        "project":  "src/StarPie.Plugin.SwitchWindow/StarPie.Plugin.SwitchWindow.csproj",
+                        "assembly":  "StarPie.Plugin.SwitchWindow.dll",
+                        "targetFramework":  "net8.0-windows",
+                        "version":  "1.0.0",
+                        "pluginId":  "starpie.builtin.switchwindow",
+                        "contributionId":  "switchWindow",
+                        "entryType":  "StarPie.Plugin.SwitchWindow.SwitchWindowPlugin",
+                        "typeClaims":  [
+                                           "SwitchWindow"
+                                       ],
+                        "capabilities":  [
+                                             "WindowControl"
+                                         ],
+                        "releaseDirectory":  "StarPie.Plugin.SwitchWindow",
+                        "description":  "随 StarPie 分发的内置动作：切换到任务栏指定位置的窗口。可在「插件」页单独停用。",
+                        "author":  "StarPie Studio",
+                        "license":  "MIT",
+                        "homepage":  "https://github.com/SoftBlack42/StarPie",
+                        "icon":  null,
+                        "tags":  [
+                                     "official",
+                                     "builtin"
+                                 ],
+                        "enabled":  true
+                    },
+                    {
+                        "id":  "starpie.builtin.system",
+                        "name":  "系统控制",
+                        "project":  "src/StarPie.Plugin.System/StarPie.Plugin.System.csproj",
+                        "assembly":  "StarPie.Plugin.System.dll",
+                        "targetFramework":  "net8.0-windows",
+                        "version":  "1.0.0",
+                        "pluginId":  "starpie.builtin.system",
+                        "contributionId":  "system",
+                        "entryType":  "StarPie.Plugin.System.SystemPlugin",
+                        "typeClaims":  [
+                                           "System"
+                                       ],
+                        "capabilities":  [
+                                             "InputSimulation",
+                                             "Process"
+                                         ],
+                        "releaseDirectory":  "StarPie.Plugin.System",
+                        "description":  "随 StarPie 分发的内置动作：最小化 / 任务视图 / 音量 / 锁屏 / 关机等系统功能。可在「插件」页单独停用。",
+                        "author":  "StarPie Studio",
+                        "license":  "MIT",
+                        "homepage":  "https://github.com/SoftBlack42/StarPie",
+                        "icon":  null,
+                        "tags":  [
+                                     "official",
+                                     "builtin"
+                                 ],
+                        "enabled":  true
+                    },
+                    {
+                        "id":  "starpie.builtin.tile",
+                        "name":  "平铺窗口",
+                        "project":  "src/StarPie.Plugin.Tile/StarPie.Plugin.Tile.csproj",
+                        "assembly":  "StarPie.Plugin.Tile.dll",
+                        "targetFramework":  "net8.0-windows",
+                        "version":  "1.0.0",
+                        "pluginId":  "starpie.builtin.tile",
+                        "contributionId":  "tile",
+                        "entryType":  "StarPie.Plugin.Tile.TilePlugin",
+                        "typeClaims":  [
+                                           "Tile"
+                                       ],
+                        "capabilities":  [
+                                             "WindowControl"
+                                         ],
+                        "releaseDirectory":  "StarPie.Plugin.Tile",
+                        "description":  "随 StarPie 分发的内置动作：平铺窗口。可在「插件」页单独停用。",
+                        "author":  "StarPie Studio",
+                        "license":  "MIT",
+                        "homepage":  "https://github.com/SoftBlack42/StarPie",
+                        "icon":  null,
+                        "tags":  [
+                                     "official",
+                                     "builtin"
+                                 ],
+                        "enabled":  true
+                    },
+                    {
+                        "id":  "starpie.builtin.toggletopmost",
+                        "name":  "窗口置顶/取消置顶",
+                        "project":  "src/StarPie.Plugin.ToggleTopmost/StarPie.Plugin.ToggleTopmost.csproj",
+                        "assembly":  "StarPie.Plugin.ToggleTopmost.dll",
+                        "targetFramework":  "net8.0-windows",
+                        "version":  "1.0.0",
+                        "pluginId":  "starpie.builtin.toggletopmost",
+                        "contributionId":  "toggleTopmost",
+                        "entryType":  "StarPie.Plugin.ToggleTopmost.ToggleTopmostPlugin",
+                        "typeClaims":  [
+                                           "ToggleTopmost"
+                                       ],
+                        "capabilities":  [
+                                             "WindowControl"
+                                         ],
+                        "releaseDirectory":  "StarPie.Plugin.ToggleTopmost",
+                        "description":  "随 StarPie 分发的内置动作：窗口置顶/取消置顶。可在「插件」页单独停用。",
+                        "author":  "StarPie Studio",
+                        "license":  "MIT",
+                        "homepage":  "https://github.com/SoftBlack42/StarPie",
+                        "icon":  null,
+                        "tags":  [
+                                     "official",
+                                     "builtin"
+                                 ],
+                        "enabled":  true
+                    },
+                    {
+                        "id":  "starpie.builtin.weburl",
+                        "name":  "打开网址",
+                        "project":  "src/StarPie.Plugin.WebUrl/StarPie.Plugin.WebUrl.csproj",
+                        "assembly":  "StarPie.Plugin.WebUrl.dll",
+                        "targetFramework":  "net8.0-windows",
+                        "version":  "1.0.0",
+                        "pluginId":  "starpie.builtin.weburl",
+                        "contributionId":  "webUrl",
+                        "entryType":  "StarPie.Plugin.WebUrl.WebUrlPlugin",
+                        "typeClaims":  [
+                                           "Url",
+                                           "WebUrl"
+                                       ],
+                        "capabilities":  [
+                                             "Process"
+                                         ],
+                        "releaseDirectory":  "StarPie.Plugin.WebUrl",
+                        "description":  "随 StarPie 分发的内置动作：用默认或指定浏览器打开网址。可在「插件」页单独停用。",
+                        "author":  "StarPie Studio",
+                        "license":  "MIT",
+                        "homepage":  "https://github.com/SoftBlack42/StarPie",
+                        "icon":  null,
+                        "tags":  [
+                                     "official",
+                                     "builtin"
+                                 ],
+                        "enabled":  true
+                    },
+                    {
+                        "id":  "starpie.builtin.windowopacity",
+                        "name":  "窗口透明度",
+                        "project":  "src/StarPie.Plugin.WindowOpacity/StarPie.Plugin.WindowOpacity.csproj",
+                        "assembly":  "StarPie.Plugin.WindowOpacity.dll",
+                        "targetFramework":  "net8.0-windows",
+                        "version":  "1.0.0",
+                        "pluginId":  "starpie.builtin.windowopacity",
+                        "contributionId":  "windowOpacity",
+                        "entryType":  "StarPie.Plugin.WindowOpacity.WindowOpacityPlugin",
+                        "typeClaims":  [
+                                           "WindowOpacity"
+                                       ],
+                        "capabilities":  [
+                                             "WindowControl"
+                                         ],
+                        "releaseDirectory":  "StarPie.Plugin.WindowOpacity",
+                        "description":  "随 StarPie 分发的内置动作：窗口透明度。可在「插件」页单独停用。",
+                        "author":  "StarPie Studio",
+                        "license":  "MIT",
+                        "homepage":  "https://github.com/SoftBlack42/StarPie",
+                        "icon":  null,
+                        "tags":  [
+                                     "official",
+                                     "builtin"
+                                 ],
+                        "enabled":  true
+                    }
+                ]
 }

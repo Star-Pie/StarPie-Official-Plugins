@@ -2,7 +2,7 @@
 
 StarPie 官方内建动作模块的独立源码与发布仓库。
 
-> 当前状态：12 个官方动作插件已迁入本仓库，支持增量构建、`.spkg` 打包、签名 catalog 和 GitHub Release 发布。主程序侧的远程模块安装客户端仍待接入。
+> 当前状态：13 个官方动作插件已迁入本仓库，支持增量构建、`.spkg` 打包、签名 catalog 和 GitHub Release 发布。主程序侧的远程模块安装客户端仍待接入。
 
 ## 仓库目标
 
@@ -48,10 +48,16 @@ StarPie 运行时实际加载的仍然是 DLL 程序集。`.spkg` 只是分发�
 | 系统控制 | `starpie.builtin.system` | `System` | 通过预设下拉执行最小化、任务视图、音量、锁屏、关机等系统操作。 |
 | 截屏识字 (OCR) | `starpie.builtin.ocr` | `Ocr`、`ScreenOcr` | 触发后现场框选屏幕区域，交给宿主 OCR 服务识别文字；无预配置参数。 |
 
+### 行业与绘图工具
+
+| 插件 | 插件 ID | 动作类型 | 基本功能 |
+|---|---|---|---|
+| CAD 模拟按键与命令输入 | `starpie.builtin.cadcommand` | `CadCommand` | 专为 CAD 设计师优化的命令与按键输入工具：内置 Unicode 防输入法拦截、^C^C 前置取消与空格/回车提交。 |
+
 ## 仓库结构
 
 ```text
-src/                         12 个官方插件源码与插件 SDK 契约快照
+src/                         13 个官方插件源码与插件 SDK 契约快照
 tests/                       模块包验证与宿主兼容性测试预留目录
 build/                       构建、打包、catalog、校验与发布脚本
 catalog/                     模块 catalog JSON Schema 与示例
@@ -112,7 +118,7 @@ release-metadata/            仅用于 CI 元数据，不提交 Git
 
 已完成：
 
-1. 将 12 个官方模块工程迁入 `src/`。
+1. 将 13 个官方模块工程迁入 `src/`。
 2. 填充 `module-registry.json`。
 3. 建立模块打包、catalog 生成、签名、增量发布与通道校验流水线。
 4. 建立模块包验证与宿主兼容性测试目录。

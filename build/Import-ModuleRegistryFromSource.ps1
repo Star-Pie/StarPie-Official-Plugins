@@ -14,7 +14,7 @@ foreach ($moduleDirectory in Get-ChildItem -LiteralPath $sourceRoot -Directory |
     $projectFile = Get-ChildItem -LiteralPath $moduleDirectory.FullName -Filter '*.csproj' -File | Select-Object -First 1
     if ($null -eq $projectFile) { continue }
 
-    [xml]$project = Get-Content -LiteralPath $projectFile.FullName -Raw
+    [xml]$project = Get-Content -LiteralPath $projectFile.FullName -Raw -Encoding UTF8
     $propertyGroup = $project.Project.PropertyGroup |
         Where-Object { $_.TargetFramework -or $_.AssemblyName -or $_.Version } |
         Select-Object -First 1
@@ -27,12 +27,12 @@ foreach ($moduleDirectory in Get-ChildItem -LiteralPath $sourceRoot -Directory |
 
     $actionFile = Get-ChildItem -LiteralPath $moduleDirectory.FullName -Filter '*Action.cs' -File | Select-Object -First 1
     if ($null -eq $actionFile) { throw "No action source found for '$($moduleDirectory.Name)'." }
-    $contributionMatch = [regex]::Match((Get-Content -LiteralPath $actionFile.FullName -Raw), 'Id\s*=\s*"([^"]+)"')
+    $contributionMatch = [regex]::Match((Get-Content -LiteralPath $actionFile.FullName -Raw -Encoding UTF8), 'Id\s*=\s*"([^"]+)"')
     if (-not $contributionMatch.Success) { throw "No ActionDescriptor.Id found in '$($actionFile.FullName)'." }
 
     $pluginFile = Get-ChildItem -LiteralPath $moduleDirectory.FullName -Filter '*Plugin.cs' -File | Select-Object -First 1
     if ($null -eq $pluginFile) { throw "No plugin entry source found for '$($moduleDirectory.Name)'." }
-    $pluginText = Get-Content -LiteralPath $pluginFile.FullName -Raw
+    $pluginText = Get-Content -LiteralPath $pluginFile.FullName -Raw -Encoding UTF8
     $entryMatch = [regex]::Match($pluginText, 'public\s+sealed\s+class\s+([A-Za-z_][A-Za-z0-9_]*)')
     if (-not $entryMatch.Success) { throw "No public plugin class found in '$($pluginFile.FullName)'." }
 

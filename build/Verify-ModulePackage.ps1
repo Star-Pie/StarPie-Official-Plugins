@@ -14,9 +14,9 @@ if (-not (Test-Path -LiteralPath $PackagePath)) {
 }
 
 $temp = Join-Path ([System.IO.Path]::GetTempPath()) ('starpie-spkg-verify-' + [Guid]::NewGuid().ToString('N'))
-[System.IO.Directory]::CreateDirectory($temp) | Out-Null
 try {
-    Expand-Archive -LiteralPath $PackagePath -DestinationPath $temp -Force
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [System.IO.Compression.ZipFile]::ExtractToDirectory($PackagePath, $temp)
 
     $pluginJson = Join-Path $temp 'plugin.json'
     $moduleManifest = Join-Path $temp 'module.manifest.json'

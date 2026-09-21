@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    StarPie 官方随包模块：CAD 模拟按键与命令输入 (StarPie.Plugin.CadCommand)
+    ========================================================================
+    专为 AutoCAD、中望CAD、浩辰CAD 等工程绘图设计软件优化的命令与按键输入工具：
+      - Unicode 字符流底层注入：彻底规避 Windows 中文输入法弹窗拦截阻断；
+      - 前置 Esc 命令行清理：支持发送 ^C^C（两次 ESC）重置正在运行的命令提示符；
+      - CAD 专属提交按键：支持空格 (Space)、回车 (Enter) 或保留在命令行等待输入参数；
+      - 多行宏连续执行：支持将多行脚本按行逐一执行并提交。
+
+    遵循官方模块规范：
+      1. 继承 Directory.Build.props 统一编译参数；
+      2. 引用 StarPie.Plugin.Abstractions，设置 Private=false；
+      3. 严禁携带主程序 StarPie.dll 或 Abstractions 产物。
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12.0</LangVersion>
+
+    <AssemblyName>StarPie.Plugin.CadCommand</AssemblyName>
+    <RootNamespace>StarPie.Plugin.CadCommand</RootNamespace>
+
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Product>StarPie CAD 模拟按键与命令输入</Product>
+    <Company>StarPie Studio</Company>
+    <Description>随 StarPie 分发的内置动作：专为 CAD 设计师优化的文本与模拟按键输入工具。可在「插件」页单独停用。</Description>
+
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Private=false：不把 SDK 程序集复制到输出目录。生产物里必须只有这一枚 dll。 -->
+    <ProjectReference Include="..\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="StarPiePluginId" Value="starpie.builtin.cadcommand" />
+    <AssemblyMetadata Include="StarPiePluginName" Value="CAD 模拟按键与命令输入" />
+    <AssemblyMetadata Include="StarPiePluginCapabilities" Value="InputSimulation" />
+    <AssemblyMetadata Include="StarPiePluginLicense" Value="MIT" />
+    <AssemblyMetadata Include="StarPiePluginHomepage" Value="https://github.com/Star-Pie/StarPie" />
+
+    <!-- 认领顶层类型 CadCommand，并映射到底层动作 cadCommand -->
+    <AssemblyMetadata Include="StarPiePluginTypeClaims" Value="CadCommand=cadCommand" />
+  </ItemGroup>
+
+</Project>

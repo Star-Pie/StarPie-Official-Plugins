@@ -34,7 +34,11 @@ function Read-JsonFile {
         throw "JSON file not found: $Path"
     }
 
-    return Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json -Depth 100
+    $raw = Get-Content -LiteralPath $Path -Raw -Encoding UTF8
+    if ((Get-Command ConvertFrom-Json).Parameters.ContainsKey('Depth')) {
+        return $raw | ConvertFrom-Json -Depth 100
+    }
+    return $raw | ConvertFrom-Json
 }
 
 function Write-JsonFile {
@@ -151,7 +155,14 @@ function ConvertTo-NormalizedRelativePath {
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$BasePath,[Parameter(Mandatory)][string]$Path)
 
-    $relative = [System.IO.Path]::GetRelativePath($BasePath, $Path)
+    try {
+        $relative = [System.IO.Path]::GetRelativePath($BasePath, $Path)
+    }
+    catch {
+        $baseUri = New-Object System.Uri(($BasePath.TrimEnd('\', '/') + '/'))
+        $targetUri = New-Object System.Uri($Path)
+        $relative = [System.Uri]::UnescapeDataString($baseUri.MakeRelativeUri($targetUri).ToString())
+    }
     return $relative.Replace('\', '/')
 }
 
@@ -216,7 +227,11 @@ function Select-ModulesFromJson {
         [object]$Registry
     )
 
-    $requested = @($ModulesJson | ConvertFrom-Json -Depth 100)
+    $requested = if ((Get-Command ConvertFrom-Json).Parameters.ContainsKey('Depth')) {
+        @($ModulesJson | ConvertFrom-Json -Depth 100)
+    } else {
+        @($ModulesJson | ConvertFrom-Json)
+    }
     if ($requested.Count -eq 1 -and $null -ne $requested[0].modules) {
         $requested = @($requested[0].modules)
     }
