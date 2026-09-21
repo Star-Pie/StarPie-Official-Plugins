@@ -9,7 +9,7 @@
                         "project":  "src/StarPie.Plugin.CadCommand/StarPie.Plugin.CadCommand.csproj",
                         "assembly":  "StarPie.Plugin.CadCommand.dll",
                         "targetFramework":  "net8.0-windows",
-                        "version":  "1.0.0",
+                        "version":  "1.0.1",
                         "pluginId":  "starpie.builtin.cadcommand",
                         "contributionId":  "cadCommand",
                         "entryType":  "StarPie.Plugin.CadCommand.CadCommandPlugin",
