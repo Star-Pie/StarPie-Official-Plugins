@@ -14,7 +14,6 @@
                         "contributionId":  "cadCommand",
                         "entryType":  "StarPie.Plugin.CadCommand.CadCommandPlugin",
                         "typeClaims":  [
-                                           "CadCommand"
                                        ],
                         "capabilities":  [
                                              "InputSimulation"
