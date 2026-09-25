@@ -29,10 +29,10 @@ public sealed class KeypadLayerAction : IActionContribution
     public ActionDescriptor Descriptor => new()
     {
         Id = "keypadLayer",
-        DisplayName = Texts.ActionTitle,
+        DisplayName = _context.I18n.T("keypad.title", Texts.ActionTitle),
         DisplayNameKey = "keypad.title",
-        Description = Texts.ActionDesc,
-        Category = Texts.Category,
+        Description = _context.I18n.T("keypad.desc", Texts.ActionDescZhCn),
+        Category = _context.I18n.T("keypad.category", Texts.ActionCategoryZhCn),
         IconKey = _iconKey,
         Kind = ActionKind.Sequential,
         TimeoutSeconds = 5,
@@ -72,31 +72,37 @@ public sealed class KeypadLayerAction : IActionContribution
             return _context.I18n.T("keypad.preview", Texts.Preview);
         }
 
-        return FormatCustomPreview(keyMap);
+        string moreTemplate = _context.I18n.T("keypad.preview.more", Texts.PreviewMore);
+        return FormatCustomPreview(keyMap, moreTemplate);
     }
 
-    private string FormatCustomPreview(string keyMap)
+    public static string FormatCustomPreview(string keyMap, string? moreTemplate = null)
     {
-        string payload = keyMap;
+        if (string.IsNullOrWhiteSpace(keyMap))
+        {
+            return Texts.Preview;
+        }
+
+        string payload = keyMap.Trim();
         if (payload.StartsWith("v1|", StringComparison.OrdinalIgnoreCase))
         {
             payload = payload.Substring(3);
         }
 
-        string[] pairs = payload.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        string[] pairs = payload.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         if (pairs.Length == 0)
         {
-            return _context.I18n.T("keypad.preview", Texts.Preview);
+            return Texts.Preview;
         }
 
         var list = new List<string>(pairs.Length);
         foreach (string pair in pairs)
         {
-            int colonIdx = pair.IndexOf(':');
-            if (colonIdx > 0 && colonIdx < pair.Length - 1)
+            int sepIdx = pair.IndexOfAny(new[] { ':', '=' });
+            if (sepIdx > 0 && sepIdx < pair.Length - 1)
             {
-                string src = pair.Substring(0, colonIdx).Trim();
-                string dst = pair.Substring(colonIdx + 1).Trim();
+                string src = pair.Substring(0, sepIdx).Trim();
+                string dst = pair.Substring(sepIdx + 1).Trim();
                 list.Add($"{src} ➔ {dst}");
             }
             else
@@ -111,8 +117,8 @@ public sealed class KeypadLayerAction : IActionContribution
         }
 
         string firstThree = string.Join(", ", list.GetRange(0, 3));
-        string moreTemplate = _context.I18n.T("keypad.preview.more", Texts.PreviewMore);
-        string suffix = string.Format(moreTemplate, list.Count);
+        string template = !string.IsNullOrEmpty(moreTemplate) ? moreTemplate : Texts.PreviewMore;
+        string suffix = string.Format(template, list.Count);
         return $"{firstThree} {suffix}".Trim();
     }
 

@@ -125,6 +125,16 @@ if (Test-Path -LiteralPath $actionFile) {
     # Check that raw host result and exception are logged to plugin log
     Assert-Condition ($actionText -match 'Log\.(Warn|Error)\s*\([^)]*remapResult\.Message') "ExecuteAsync logs raw remapResult.Message to plugin log (INV-I18N)"
     Assert-Condition ($actionText -match 'Log\.Error\s*\([^)]*ex') "ExecuteAsync logs raw exceptions to plugin log (INV-I18N)"
+
+    # Check Descriptor localization (INV-I18N)
+    Assert-Condition ($actionText -match 'Category\s*=\s*_context\.I18n\.T\(\s*"keypad\.category"') "Descriptor Category uses localized entry keypad.category (INV-I18N)"
+    Assert-Condition ($actionText -notmatch 'Category\s*=\s*Texts\.Category') "Descriptor Category does not expose raw Texts.Category (INV-I18N)"
+    Assert-Condition ($actionText -match 'Description\s*=\s*_context\.I18n\.T\(\s*"keypad\.desc"') "Descriptor Description uses localized entry keypad.desc (INV-I18N)"
+    Assert-Condition ($actionText -notmatch 'Description\s*=\s*Texts\.ActionDesc[,\r\n]') "Descriptor Description does not use unlocalized static ActionDesc directly (INV-I18N)"
+
+    # Check Preview custom key mapping branch (INV-KEYMAP-PREVIEW)
+    Assert-Condition ($actionText -match 'FormatCustomPreview\(') "Preview uses FormatCustomPreview for custom mappings (INV-KEYMAP-PREVIEW)"
+    Assert-Condition ($actionText -match 'string\.Equals\s*\(\s*keyMap\s*,\s*DefaultKeyMap') "Preview distinguishes DefaultKeyMap from custom mappings (INV-KEYMAP-PREVIEW)"
 }
 
 # 6. Check Texts.cs (INV-I18N & language-neutral static strings)
@@ -183,6 +193,58 @@ if (Test-Path -LiteralPath $sdkSourceFile) {
     $sdkSource = Get-Content -LiteralPath $sdkSourceFile -Raw | ConvertFrom-Json
     Assert-Condition ($sdkSource.sourceCommit -eq 'd8ddbce2669d9471e09f03f153403e5fdd733d63') "SDK_SOURCE.json records commit d8ddbce2669d9471e09f03f153403e5fdd733d63"
     Assert-Condition ($sdkSource.apiVersion -eq '1.7') "SDK_SOURCE.json records apiVersion 1.7"
+}
+
+# 8. Check Preview formatting and custom mapping regression tests (INV-KEYMAP-PREVIEW)
+$builtDll = Join-Path $root 'src/StarPie.Plugin.KeypadLayer/bin/Release/net8.0-windows/StarPie.Plugin.KeypadLayer.dll'
+if (-not (Test-Path -LiteralPath $builtDll)) {
+    $builtDll = Join-Path $root 'artifacts/staging/starpie.plugin.keypadlayer/1.0.0/StarPie.Plugin.KeypadLayer.dll'
+}
+if (Test-Path -LiteralPath $builtDll) {
+    $abstractionsDll = Join-Path $root 'src/StarPie.Plugin.Abstractions/bin/Release/net8.0-windows/StarPie.Plugin.Abstractions.dll'
+    if (Test-Path -LiteralPath $abstractionsDll) {
+        [System.Reflection.Assembly]::LoadFrom($abstractionsDll) | Out-Null
+    }
+    $asm = [System.Reflection.Assembly]::LoadFrom($builtDll)
+    $type = $asm.GetType('StarPie.Plugin.KeypadLayer.KeypadLayerAction')
+    $textsType = $asm.GetType('StarPie.Plugin.KeypadLayer.Texts')
+
+    if ($type -and $textsType) {
+        $formatMethod = $type.GetMethod('FormatCustomPreview', [System.Reflection.BindingFlags]'Public, Static')
+        Assert-Condition ($null -ne $formatMethod) "KeypadLayerAction exposes FormatCustomPreview static helper (INV-KEYMAP-PREVIEW)"
+
+        if ($formatMethod) {
+            $defaultPreview = $textsType.GetField('Preview', [System.Reflection.BindingFlags]'NonPublic, Static').GetValue($null)
+
+            # Case 1: single custom mapping
+            $res1 = $formatMethod.Invoke($null, @('v1|A:Space', $null))
+            Assert-Condition ($res1 -eq 'A ➔ Space') "Custom preview formats single pair 'v1|A:Space' -> 'A ➔ Space'"
+            Assert-Condition ($res1 -ne $defaultPreview) "Custom mapping does not return default preset preview"
+            Assert-Condition ($res1 -notmatch 'CAD') "Custom mapping preview contains no CAD terminology"
+
+            # Case 2: two custom mappings
+            $res2 = $formatMethod.Invoke($null, @('v1|A:Space,B:Enter', $null))
+            Assert-Condition ($res2 -eq 'A ➔ Space, B ➔ Enter') "Custom preview formats multiple pairs 'v1|A:Space,B:Enter'"
+            Assert-Condition ($res2 -ne $defaultPreview) "Two-pair custom mapping does not return default preset preview"
+
+            # Case 3: more than three mappings
+            $res4 = $formatMethod.Invoke($null, @('v1|Q:Num7,W:Num8,E:Num9,R:Num0', $null))
+            Assert-Condition ($res4 -match 'Q ➔ Num7, W ➔ Num8, E ➔ Num9') "Custom preview truncates after 3 pairs with suffix"
+            Assert-Condition ($res4 -match '4') "Custom preview suffix indicates count (4)"
+            Assert-Condition ($res4 -ne $defaultPreview) "Four-pair custom mapping does not return default preset preview"
+
+            # Case 4: delimiters (semicolon and equals)
+            $resSemi = $formatMethod.Invoke($null, @('v1|X=1;Y=2', $null))
+            Assert-Condition ($resSemi -eq 'X ➔ 1, Y ➔ 2') "Custom preview handles ';' delimiter and '=' separator"
+
+            # Case 5: empty or whitespace falls back
+            $resEmpty = $formatMethod.Invoke($null, @('', $null))
+            Assert-Condition ($resEmpty -eq $defaultPreview) "Empty keyMap falls back to default preset preview"
+        }
+    }
+    else {
+        Assert-Condition $false "KeypadLayerAction or Texts type found in assembly"
+    }
 }
 
 Write-Host "--------------------------------------------------------"

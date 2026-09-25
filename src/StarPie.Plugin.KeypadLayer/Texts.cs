@@ -12,12 +12,14 @@ internal static class Texts
     // ---------------------------------------------------------------- 静态显示标记（语言无关键位标记，无中文散文）
 
     internal const string Category = "KeyMap";
-    internal const string ActionDesc = "QWE/ASD/ZXC/R → Num7–Num0";
+    internal const string ActionDesc = "Toggle custom key mapping (Default: QWE/ASD/ZXC/R → Num7–Num0)";
     internal const string FieldKeyMapHelp = "QWE/ASD/ZXC/R → Num7–Num0";
 
     // ---------------------------------------------------------------- zh-CN (默认/兜底)
 
     internal const string ActionTitle = "按键映射";
+    internal const string ActionCategoryZhCn = "按键映射";
+    internal const string ActionDescZhCn = "开启或关闭自定义按键映射，默认预设为左手数字小键盘 (QWE/ASD/ZXC/R ➔ 789/456/123/0)";
     internal const string FieldKeyMap = "键盘映射配置";
     internal const string Preview = "按键映射 (默认: QWE/ASD/ZXC/R ➔ 789/456/123/0)";
     internal const string PreviewMore = "... (共 {0} 项)";
@@ -36,8 +38,8 @@ internal static class Texts
     internal static readonly (string Key, string ZhCn, string En)[] Base = new[]
     {
         ("keypad.title", ActionTitle, "Key Mapping"),
-        ("keypad.desc", ActionDesc, ActionDesc),
-        ("keypad.category", "按键映射", "Key Mapping"),
+        ("keypad.desc", ActionDescZhCn, ActionDesc),
+        ("keypad.category", ActionCategoryZhCn, "Key Mapping"),
 
         ("keypad.field.keyMap", FieldKeyMap, "Keyboard Remapping"),
         ("keypad.field.keyMapHelp", FieldKeyMapHelp, FieldKeyMapHelp),
@@ -60,7 +62,7 @@ internal static class Texts
     internal static readonly Dictionary<string, string> ZhTw = new()
     {
         ["keypad.title"] = "按鍵對應",
-        ["keypad.desc"] = ActionDesc,
+        ["keypad.desc"] = "開啟或關閉自訂按鍵對應，預設為左手數字小鍵盤 (QWE/ASD/ZXC/R ➔ 789/456/123/0)",
         ["keypad.category"] = "按鍵對應",
         ["keypad.field.keyMap"] = "鍵盤對應設定",
         ["keypad.field.keyMapHelp"] = FieldKeyMapHelp,
@@ -80,7 +82,7 @@ internal static class Texts
     internal static readonly Dictionary<string, string> Ja = new()
     {
         ["keypad.title"] = "キーマッピング",
-        ["keypad.desc"] = ActionDesc,
+        ["keypad.desc"] = "カスタムキーマッピングの切り替え（デフォルト: 左手テンキー QWE/ASD/ZXC/R ➔ 789/456/123/0）",
         ["keypad.category"] = "キーマッピング",
         ["keypad.field.keyMap"] = "キーマッピング設定",
         ["keypad.field.keyMapHelp"] = FieldKeyMapHelp,
