@@ -53,11 +53,12 @@ StarPie 运行时实际加载的仍然是 DLL 程序集。`.spkg` 只是分发�
 | 插件 | 插件 ID | 动作类型 | 基本功能 |
 |---|---|---|---|
 | CAD 模拟按键与命令输入 | `starpie.plugin.cadcommand` | `Plugin`（`cadCommand`） | 专为 CAD 设计师优化的命令与按键输入工具：内置 Unicode 防输入法拦截、^C^C 前置取消与空格/回车提交。 |
+| CAD 数字键盘层 | `starpie.plugin.keypadlayer` | `Plugin`（`keypadLayer`） | 专为 CAD 设计师优化的左手空间数字小键盘映射层（QWE/ASD/ZXC/R -> 789/456/123/0），无需移动鼠标即可完成尺寸输入。 |
 
 ## 仓库结构
 
 ```text
-src/                         13 个官方插件源码与插件 SDK 契约快照
+src/                         14 个官方插件源码与插件 SDK 契约快照
 tests/                       模块包验证与宿主兼容性测试预留目录
 build/                       构建、打包、catalog、校验与发布脚本
 catalog/                     模块 catalog JSON Schema 与示例

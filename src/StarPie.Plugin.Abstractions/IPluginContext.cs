@@ -33,6 +33,17 @@ public interface IPluginContext
     /// <summary>注册矢量图标。</summary>
     IIconRegistry Icons { get; }
 
+    /// <summary>
+    /// 声明插件级参数页（SDK 1.6 起）。
+    /// <para>
+    /// 与 <see cref="Actions"/> 的区别：这里的字段属于<b>插件整体</b>，值落在
+    /// <see cref="Settings"/> 的同一命名空间里，由宿主在插件管理卡片上统一渲染。
+    /// 纯声明式，不需要任何能力位 —— 宿主只是用 SDK 类型画了个表单，
+    /// 既不接管用户点击，也不起进程。
+    /// </para>
+    /// </summary>
+    ISettingsPageRegistry SettingsPage { get; }
+
     /// <summary>宿主已验证的动作能力（发快捷键 / 启程序 / 剪贴板 / 开网址）。</summary>
     IHostActionInvoker Host { get; }
 
@@ -71,6 +82,18 @@ public interface IPluginContext
     /// 预设清单（<see cref="IHostSystemService.Presets"/>）始终可读，理由见该接口。
     /// </summary>
     IHostSystemService System { get; }
+
+    /// <summary>
+    /// 轮盘呼出（在指定屏幕位置呼出用户的轮盘，由用户选扇区执行）。
+    /// 需要 <see cref="PluginCapability.Wheel"/> 能力，理由见 <see cref="IHostWheelService"/>。
+    /// </summary>
+    IHostWheelService Wheel { get; }
+
+    /// <summary>
+    /// 键盘重映射（由宿主管理的进程级按键重映射会话，SDK 1.7 起）。
+    /// 需要 <see cref="PluginCapability.InputRemapping"/> 能力。
+    /// </summary>
+    IHostKeyboardRemapService KeyboardRemap { get; }
 
     /// <summary>宿主环境信息。</summary>
     IHostInfo Info { get; }

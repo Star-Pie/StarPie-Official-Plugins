@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    StarPie 官方在线插件：CAD 数字键盘层 (StarPie.Plugin.KeypadLayer)
+    ========================================================================
+    专为 CAD 及工程设计软件优化的左手空间数字小键盘映射层：
+      - 一键将左手主键区 QWE/ASD/ZXC/R 映射为空间数字小键盘 789/456/123/0；
+      - 右手可保持鼠标定位或滚轮缩放，左手直接进行尺寸数值快速盲打；
+      - 基于 StarPie SDK 1.7 宿主级输入重映射能力（IHostKeyboardRemapService）；
+      - 纯宿主集中式低级钩子派发，零 P/Invoke、零全局钩子、失焦与紧急长按 Esc 自动释放。
+
+    遵循官方模块规范：
+      1. 继承 Directory.Build.props 统一编译参数；
+      2. 引用 StarPie.Plugin.Abstractions，设置 Private=false；
+      3. 零 NuGet 依赖，严禁携带主程序 StarPie.dll 或 Abstractions 产物。
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12.0</LangVersion>
+
+    <AssemblyName>StarPie.Plugin.KeypadLayer</AssemblyName>
+    <RootNamespace>StarPie.Plugin.KeypadLayer</RootNamespace>
+
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Product>StarPie CAD 数字键盘层</Product>
+    <Company>StarPie Studio</Company>
+    <Description>StarPie 官方插件：为 CAD 与工程设计软件提供左手空间数字小键盘映射层。可在「插件」页单独停用。</Description>
+
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Private=false：不把 SDK 程序集复制到输出目录。生产物里必须只有这一枚 dll。 -->
+    <ProjectReference Include="..\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="StarPiePluginId" Value="starpie.plugin.keypadlayer" />
+    <AssemblyMetadata Include="StarPiePluginName" Value="CAD 数字键盘层" />
+    <AssemblyMetadata Include="StarPiePluginCapabilities" Value="InputRemapping" />
+    <AssemblyMetadata Include="StarPiePluginLicense" Value="MIT" />
+    <AssemblyMetadata Include="StarPiePluginHomepage" Value="https://github.com/Star-Pie/StarPie" />
+    <AssemblyMetadata Include="StarPiePluginApiVersion" Value="1.7" />
+    <AssemblyMetadata Include="StarPiePluginMinHostVersion" Value="1.8.1-beta.1" />
+  </ItemGroup>
+
+</Project>

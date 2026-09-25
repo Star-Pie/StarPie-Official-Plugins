@@ -33,6 +33,35 @@
                         "minHostVersion":  "1.8.0-beta.1"
                     },
                     {
+                        "id":  "starpie.plugin.keypadlayer",
+                        "name":  "CAD 数字键盘层",
+                        "project":  "src/StarPie.Plugin.KeypadLayer/StarPie.Plugin.KeypadLayer.csproj",
+                        "assembly":  "StarPie.Plugin.KeypadLayer.dll",
+                        "targetFramework":  "net8.0-windows",
+                        "version":  "1.0.0",
+                        "pluginId":  "starpie.plugin.keypadlayer",
+                        "contributionId":  "keypadLayer",
+                        "entryType":  "StarPie.Plugin.KeypadLayer.KeypadLayerPlugin",
+                        "typeClaims":  [
+                                       ],
+                        "capabilities":  [
+                                             "InputRemapping"
+                                         ],
+                        "releaseDirectory":  "StarPie.Plugin.KeypadLayer",
+                        "description":  "StarPie 官方插件：为 CAD 与工程设计软件提供左手空间数字小键盘映射层。可在「插件」页单独停用。",
+                        "author":  "StarPie Studio",
+                        "license":  "MIT",
+                        "homepage":  "https://github.com/Star-Pie/StarPie",
+                        "icon":  null,
+                        "tags":  [
+                                     "official",
+                                     "plugin"
+                                 ],
+                        "enabled":  true,
+                        "apiVersion":  "1.7",
+                        "minHostVersion":  "1.8.1-beta.1"
+                    },
+                    {
                         "id":  "starpie.builtin.command",
                         "name":  "运行命令",
                         "project":  "src/StarPie.Plugin.Command/StarPie.Plugin.Command.csproj",

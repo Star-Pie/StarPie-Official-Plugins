@@ -18,4 +18,6 @@ src/
   StarPie.Plugin.SwitchWindow/
   StarPie.Plugin.Ocr/
   StarPie.Plugin.System/
+  StarPie.Plugin.CadCommand/
+  StarPie.Plugin.KeypadLayer/
 ```

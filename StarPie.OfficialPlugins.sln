@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -32,6 +32,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarPie.Plugin.WindowOpacity", "src\StarPie.Plugin.WindowOpacity\StarPie.Plugin.WindowOpacity.csproj", "{90760845-EBD2-4EAE-BEC1-ADFB9CCE6162}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarPie.Plugin.CadCommand", "src\StarPie.Plugin.CadCommand\StarPie.Plugin.CadCommand.csproj", "{22837BA6-0264-4FEC-AD95-1A8DF1AF16CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarPie.Plugin.KeypadLayer", "src\StarPie.Plugin.KeypadLayer\StarPie.Plugin.KeypadLayer.csproj", "{66D34547-B823-4022-A080-2D450F46FC6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -211,6 +213,18 @@ Global
 		{22837BA6-0264-4FEC-AD95-1A8DF1AF16CC}.Release|x64.Build.0 = Release|x64
 		{22837BA6-0264-4FEC-AD95-1A8DF1AF16CC}.Release|x86.ActiveCfg = Release|x64
 		{22837BA6-0264-4FEC-AD95-1A8DF1AF16CC}.Release|x86.Build.0 = Release|x64
+		{66D34547-B823-4022-A080-2D450F46FC6A}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{66D34547-B823-4022-A080-2D450F46FC6A}.Debug|Any CPU.Build.0 = Debug|x64
+		{66D34547-B823-4022-A080-2D450F46FC6A}.Debug|x64.ActiveCfg = Debug|x64
+		{66D34547-B823-4022-A080-2D450F46FC6A}.Debug|x64.Build.0 = Debug|x64
+		{66D34547-B823-4022-A080-2D450F46FC6A}.Debug|x86.ActiveCfg = Debug|x64
+		{66D34547-B823-4022-A080-2D450F46FC6A}.Debug|x86.Build.0 = Debug|x64
+		{66D34547-B823-4022-A080-2D450F46FC6A}.Release|Any CPU.ActiveCfg = Release|x64
+		{66D34547-B823-4022-A080-2D450F46FC6A}.Release|Any CPU.Build.0 = Release|x64
+		{66D34547-B823-4022-A080-2D450F46FC6A}.Release|x64.ActiveCfg = Release|x64
+		{66D34547-B823-4022-A080-2D450F46FC6A}.Release|x64.Build.0 = Release|x64
+		{66D34547-B823-4022-A080-2D450F46FC6A}.Release|x86.ActiveCfg = Release|x64
+		{66D34547-B823-4022-A080-2D450F46FC6A}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -230,5 +244,6 @@ Global
 		{ABBBCCB8-E441-4A18-8F8D-3092D606E68E} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{90760845-EBD2-4EAE-BEC1-ADFB9CCE6162} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{22837BA6-0264-4FEC-AD95-1A8DF1AF16CC} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{66D34547-B823-4022-A080-2D450F46FC6A} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

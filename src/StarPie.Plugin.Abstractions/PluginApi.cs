@@ -23,6 +23,16 @@ public static class PluginApi
     /// <item>1.4 —— 新增 <see cref="IHostSystemService"/>（装配到
     /// <see cref="IPluginContext.System"/>）与 <see cref="PluginCapability.InputSimulation"/>，
     /// 使「系统控制」不必再硬编码在宿主里。</item>
+    /// <item>1.5 —— 新增 <see cref="IHostWheelService"/>（装配到
+    /// <see cref="IPluginContext.Wheel"/>）与 <see cref="PluginCapability.Wheel"/>，
+    /// 使「悬浮球」这类常驻形态不必（也无法）在插件里复刻轮盘。</item>
+    /// <item>1.6 —— 新增 <see cref="ISettingsPageRegistry"/>（装配到
+    /// <see cref="IPluginContext.SettingsPage"/>）与 <see cref="SettingsPageDescriptor"/>，
+    /// 使插件能声明<b>插件级</b>参数页、由宿主在插件管理卡片上统一渲染。
+    /// 同时提供 <see cref="IPluginSettings.OnChanged"/>，让插件在设置成功持久化后响应具体字段变化。</item>
+    /// <item>1.7 —— 新增 <see cref="IHostKeyboardRemapService"/>（装配到
+    /// <see cref="IPluginContext.KeyboardRemap"/>）与 <see cref="PluginCapability.InputRemapping"/>，
+    /// 使授权插件能切换受控的进程级键盘映射会话；新增 <see cref="ParameterFieldType.KeyMap"/> 参数控件类型。</item>
     /// </list>
     /// <para>
     /// <b>每加一个服务面就在这里补一条，别只改数字。</b>这份清单是后来者判断
@@ -30,10 +40,10 @@ public static class PluginApi
     /// 插件作者会按旧清单去推断版本兼容性，而结论是错的。
     /// </para>
     /// </summary>
-    public const int ApiVersionMinor = 4;
+    public const int ApiVersionMinor = 7;
 
     /// <summary>
-    /// SDK 契约版本字符串，形如 <c>1.4</c>。
+    /// SDK 契约版本字符串，形如 <c>1.7</c>。
     /// <para>
     /// 这里没法用常量插值消掉重复：C# 的常量插值只接受 <c>string</c> 常量，
     /// 而版本号的两个组成部分是 <c>int</c>。所以「这个字符串」与「上面两个数字」
@@ -42,7 +52,7 @@ public static class PluginApi
     /// 漂了以后报错信息里的版本号会和真实契约对不上，排查时先被误导一轮。
     /// </para>
     /// </summary>
-    public const string ApiVersion = "1.4";
+    public const string ApiVersion = "1.7";
 
     /// <summary>本契约程序集的程序集名。宿主的 PluginLoadContext 依赖它做「共享程序集放行」。</summary>
     public const string AbstractionsAssemblyName = "StarPie.Plugin.Abstractions";
