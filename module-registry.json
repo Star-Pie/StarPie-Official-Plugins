@@ -33,6 +33,35 @@
                         "minHostVersion":  "1.8.0-beta.1"
                     },
                     {
+                        "id":  "starpie.plugin.keypadlayer",
+                        "name":  "按键映射",
+                        "project":  "src/StarPie.Plugin.KeypadLayer/StarPie.Plugin.KeypadLayer.csproj",
+                        "assembly":  "StarPie.Plugin.KeypadLayer.dll",
+                        "targetFramework":  "net8.0-windows",
+                        "version":  "1.0.0",
+                        "pluginId":  "starpie.plugin.keypadlayer",
+                        "contributionId":  "keypadLayer",
+                        "entryType":  "StarPie.Plugin.KeypadLayer.KeypadLayerPlugin",
+                        "typeClaims":  [
+                                       ],
+                        "capabilities":  [
+                                             "InputRemapping"
+                                         ],
+                        "releaseDirectory":  "StarPie.Plugin.KeypadLayer",
+                        "description":  "通过轮盘开启或关闭自定义按键映射，将物理按键映射为目标按键；支持可视化配置，并在切换应用或长按 Esc 时安全释放。默认提供左手数字小键盘预设。",
+                        "author":  "StarPie Studio",
+                        "license":  "MIT",
+                        "homepage":  "https://github.com/Star-Pie/StarPie",
+                        "icon":  null,
+                        "tags":  [
+                                     "official",
+                                     "plugin"
+                                 ],
+                        "enabled":  true,
+                        "apiVersion":  "1.7",
+                        "minHostVersion":  "1.8.1-beta.1"
+                    },
+                    {
                         "id":  "starpie.builtin.command",
                         "name":  "运行命令",
                         "project":  "src/StarPie.Plugin.Command/StarPie.Plugin.Command.csproj",

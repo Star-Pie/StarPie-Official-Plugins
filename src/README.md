@@ -1,6 +1,6 @@
 # 模块源码目录
 
-仓库骨架和发布流水线验证通过后，官方模块工程将迁移到这里。
+此目录包含官方模块工程；共享 SDK 契约位于仓库根目录的 `sdk/`。
 
 预期目录如下：
 
@@ -18,4 +18,7 @@ src/
   StarPie.Plugin.SwitchWindow/
   StarPie.Plugin.Ocr/
   StarPie.Plugin.System/
+  StarPie.Plugin.CadCommand/
+  StarPie.Plugin.KeypadLayer/
+  StarPie.Plugin.FloatingBall/
 ```
