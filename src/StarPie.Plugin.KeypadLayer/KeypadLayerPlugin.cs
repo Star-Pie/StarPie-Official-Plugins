@@ -3,10 +3,10 @@ using StarPie.Plugin;
 namespace StarPie.Plugin.KeypadLayer;
 
 /// <summary>
-/// StarPie 官方独立插件入口：「CAD 数字键盘层」。
+/// StarPie 官方独立插件入口：「按键映射」。
 /// <para>
-/// 专为 AutoCAD、中望CAD、浩辰CAD、SolidWorks 等各类工程设计软件打造：
-/// 1. 左手空间数字盲打：将左手 QWE/ASD/ZXC/R 键位无缝切换为数字小键盘 789/456/123/0；
+/// 通过轮盘开启或关闭自定义按键映射，将物理按键映射为目标按键：
+/// 1. 支持可视化配置映射，默认提供左手数字小键盘预设（QWE/ASD/ZXC/R ➔ 789/456/123/0）；
 /// 2. 宿主集中式管理：由宿主唯一的低级键盘钩子高效注入扫描码，失焦与长按 Esc 紧急释放；
 /// 3. 单扇区切换：在轮盘中触发一次即开启，再次触发即关闭。
 /// </para>
@@ -29,7 +29,7 @@ public sealed class KeypadLayerPlugin : IStarPiePlugin
         // ③ 注册动作贡献点
         context.Actions.Register(new KeypadLayerAction(context, iconKey));
 
-        context.Log.Info("CAD 数字键盘层插件已成功初始化");
+        context.Log.Info("按键映射插件已成功初始化");
     }
 
     public void Shutdown()

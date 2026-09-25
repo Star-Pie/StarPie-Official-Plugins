@@ -48,12 +48,17 @@ StarPie 运行时实际加载的仍然是 DLL 程序集。`.spkg` 只是分发�
 | 系统控制 | `starpie.builtin.system` | `System` | 通过预设下拉执行最小化、任务视图、音量、锁屏、关机等系统操作。 |
 | 截屏识字 (OCR) | `starpie.builtin.ocr` | `Ocr`、`ScreenOcr` | 触发后现场框选屏幕区域，交给宿主 OCR 服务识别文字；无预配置参数。 |
 
+### 输入增强与按键映射
+
+| 插件 | 插件 ID | 动作类型 | 基本功能 |
+|---|---|---|---|
+| 按键映射 | `starpie.plugin.keypadlayer` | `Plugin`（`keypadLayer`） | 通过轮盘开启或关闭自定义按键映射，将物理按键映射为目标按键；支持可视化配置，并在切换应用或长按 Esc 时安全释放。默认提供左手数字小键盘预设。 |
+
 ### 行业与绘图工具
 
 | 插件 | 插件 ID | 动作类型 | 基本功能 |
 |---|---|---|---|
 | CAD 模拟按键与命令输入 | `starpie.plugin.cadcommand` | `Plugin`（`cadCommand`） | 专为 CAD 设计师优化的命令与按键输入工具：内置 Unicode 防输入法拦截、^C^C 前置取消与空格/回车提交。 |
-| CAD 数字键盘层 | `starpie.plugin.keypadlayer` | `Plugin`（`keypadLayer`） | 专为 CAD 设计师优化的左手空间数字小键盘映射层（QWE/ASD/ZXC/R -> 789/456/123/0），无需移动鼠标即可完成尺寸输入。 |
 
 ## 仓库结构
 

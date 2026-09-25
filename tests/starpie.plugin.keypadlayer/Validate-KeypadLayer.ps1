@@ -33,7 +33,7 @@ $module = @($registry.modules) | Where-Object { $_.id -eq 'starpie.plugin.keypad
 Assert-Condition ($null -ne $module) "starpie.plugin.keypadlayer is registered in module-registry.json"
 
 if ($module) {
-    Assert-Condition ($module.name -eq 'CAD 数字键盘层') "Module name is 'CAD 数字键盘层'"
+    Assert-Condition ($module.name -eq '按键映射') "Module name is '按键映射'"
     Assert-Condition ($module.project -eq 'src/StarPie.Plugin.KeypadLayer/StarPie.Plugin.KeypadLayer.csproj') "Module project path is correct"
     Assert-Condition ($module.assembly -eq 'StarPie.Plugin.KeypadLayer.dll') "Module assembly is 'StarPie.Plugin.KeypadLayer.dll'"
     Assert-Condition ($module.targetFramework -eq 'net8.0-windows') "Module targetFramework is 'net8.0-windows'"
@@ -85,6 +85,7 @@ if (Test-Path -LiteralPath $csprojPath) {
         $metaDict[$m.GetAttribute('Include')] = $m.GetAttribute('Value')
     }
     Assert-Condition ($metaDict['StarPiePluginId'] -eq 'starpie.plugin.keypadlayer') "AssemblyMetadata StarPiePluginId is 'starpie.plugin.keypadlayer'"
+    Assert-Condition ($metaDict['StarPiePluginName'] -eq '按键映射') "AssemblyMetadata StarPiePluginName is '按键映射'"
     Assert-Condition ($metaDict['StarPiePluginCapabilities'] -eq 'InputRemapping') "AssemblyMetadata StarPiePluginCapabilities is 'InputRemapping'"
     Assert-Condition ($metaDict['StarPiePluginApiVersion'] -eq '1.7') "AssemblyMetadata StarPiePluginApiVersion is '1.7'"
     Assert-Condition ($metaDict['StarPiePluginMinHostVersion'] -eq '1.8.1-beta.1') "AssemblyMetadata StarPiePluginMinHostVersion is '1.8.1-beta.1'"

@@ -7,10 +7,10 @@ using StarPie.Plugin;
 namespace StarPie.Plugin.KeypadLayer;
 
 /// <summary>
-/// CAD 数字键盘层动作贡献点实现。
+/// 按键映射动作贡献点实现。
 /// <para>
 /// 负责响应轮盘扇区触发，调用宿主集中管理的 <see cref="IHostKeyboardRemapService"/>
-/// 切换前台工程设计窗口的左手空间数字小键盘映射层。
+/// 切换前台窗口的按键映射层。默认预设为左手空间数字小键盘。
 /// </para>
 /// </summary>
 public sealed class KeypadLayerAction : IActionContribution
@@ -61,7 +61,59 @@ public sealed class KeypadLayerAction : IActionContribution
 
     public string Preview(IReadOnlyDictionary<string, string> parameters)
     {
-        return _context.I18n.T("keypad.preview", Texts.Preview);
+        if (parameters == null || !parameters.TryGetValue("keyMap", out string? keyMap) || string.IsNullOrWhiteSpace(keyMap))
+        {
+            return _context.I18n.T("keypad.preview", Texts.Preview);
+        }
+
+        keyMap = keyMap.Trim();
+        if (string.Equals(keyMap, DefaultKeyMap, StringComparison.OrdinalIgnoreCase))
+        {
+            return _context.I18n.T("keypad.preview", Texts.Preview);
+        }
+
+        return FormatCustomPreview(keyMap);
+    }
+
+    private string FormatCustomPreview(string keyMap)
+    {
+        string payload = keyMap;
+        if (payload.StartsWith("v1|", StringComparison.OrdinalIgnoreCase))
+        {
+            payload = payload.Substring(3);
+        }
+
+        string[] pairs = payload.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (pairs.Length == 0)
+        {
+            return _context.I18n.T("keypad.preview", Texts.Preview);
+        }
+
+        var list = new List<string>(pairs.Length);
+        foreach (string pair in pairs)
+        {
+            int colonIdx = pair.IndexOf(':');
+            if (colonIdx > 0 && colonIdx < pair.Length - 1)
+            {
+                string src = pair.Substring(0, colonIdx).Trim();
+                string dst = pair.Substring(colonIdx + 1).Trim();
+                list.Add($"{src} ➔ {dst}");
+            }
+            else
+            {
+                list.Add(pair);
+            }
+        }
+
+        if (list.Count <= 3)
+        {
+            return string.Join(", ", list);
+        }
+
+        string firstThree = string.Join(", ", list.GetRange(0, 3));
+        string moreTemplate = _context.I18n.T("keypad.preview.more", Texts.PreviewMore);
+        string suffix = string.Format(moreTemplate, list.Count);
+        return $"{firstThree} {suffix}".Trim();
     }
 
     public Task<ActionResult> ExecuteAsync(PluginActionInput input, CancellationToken cancellationToken)

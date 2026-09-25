@@ -34,7 +34,7 @@
                     },
                     {
                         "id":  "starpie.plugin.keypadlayer",
-                        "name":  "CAD 数字键盘层",
+                        "name":  "按键映射",
                         "project":  "src/StarPie.Plugin.KeypadLayer/StarPie.Plugin.KeypadLayer.csproj",
                         "assembly":  "StarPie.Plugin.KeypadLayer.dll",
                         "targetFramework":  "net8.0-windows",
@@ -48,7 +48,7 @@
                                              "InputRemapping"
                                          ],
                         "releaseDirectory":  "StarPie.Plugin.KeypadLayer",
-                        "description":  "StarPie 官方插件：为 CAD 与工程设计软件提供左手空间数字小键盘映射层。可在「插件」页单独停用。",
+                        "description":  "通过轮盘开启或关闭自定义按键映射，将物理按键映射为目标按键；支持可视化配置，并在切换应用或长按 Esc 时安全释放。默认提供左手数字小键盘预设。",
                         "author":  "StarPie Studio",
                         "license":  "MIT",
                         "homepage":  "https://github.com/Star-Pie/StarPie",

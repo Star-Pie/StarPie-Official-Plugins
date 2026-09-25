@@ -1,13 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    StarPie 官方在线插件：CAD 数字键盘层 (StarPie.Plugin.KeypadLayer)
+    StarPie 官方在线插件：按键映射 (StarPie.Plugin.KeypadLayer)
     ========================================================================
-    专为 CAD 及工程设计软件优化的左手空间数字小键盘映射层：
-      - 一键将左手主键区 QWE/ASD/ZXC/R 映射为空间数字小键盘 789/456/123/0；
-      - 右手可保持鼠标定位或滚轮缩放，左手直接进行尺寸数值快速盲打；
-      - 基于 StarPie SDK 1.7 宿主级输入重映射能力（IHostKeyboardRemapService）；
-      - 纯宿主集中式低级钩子派发，零 P/Invoke、零全局钩子、失焦与紧急长按 Esc 自动释放。
+    通过轮盘开启或关闭自定义按键映射，将物理按键映射为目标按键；
+    支持可视化配置，并在切换应用或长按 Esc 时安全释放。默认提供左手数字小键盘预设。
 
     遵循官方模块规范：
       1. 继承 Directory.Build.props 统一编译参数；
@@ -27,9 +24,9 @@
     <Version>1.0.0</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
-    <Product>StarPie CAD 数字键盘层</Product>
+    <Product>StarPie 按键映射</Product>
     <Company>StarPie Studio</Company>
-    <Description>StarPie 官方插件：为 CAD 与工程设计软件提供左手空间数字小键盘映射层。可在「插件」页单独停用。</Description>
+    <Description>StarPie 官方插件：通过轮盘开启或关闭自定义按键映射，将物理按键映射为目标按键；支持可视化配置，并在切换应用或长按 Esc 时安全释放。默认提供左手数字小键盘预设。</Description>
 
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
@@ -44,7 +41,7 @@
 
   <ItemGroup>
     <AssemblyMetadata Include="StarPiePluginId" Value="starpie.plugin.keypadlayer" />
-    <AssemblyMetadata Include="StarPiePluginName" Value="CAD 数字键盘层" />
+    <AssemblyMetadata Include="StarPiePluginName" Value="按键映射" />
     <AssemblyMetadata Include="StarPiePluginCapabilities" Value="InputRemapping" />
     <AssemblyMetadata Include="StarPiePluginLicense" Value="MIT" />
     <AssemblyMetadata Include="StarPiePluginHomepage" Value="https://github.com/Star-Pie/StarPie" />
