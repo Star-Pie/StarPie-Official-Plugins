@@ -21,9 +21,9 @@
     <AssemblyName>StarPie.Plugin.KeypadLayer</AssemblyName>
     <RootNamespace>StarPie.Plugin.KeypadLayer</RootNamespace>
 
-    <Version>1.0.0</Version>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
     <Product>StarPie 按键映射</Product>
     <Company>StarPie Studio</Company>
     <Description>StarPie 官方插件：通过轮盘开启或关闭自定义按键映射，将物理按键映射为目标按键；支持可视化配置，并在切换应用或长按 Esc 时安全释放。默认提供左手数字小键盘预设。</Description>
@@ -46,7 +46,7 @@
     <AssemblyMetadata Include="StarPiePluginLicense" Value="MIT" />
     <AssemblyMetadata Include="StarPiePluginHomepage" Value="https://github.com/Star-Pie/StarPie" />
     <AssemblyMetadata Include="StarPiePluginApiVersion" Value="1.7" />
-    <AssemblyMetadata Include="StarPiePluginMinHostVersion" Value="1.8.1-beta.1" />
+    <AssemblyMetadata Include="StarPiePluginMinHostVersion" Value="1.8.0-beta.3" />
   </ItemGroup>
 
 </Project>

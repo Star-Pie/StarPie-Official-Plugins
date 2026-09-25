@@ -37,14 +37,14 @@ if ($module) {
     Assert-Condition ($module.project -eq 'src/StarPie.Plugin.KeypadLayer/StarPie.Plugin.KeypadLayer.csproj') "Module project path is correct"
     Assert-Condition ($module.assembly -eq 'StarPie.Plugin.KeypadLayer.dll') "Module assembly is 'StarPie.Plugin.KeypadLayer.dll'"
     Assert-Condition ($module.targetFramework -eq 'net8.0-windows') "Module targetFramework is 'net8.0-windows'"
-    Assert-Condition ($module.version -eq '1.0.0') "Module version is '1.0.0'"
+    Assert-Condition ($module.version -eq '1.0.1') "Module version is '1.0.1'"
     Assert-Condition ($module.pluginId -eq 'starpie.plugin.keypadlayer') "Module pluginId is 'starpie.plugin.keypadlayer' (INV-MODULE-IDENTITY)"
     Assert-Condition ($module.contributionId -eq 'keypadLayer') "Module contributionId is 'keypadLayer' (INV-MODULE-IDENTITY)"
     Assert-Condition ($module.entryType -eq 'StarPie.Plugin.KeypadLayer.KeypadLayerPlugin') "Module entryType is 'StarPie.Plugin.KeypadLayer.KeypadLayerPlugin'"
     Assert-Condition (@($module.typeClaims).Count -eq 0) "Module typeClaims is empty (INV-MODULE-IDENTITY)"
     Assert-Condition (@($module.capabilities).Count -eq 1 -and @($module.capabilities)[0] -eq 'InputRemapping') "Module capabilities contains only 'InputRemapping' (INV-MODULE-IDENTITY)"
     Assert-Condition ($module.apiVersion -eq '1.7') "Module declared apiVersion is '1.7' (INV-OLD-MODULE-COMPAT)"
-    Assert-Condition ($module.minHostVersion -eq '1.8.1-beta.1') "Module declared minHostVersion is '1.8.1-beta.1' (INV-OLD-MODULE-COMPAT)"
+    Assert-Condition ($module.minHostVersion -eq '1.8.0-beta.3') "Module declared minHostVersion is '1.8.0-beta.3' (INV-OLD-MODULE-COMPAT)"
     Assert-Condition ($module.enabled -eq $true) "Module is enabled"
 }
 
@@ -88,7 +88,7 @@ if (Test-Path -LiteralPath $csprojPath) {
     Assert-Condition ($metaDict['StarPiePluginName'] -eq '按键映射') "AssemblyMetadata StarPiePluginName is '按键映射'"
     Assert-Condition ($metaDict['StarPiePluginCapabilities'] -eq 'InputRemapping') "AssemblyMetadata StarPiePluginCapabilities is 'InputRemapping'"
     Assert-Condition ($metaDict['StarPiePluginApiVersion'] -eq '1.7') "AssemblyMetadata StarPiePluginApiVersion is '1.7'"
-    Assert-Condition ($metaDict['StarPiePluginMinHostVersion'] -eq '1.8.1-beta.1') "AssemblyMetadata StarPiePluginMinHostVersion is '1.8.1-beta.1'"
+    Assert-Condition ($metaDict['StarPiePluginMinHostVersion'] -eq '1.8.0-beta.3') "AssemblyMetadata StarPiePluginMinHostVersion is '1.8.0-beta.3'"
     Assert-Condition (-not $metaDict.ContainsKey('StarPiePluginTypeClaims')) "AssemblyMetadata StarPiePluginTypeClaims is absent (typeClaims empty)"
 }
 
@@ -198,7 +198,7 @@ if (Test-Path -LiteralPath $sdkSourceFile) {
 # 8. Check Preview formatting and custom mapping regression tests (INV-KEYMAP-PREVIEW)
 $builtDll = Join-Path $root 'src/StarPie.Plugin.KeypadLayer/bin/Release/net8.0-windows/StarPie.Plugin.KeypadLayer.dll'
 if (-not (Test-Path -LiteralPath $builtDll)) {
-    $builtDll = Join-Path $root 'artifacts/staging/starpie.plugin.keypadlayer/1.0.0/StarPie.Plugin.KeypadLayer.dll'
+    $builtDll = Join-Path $root 'artifacts/staging/starpie.plugin.keypadlayer/1.0.1/StarPie.Plugin.KeypadLayer.dll'
 }
 if (Test-Path -LiteralPath $builtDll) {
     $abstractionsDll = Join-Path $root 'sdk/StarPie.Plugin.Abstractions/bin/Release/net8.0-windows/StarPie.Plugin.Abstractions.dll'
