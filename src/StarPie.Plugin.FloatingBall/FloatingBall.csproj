@@ -67,7 +67,7 @@
     <AssemblyMetadata Include="StarPiePluginName" Value="悬浮球" />
     <AssemblyMetadata Include="StarPiePluginCapabilities" Value="Ui;Wheel" />
     <AssemblyMetadata Include="StarPiePluginApiVersion" Value="1.6" />
-    <AssemblyMetadata Include="StarPiePluginMinHostVersion" Value="1.8.0-beta.2" />
+    <AssemblyMetadata Include="StarPiePluginMinHostVersion" Value="1.8.0-beta.3" />
     <AssemblyMetadata Include="StarPiePluginLicense" Value="MIT" />
     <AssemblyMetadata Include="StarPiePluginHomepage" Value="https://github.com/Star-Pie/StarPie" />
   </ItemGroup>
