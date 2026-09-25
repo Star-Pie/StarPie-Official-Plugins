@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarPie.Plugin.Abstractions", "src\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj", "{71CA49E2-A6C2-4134-99C7-1CE6FAAF2223}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarPie.Plugin.Abstractions", "sdk\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj", "{71CA49E2-A6C2-4134-99C7-1CE6FAAF2223}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarPie.Plugin.Command", "src\StarPie.Plugin.Command\StarPie.Plugin.Command.csproj", "{0E21E20F-94D1-4CDC-A6E6-3DCB28EAB735}"
 EndProject
@@ -34,6 +34,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarPie.Plugin.CadCommand", "src\StarPie.Plugin.CadCommand\StarPie.Plugin.CadCommand.csproj", "{22837BA6-0264-4FEC-AD95-1A8DF1AF16CC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarPie.Plugin.KeypadLayer", "src\StarPie.Plugin.KeypadLayer\StarPie.Plugin.KeypadLayer.csproj", "{66D34547-B823-4022-A080-2D450F46FC6A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarPie.Plugin.FloatingBall", "src\StarPie.Plugin.FloatingBall\FloatingBall.csproj", "{249536B4-FC1B-4752-B445-F0E2F6671FEC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -225,6 +227,18 @@ Global
 		{66D34547-B823-4022-A080-2D450F46FC6A}.Release|x64.Build.0 = Release|x64
 		{66D34547-B823-4022-A080-2D450F46FC6A}.Release|x86.ActiveCfg = Release|x64
 		{66D34547-B823-4022-A080-2D450F46FC6A}.Release|x86.Build.0 = Release|x64
+		{249536B4-FC1B-4752-B445-F0E2F6671FEC}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{249536B4-FC1B-4752-B445-F0E2F6671FEC}.Debug|Any CPU.Build.0 = Debug|x64
+		{249536B4-FC1B-4752-B445-F0E2F6671FEC}.Debug|x64.ActiveCfg = Debug|x64
+		{249536B4-FC1B-4752-B445-F0E2F6671FEC}.Debug|x64.Build.0 = Debug|x64
+		{249536B4-FC1B-4752-B445-F0E2F6671FEC}.Debug|x86.ActiveCfg = Debug|x64
+		{249536B4-FC1B-4752-B445-F0E2F6671FEC}.Debug|x86.Build.0 = Debug|x64
+		{249536B4-FC1B-4752-B445-F0E2F6671FEC}.Release|Any CPU.ActiveCfg = Release|x64
+		{249536B4-FC1B-4752-B445-F0E2F6671FEC}.Release|Any CPU.Build.0 = Release|x64
+		{249536B4-FC1B-4752-B445-F0E2F6671FEC}.Release|x64.ActiveCfg = Release|x64
+		{249536B4-FC1B-4752-B445-F0E2F6671FEC}.Release|x64.Build.0 = Release|x64
+		{249536B4-FC1B-4752-B445-F0E2F6671FEC}.Release|x86.ActiveCfg = Release|x64
+		{249536B4-FC1B-4752-B445-F0E2F6671FEC}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -245,5 +259,6 @@ Global
 		{90760845-EBD2-4EAE-BEC1-ADFB9CCE6162} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{22837BA6-0264-4FEC-AD95-1A8DF1AF16CC} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{66D34547-B823-4022-A080-2D450F46FC6A} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{249536B4-FC1B-4752-B445-F0E2F6671FEC} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

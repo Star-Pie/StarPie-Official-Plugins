@@ -187,7 +187,7 @@ if (Test-Path -LiteralPath $textsFile) {
 }
 
 # 7. Check SDK_SOURCE.json (INV-SDK-SNAPSHOT)
-$sdkSourceFile = Join-Path $root 'src/StarPie.Plugin.Abstractions/SDK_SOURCE.json'
+$sdkSourceFile = Join-Path $root 'sdk/StarPie.Plugin.Abstractions/SDK_SOURCE.json'
 Assert-Condition (Test-Path -LiteralPath $sdkSourceFile) "SDK_SOURCE.json exists"
 if (Test-Path -LiteralPath $sdkSourceFile) {
     $sdkSource = Get-Content -LiteralPath $sdkSourceFile -Raw | ConvertFrom-Json
@@ -201,7 +201,7 @@ if (-not (Test-Path -LiteralPath $builtDll)) {
     $builtDll = Join-Path $root 'artifacts/staging/starpie.plugin.keypadlayer/1.0.0/StarPie.Plugin.KeypadLayer.dll'
 }
 if (Test-Path -LiteralPath $builtDll) {
-    $abstractionsDll = Join-Path $root 'src/StarPie.Plugin.Abstractions/bin/Release/net8.0-windows/StarPie.Plugin.Abstractions.dll'
+    $abstractionsDll = Join-Path $root 'sdk/StarPie.Plugin.Abstractions/bin/Release/net8.0-windows/StarPie.Plugin.Abstractions.dll'
     if (Test-Path -LiteralPath $abstractionsDll) {
         [System.Reflection.Assembly]::LoadFrom($abstractionsDll) | Out-Null
     }
