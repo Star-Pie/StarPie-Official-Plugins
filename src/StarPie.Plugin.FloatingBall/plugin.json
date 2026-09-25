@@ -10,7 +10,7 @@
   "version": "1.0.0",
 
   "apiVersion": "1.6",
-  "minHostVersion": "1.8.0-beta.2",
+  "minHostVersion": "1.8.0-beta.3",
 
   "targetFramework": "net8.0-windows",
   "platform": "win-x64",

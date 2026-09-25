@@ -400,6 +400,6 @@
                                  ],
                         "enabled":  true,
                         "apiVersion":  "1.6",
-                        "minHostVersion":  "1.8.0-beta.2"
+                        "minHostVersion":  "1.8.0-beta.3"
                     }                ]
 }
