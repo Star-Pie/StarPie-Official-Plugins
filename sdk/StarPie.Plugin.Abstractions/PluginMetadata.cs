@@ -84,6 +84,22 @@ public enum PluginCapability
     /// </para>
     /// </summary>
     InputSimulation = 1 << 10,
+
+    /// <summary>
+    /// 呼出宿主的轮盘并让用户从中选一个扇区执行。
+    /// <para>
+    /// 与 <see cref="Ui"/> 分开是刻意的，不要合并：<c>Ui</c> 的后果是「多出一个插件自己的窗口」，
+    /// 而呼出轮盘的后果重得多 —— 轮盘上每个扇区跑的都是<b>用户自己配置的动作</b>
+    /// （启动程序、发快捷键、执行命令 …），插件借此把用户推到「点哪个执行哪个」的位置上。
+    /// 更实际的一条：轮盘呼出期间会有一层全屏遮罩接管所有鼠标点击，
+    /// 用户此刻的每一次点击都属于选盘，而不是他原来要点的东西 —— 这必须让用户在安装时看见。
+    /// </para>
+    /// <para>
+    /// 与 <see cref="WindowControl"/> / <see cref="ScreenCapture"/> / <see cref="InputSimulation"/>
+    /// 同理，新值取 <c>1 &lt;&lt; 11</c> 而不是插进中间：插入会改变后续所有成员的位值。
+    /// </para>
+    /// </summary>
+    Wheel = 1 << 11,
 }
 
 /// <summary>宿主持有的插件元数据。由宿主从 manifest 解析后经 <see cref="IPluginContext.Me"/> 提供给插件。</summary>
