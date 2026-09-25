@@ -38,7 +38,7 @@
                         "project":  "src/StarPie.Plugin.KeypadLayer/StarPie.Plugin.KeypadLayer.csproj",
                         "assembly":  "StarPie.Plugin.KeypadLayer.dll",
                         "targetFramework":  "net8.0-windows",
-                        "version":  "1.0.0",
+                        "version":  "1.0.1",
                         "pluginId":  "starpie.plugin.keypadlayer",
                         "contributionId":  "keypadLayer",
                         "entryType":  "StarPie.Plugin.KeypadLayer.KeypadLayerPlugin",
@@ -59,7 +59,7 @@
                                  ],
                         "enabled":  true,
                         "apiVersion":  "1.7",
-                        "minHostVersion":  "1.8.1-beta.1"
+                        "minHostVersion":  "1.8.0-beta.3"
                     },
                     {
                         "id":  "starpie.builtin.command",
