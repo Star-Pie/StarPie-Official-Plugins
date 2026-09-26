@@ -66,24 +66,31 @@ public sealed class FloatingBallPlugin : IStarPiePlugin
 
         BallController? ball = _ball;
         _ball = null;
+        IPluginContext? context = _context;
 
-        if (ball != null && ball.HasWindow)
+        if (ball != null && ball.HasWindow && context != null)
         {
             try
             {
-                // 关窗必须在 UI 线程上发生，所以投递而不是就地执行 —— Shutdown 里阻塞等待
-                // UI 线程是在拿「宿主正在停插件的线程」去等「正在被插件占住的线程」，没有收益只有死锁面。
-                // 只在真有一颗球时才投递：一个什么也不做的操作项本身就把插件闭包
-                // 握在 UI 线程的队列里，宿主的卸载探针会因此判成「引用有残留，需重启」。
-                _context?.Dispatcher.Post(ball.Shutdown);
+                // 正常停用由宿主后台线程发起：等 UI 线程真正关窗后再返回，
+                // 否则宿主可能在排队的窗口回调仍持有插件实例时开始 ALC 卸载。
+                // 退出路径可能同步占用 UI 线程，必须限时等待以免形成死锁。
+                if (context.Dispatcher.IsOnUiThread)
+                {
+                    ball.Shutdown();
+                }
+                else if (!context.Dispatcher.InvokeAsync(ball.Shutdown).Wait(TimeSpan.FromSeconds(2)))
+                {
+                    context.Log.Warn("关闭悬浮球窗口等待 UI 线程超时；宿主退出时将继续清理。");
+                }
             }
             catch (Exception ex)
             {
-                _context?.Log.Warn($"投递关闭悬浮球的动作失败：{ex.Message}");
+                context.Log.Warn($"关闭悬浮球窗口失败：{ex.Message}");
             }
         }
 
-        _context?.Log.Info("已停用。");
+        context?.Log.Info("已停用。");
         _context = null;
     }
 

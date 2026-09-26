@@ -32,9 +32,9 @@
     <AssemblyName>StarPie.Plugin.FloatingBall</AssemblyName>
     <RootNamespace>StarPie.Plugin.FloatingBall</RootNamespace>
 
-    <Version>1.0.0</Version>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
     <Product>StarPie 悬浮球插件</Product>
     <Company>StarPie Studio</Company>
     <Description>在屏幕上放一颗常驻悬浮球，点它呼出你自己的轮盘。</Description>

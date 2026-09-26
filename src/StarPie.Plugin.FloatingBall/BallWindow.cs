@@ -72,15 +72,11 @@ internal sealed class BallWindow : Window
         MouseLeftButtonDown += OnLeftButtonDown;
         MouseMove += OnMouseMove;
         MouseLeftButtonUp += OnLeftButtonUp;
-        MouseRightButtonUp += (_, _) => HideRequested?.Invoke();
         SourceInitialized += OnSourceInitialized;
     }
 
     /// <summary>用户点了一下球。参数是球心在虚拟屏幕坐标系里的物理像素坐标。</summary>
     public event Action<double, double>? WheelRequested;
-
-    /// <summary>用户用右键收起球。</summary>
-    public event Action? HideRequested;
 
     /// <summary>一次拖动结束（松手时触发一次，供调用方把位置落盘）。</summary>
     public event Action? Moved;

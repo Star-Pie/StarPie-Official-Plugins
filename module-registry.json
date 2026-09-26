@@ -407,7 +407,7 @@
                         "project":  "src/StarPie.Plugin.FloatingBall/FloatingBall.csproj",
                         "assembly":  "StarPie.Plugin.FloatingBall.dll",
                         "targetFramework":  "net8.0-windows",
-                        "version":  "1.0.0",
+                        "version":  "1.0.1",
                         "pluginId":  "starpie.plugin.floatingball",
                         "contributionId":  "showBall",
                         "entryType":  "StarPie.Plugin.FloatingBall.FloatingBallPlugin",
