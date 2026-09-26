@@ -94,14 +94,20 @@ internal sealed class BallController
     /// </summary>
     public void Restore()
     {
-        CreateAndShow(
-            BallPreference.Diameter(_context),
-            BallPreference.Opacity(_context),
-            BallPreference.Color(_context),
-            ReadInt(KeyLeft),
-            ReadInt(KeyTop));
-    }
+        double diameter = BallPreference.Diameter(_context);
+        double opacity = BallPreference.Opacity(_context);
+        string color = BallPreference.Color(_context);
 
+        // 用户可能先用 showBall 动作显示球，再开启设置页开关。
+        // 此时不能再造一颗并覆盖 _ball，否则旧窗口留在 WPF 窗口集合中，插件无法卸载。
+        if (_ball != null)
+        {
+            Show(diameter, opacity, color);
+            return;
+        }
+
+        CreateAndShow(diameter, opacity, color, ReadInt(KeyLeft), ReadInt(KeyTop));
+    }
     /// <summary>
     /// 现在屏幕上是否真有一颗球窗。
     /// <para>
@@ -137,7 +143,6 @@ internal sealed class BallController
         if (left is int savedX && top is int savedY) ball.RequestPhysicalLocation(savedX, savedY);
 
         ball.WheelRequested += RequestWheel;
-        ball.HideRequested += Hide;
         ball.Moved += PersistPosition;
 
         _ball = ball;
@@ -157,7 +162,6 @@ internal sealed class BallController
         if (ball == null) return;
 
         ball.WheelRequested -= RequestWheel;
-        ball.HideRequested -= Hide;
         ball.Moved -= PersistPosition;
 
         try

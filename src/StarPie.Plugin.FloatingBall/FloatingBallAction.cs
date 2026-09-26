@@ -34,7 +34,7 @@ internal sealed class ShowBallContribution : IActionContribution
         Id = "showBall",
         DisplayName = "显示悬浮球",
         DisplayNameKey = "action.show-ball.name",
-        Description = "在屏幕上放一颗常驻悬浮球，点它呼出你的轮盘。拖动可挪位置，右键收起。",
+        Description = "在屏幕上放一颗常驻悬浮球，点它呼出你的轮盘。拖动可挪位置，收起请使用插件设置或「隐藏悬浮球」动作。",
         Category = "悬浮球",
         IconKey = _iconKey,
         Kind = ActionKind.Sequential,
@@ -207,9 +207,8 @@ internal sealed class ShowBallContribution : IActionContribution
 /// <summary>
 /// 动作二：隐藏悬浮球。
 /// <para>
-/// 它与「右键收球」是同一条路（都走 <see cref="BallController.Hide"/>），差别只在要不要落盘
-/// <c>visible=false</c> —— 落了这个标记，下次开机就不会再自动出现。
-/// 没有这个动作的话，用户只能右键收球、然后再也找不回开机自启的开关。
+/// 它与插件设置页的显示开关共用同一条关窗路径（<see cref="BallController.Hide"/>），
+/// 并记住这次隐藏；下次需要显示时可用「显示悬浮球」动作或将设置页开关关闭后重新开启。
 /// </para>
 /// </summary>
 internal sealed class HideBallContribution : IActionContribution

@@ -3,11 +3,11 @@
 
   "id": "starpie.plugin.floatingball",
   "name": "悬浮球",
-  "description": "在屏幕上放一颗常驻悬浮球：点它呼出你自己的轮盘，选哪个扇区执行哪个。拖动改位置，右键收起。球由插件画，轮盘整体归宿主 —— 外观、扇区、体积、多屏 DPI 永远和你配的那一套一致。",
+  "description": "在屏幕上放一颗常驻悬浮球：点它呼出你自己的轮盘，选哪个扇区执行哪个。拖动改位置，可通过插件设置或动作收起。球由插件画，轮盘整体归宿主 —— 外观、扇区、体积、多屏 DPI 永远和你配的那一套一致。",
   "author": "StarPie Studio",
   "homepage": "https://github.com/Star-Pie/StarPie",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "1.0.1",
 
   "apiVersion": "1.6",
   "minHostVersion": "1.8.0-beta.3",
