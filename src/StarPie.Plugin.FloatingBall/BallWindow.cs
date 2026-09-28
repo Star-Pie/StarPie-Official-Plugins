@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -30,12 +31,13 @@ namespace StarPie.Plugin.FloatingBall;
 internal sealed class BallWindow : Window
 {
     /// <summary>按下到抬起的位移不超过这个物理像素数就算「点击」，否则算拖动。</summary>
-    private const int ClickSlopPhysical = 4;
+    private const int ClickSlopPhysical = BallPlacement.DefaultClickSlopPhysical;
 
     /// <summary>第一次落位时右侧留的空（物理像素）：贴住屏幕右缘会压住系统托盘图标。</summary>
-    private const int DefaultRightMargin = 40;
+    private const int DefaultRightMargin = BallPlacement.DefaultRightMarginPhysical;
 
     private static readonly Color DefaultFill = Color.FromRgb(88, 132, 222);
+    private static readonly SolidColorBrush BallBorderBrush = CreateFrozenBrush(Color.FromArgb(90, 255, 255, 255));
 
     private readonly double _diameterDiu;
 
@@ -44,8 +46,10 @@ internal sealed class BallWindow : Window
     private bool _pressed;
     private POINT _pressCursor;
 
-    /// <summary>落位点（物理像素，窗口左上角）。两个分量都为负表示「还没定过，用默认落点」。</summary>
-    private POINT _location = new(-1, -1);
+    /// <summary>落位点（物理像素，窗口左上角）。null 表示「还没定过，用默认落点」。</summary>
+    private POINT? _location;
+
+    private HwndSource? _hwndSource;
 
     public BallWindow(double diameterDiu, double opacity, string fillColor)
     {
@@ -72,13 +76,15 @@ internal sealed class BallWindow : Window
         MouseLeftButtonDown += OnLeftButtonDown;
         MouseMove += OnMouseMove;
         MouseLeftButtonUp += OnLeftButtonUp;
+        LostMouseCapture += OnLostMouseCapture;
         SourceInitialized += OnSourceInitialized;
+        Closed += OnClosed;
     }
 
     /// <summary>用户点了一下球。参数是球心在虚拟屏幕坐标系里的物理像素坐标。</summary>
     public event Action<double, double>? WheelRequested;
 
-    /// <summary>一次拖动结束（松手时触发一次，供调用方把位置落盘）。</summary>
+    /// <summary>一次拖动结束或显示器变更导致落位改变（松手或重定位时触发一次，供调用方把位置落盘）。</summary>
     public event Action? Moved;
 
     /// <summary>
@@ -90,7 +96,7 @@ internal sealed class BallWindow : Window
     public void RequestPhysicalLocation(int left, int top)
     {
         _location = new POINT(left, top);
-        if (new WindowInteropHelper(this).Handle != nint.Zero) ApplyLocation();
+        if (new WindowInteropHelper(this).Handle != nint.Zero) ApplyLocation(notifyOnRelocation: true);
     }
 
     /// <summary>球在虚拟屏幕坐标系里的物理矩形。拿不到句柄时是 0×0，调用方据此判断「还没落位」。</summary>
@@ -108,7 +114,16 @@ internal sealed class BallWindow : Window
         get
         {
             PhysicalRect rect = ReadPhysicalRect();
-            return new POINT(rect.X + rect.Width / 2, rect.Y + rect.Height / 2);
+            if (rect.Width > 0 && rect.Height > 0)
+            {
+                return new POINT(rect.X + rect.Width / 2, rect.Y + rect.Height / 2);
+            }
+            if (_location.HasValue)
+            {
+                int r = (int)Math.Round(_diameterDiu / 2);
+                return new POINT(_location.Value.X + r, _location.Value.Y + r);
+            }
+            return default;
         }
     }
 
@@ -116,12 +131,24 @@ internal sealed class BallWindow : Window
 
     private void OnLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        _pressed = true;
-        _dragging = false;
-
-        if (!GetCursorPos(out POINT cursor)) return;
+        if (!GetCursorPos(out POINT cursor))
+        {
+            _pressed = false;
+            _dragging = false;
+            return;
+        }
 
         PhysicalRect rect = ReadPhysicalRect();
+        if (rect.Width <= 0 || rect.Height <= 0)
+        {
+            // 窗口矩形不可读或尚未布局完成时，放弃本次抓取，防止因无效偏移跳动到 (0,0)
+            _pressed = false;
+            _dragging = false;
+            return;
+        }
+
+        _pressed = true;
+        _dragging = false;
         _pressCursor = cursor;
         _grabOffset = new POINT(cursor.X - rect.X, cursor.Y - rect.Y);
         CaptureMouse();
@@ -129,12 +156,20 @@ internal sealed class BallWindow : Window
 
     private void OnMouseMove(object sender, MouseEventArgs e)
     {
-        if (!_pressed || !HasDraggedFarEnough()) return;
+        if (!_pressed) return;
         if (!GetCursorPos(out POINT cursor)) return;
 
+        var gesture = BallPlacement.ClassifyGesture(
+            _pressCursor.X, _pressCursor.Y,
+            cursor.X, cursor.Y,
+            _dragging, ClickSlopPhysical);
+
+        if (gesture != BallPlacement.GestureKind.Drag) return;
+        _dragging = true;
+
         // 跟手用的是「光标物理坐标 - 按下时的抓取偏移」，全程不涉及 WPF 坐标：
-        // 一旦拿 Mouse.GetPosition 的 DIU 增量去推物理位置，跨屏拖动就必然漂。
-        RequestPhysicalLocation(cursor.X - _grabOffset.X, cursor.Y - _grabOffset.Y);
+        // 拖拽过程仅刷新视觉位置，绝不触发写盘通知。
+        UpdateDragPosition(cursor.X - _grabOffset.X, cursor.Y - _grabOffset.Y);
     }
 
     private void OnLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -142,13 +177,32 @@ internal sealed class BallWindow : Window
         if (!_pressed) return;
 
         _pressed = false;
-        ReleaseMouseCapture();
+        if (IsMouseCaptured)
+        {
+            ReleaseMouseCapture();
+        }
 
-        if (_dragging)
+        bool isDrag = _dragging;
+        if (GetCursorPos(out POINT upCursor))
+        {
+            var gesture = BallPlacement.ClassifyGesture(
+                _pressCursor.X, _pressCursor.Y,
+                upCursor.X, upCursor.Y,
+                _dragging, ClickSlopPhysical);
+
+            if (gesture == BallPlacement.GestureKind.Drag)
+            {
+                isDrag = true;
+                UpdateDragPosition(upCursor.X - _grabOffset.X, upCursor.Y - _grabOffset.Y);
+            }
+        }
+
+        _dragging = false;
+
+        if (isDrag)
         {
             // Moved 只在松手时响一次（不在每次 MouseMove 上响）：落盘的是「松手时看到的位置」，
             // 而拖动中途的每一个坐标都只是路过 —— 挂在这上面等于把一次拖拽变成几十次写盘。
-            _dragging = false;
             Moved?.Invoke();
             return;
         }
@@ -160,19 +214,18 @@ internal sealed class BallWindow : Window
         WheelRequested?.Invoke(center.X, center.Y);
     }
 
-    private bool HasDraggedFarEnough()
+    private void OnLostMouseCapture(object sender, MouseEventArgs e)
     {
-        if (_dragging) return true;
-        if (!GetCursorPos(out POINT cursor)) return false;
+        if (!_pressed) return;
 
-        if (Math.Abs(cursor.X - _pressCursor.X) <= ClickSlopPhysical
-            && Math.Abs(cursor.Y - _pressCursor.Y) <= ClickSlopPhysical)
+        bool wasDragging = _dragging;
+        _pressed = false;
+        _dragging = false;
+
+        if (wasDragging)
         {
-            return false;
+            Moved?.Invoke();
         }
-
-        _dragging = true;
-        return true;
     }
 
     // ------------------------------------------------------------------ 外观
@@ -181,25 +234,35 @@ internal sealed class BallWindow : Window
     {
         var grid = new Grid { Opacity = Math.Clamp(opacity, 0.08, 1.0) };
 
+        var effect = new DropShadowEffect
+        {
+            BlurRadius = 10,
+            ShadowDepth = 0,
+            Opacity = 0.35,
+            Color = Colors.Black,
+        };
+        if (effect.CanFreeze) effect.Freeze();
+
         grid.Children.Add(new Ellipse
         {
             Fill = ParseFill(fillColor),
 
             // 球是半透明的，没有描边就看不出边界 —— 而「哪儿算球、哪儿算球后面那个窗口」
             // 直接决定用户的下一次点击落在谁身上。
-            Stroke = new SolidColorBrush(Color.FromArgb(90, 255, 255, 255)),
+            Stroke = BallBorderBrush,
             StrokeThickness = 1.2,
             Margin = new Thickness(2),
-            Effect = new DropShadowEffect
-            {
-                BlurRadius = 10,
-                ShadowDepth = 0,
-                Opacity = 0.35,
-                Color = Colors.Black,
-            },
+            Effect = effect,
         });
 
         return grid;
+    }
+
+    private static SolidColorBrush CreateFrozenBrush(Color color)
+    {
+        var brush = new SolidColorBrush(color);
+        if (brush.CanFreeze) brush.Freeze();
+        return brush;
     }
 
     private static SolidColorBrush ParseFill(string fillColor)
@@ -220,7 +283,7 @@ internal sealed class BallWindow : Window
 
         // 颜色串里的 alpha 被丢掉：透明度归 opacity 参数独管。
         // 两处各乘一遍的结果是「设成 80% 实际得到 32%」，而用户看到的只是「颜色没生效」。
-        return new SolidColorBrush(Color.FromRgb(parsed.R, parsed.G, parsed.B));
+        return CreateFrozenBrush(Color.FromRgb(parsed.R, parsed.G, parsed.B));
     }
 
     // ------------------------------------------------------------------ Win32
@@ -234,50 +297,114 @@ internal sealed class BallWindow : Window
             // 没人给 —— 缺前者会抢前台，缺后者会在 Alt+Tab 列表里多出一项「球」。
             nint ex = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
             SetWindowLongPtr(hwnd, GWL_EXSTYLE, ex | (nint)(WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW));
+
+            _hwndSource = HwndSource.FromHwnd(hwnd);
+            _hwndSource?.AddHook(WndProc);
         }
 
-        // 无条件定位：没被要求过落点时 ApplyLocation 会算出首次落点（右侧留白、垂直偏上），
-        // 被要求过（开机恢复）时用它拿到的那个坐标。跳过这一步就等于把位置交给 WPF 的默认值，
-        // 而那时用户看到的球既不在承诺的位置，也没有任何东西会再把它挪过去。
-        ApplyLocation();
+        // 无条件定位：如果此前指定过落点且该点需要因屏幕变更纠正，在静止恢复路径下通知并持久化
+        ApplyLocation(notifyOnRelocation: true);
     }
 
-    private void ApplyLocation()
+    private void OnClosed(object? sender, EventArgs e)
+    {
+        _hwndSource?.RemoveHook(WndProc);
+        _hwndSource = null;
+    }
+
+    private nint WndProc(nint hwnd, int msg, nint wParam, nint lParam, ref bool handled)
+    {
+        const int WM_SETTINGCHANGE = 0x001A;
+        const int WM_DISPLAYCHANGE = 0x007E;
+        const int WM_DPICHANGED = 0x02E0;
+
+        // 显示器拓扑改变、分辨率改变、DPI 改变或工作区（任务栏挪动）改变时，重新校准位置与尺寸
+        if (msg is WM_DISPLAYCHANGE or WM_DPICHANGED || (msg == WM_SETTINGCHANGE && (int)wParam == 0x002F /* SPI_SETWORKAREA */))
+        {
+            ApplyLocation(notifyOnRelocation: true);
+        }
+
+        return nint.Zero;
+    }
+
+    private bool _isApplyingLocation;
+
+    /// <summary>
+    /// 用户拖拽过程中的位置更新。仅更新视觉位置和当前坐标，<b>绝不触发 Moved 事件写盘</b>。
+    /// </summary>
+    internal void UpdateDragPosition(int rawLeft, int rawTop)
     {
         nint hwnd = new WindowInteropHelper(this).Handle;
         if (hwnd == nint.Zero) return;
 
-        POINT anchor = _location;
-        bool firstPlacement = anchor.X < 0 && anchor.Y < 0;
-
-        // 首次落位还不知道最终位置，先用「按主屏宽度估出来的球心」问一次 DPI；
-        // 之后的每一次定位都已经有了确切坐标，取到的是准确值。
-        if (firstPlacement)
-        {
-            int guessedWidth = (int)Math.Round(_diameterDiu);
-            anchor = new POINT(
-                GetSystemMetrics(SM_CXSCREEN) - guessedWidth - DefaultRightMargin,
-                (GetSystemMetrics(SM_CYSCREEN) - guessedWidth) * 2 / 5);
-        }
-
+        var monitors = GetSystemMonitors();
+        POINT anchor = new(rawLeft, rawTop);
         double scale = ReadDpiScale(CenterOf(anchor));
         int width = (int)Math.Round(_diameterDiu * scale);
-        int height = (int)Math.Round(_diameterDiu * scale);
+        int height = width;
 
-        POINT placed = firstPlacement
-            ? new POINT(GetSystemMetrics(SM_CXSCREEN) - width - DefaultRightMargin,
-                        (GetSystemMetrics(SM_CYSCREEN) - height) * 2 / 5)
-            : anchor;
-
-        (int left, int top) = ClampToVirtualScreen(placed.X, placed.Y, width, height);
+        (int left, int top) = BallPlacement.ClampToMonitors(rawLeft, rawTop, width, height, monitors);
         _location = new POINT(left, top);
 
         SetWindowPos(hwnd, HWND_TOPMOST, left, top, width, height, SWP_NOACTIVATE);
     }
 
-    private POINT CenterOf(POINT topLeft)
+    internal void ApplyLocation(bool notifyOnRelocation = false)
     {
-        int radius = (int)Math.Round(_diameterDiu / 2);
+        if (_isApplyingLocation) return;
+        _isApplyingLocation = true;
+        try
+        {
+            nint hwnd = new WindowInteropHelper(this).Handle;
+            if (hwnd == nint.Zero) return;
+
+            var monitors = GetSystemMonitors();
+            var primary = monitors.Find(m => m.IsPrimary);
+            if (primary.Width <= 0 && monitors.Count > 0) primary = monitors[0];
+
+            if (_location is not POINT anchor)
+            {
+                int guessedWidth = (int)Math.Round(_diameterDiu);
+                (int guessLeft, int guessTop) = BallPlacement.CalculateInitialPlacement(
+                    guessedWidth, guessedWidth, primary, DefaultRightMargin);
+                double scale = ReadDpiScale(CenterOf(new POINT(guessLeft, guessTop), guessedWidth));
+                int width = (int)Math.Round(_diameterDiu * scale);
+                int height = width;
+
+                (int left, int top) = BallPlacement.CalculateInitialPlacement(
+                    width, height, primary, DefaultRightMargin);
+                (left, top) = BallPlacement.ClampToMonitors(left, top, width, height, monitors);
+
+                _location = new POINT(left, top);
+                SetWindowPos(hwnd, HWND_TOPMOST, left, top, width, height, SWP_NOACTIVATE);
+            }
+            else
+            {
+                double scale = ReadDpiScale(CenterOf(anchor));
+                int width = (int)Math.Round(_diameterDiu * scale);
+                int height = width;
+
+                (int left, int top) = BallPlacement.ClampToMonitors(anchor.X, anchor.Y, width, height, monitors);
+                bool moved = anchor.X != left || anchor.Y != top;
+                _location = new POINT(left, top);
+                SetWindowPos(hwnd, HWND_TOPMOST, left, top, width, height, SWP_NOACTIVATE);
+
+                // 仅在非用户拖拽状态（如恢复位置、断屏重排、分辨率/DPI 变化）导致静止球位置改变时才持久化
+                if (moved && notifyOnRelocation && !_pressed && !_dragging)
+                {
+                    Moved?.Invoke();
+                }
+            }
+        }
+        finally
+        {
+            _isApplyingLocation = false;
+        }
+    }
+
+    private POINT CenterOf(POINT topLeft, int width = 0)
+    {
+        int radius = width > 0 ? width / 2 : (int)Math.Round(_diameterDiu / 2);
         return new POINT(topLeft.X + radius, topLeft.Y + radius);
     }
 
@@ -312,36 +439,48 @@ internal sealed class BallWindow : Window
         return 1.0;
     }
 
-    private static (int Left, int Top) ClampToVirtualScreen(int left, int top, int width, int height)
+    private static List<BallPlacement.MonitorWorkArea> GetSystemMonitors()
     {
-        int virtualLeft = GetSystemMetrics(SM_XVIRTUALSCREEN);
-        int virtualTop = GetSystemMetrics(SM_YVIRTUALSCREEN);
-        int virtualWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-        int virtualHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+        var monitors = new List<BallPlacement.MonitorWorkArea>();
 
-        // 拿不到虚拟屏尺寸（异常会话）时别乱夹 —— 夹错了比夹不住更难解释。
-        if (virtualWidth <= 0 || virtualHeight <= 0) return (left, top);
+        EnumDisplayMonitors(nint.Zero, nint.Zero, (nint hMonitor, nint _, ref RECT _, nint _) =>
+        {
+            var mi = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
+            if (GetMonitorInfo(hMonitor, ref mi))
+            {
+                bool isPrimary = (mi.dwFlags & MONITORINFOF_PRIMARY) != 0;
+                monitors.Add(new BallPlacement.MonitorWorkArea(
+                    mi.rcWork.Left,
+                    mi.rcWork.Top,
+                    mi.rcWork.Right,
+                    mi.rcWork.Bottom,
+                    isPrimary));
+            }
+            return true;
+        }, nint.Zero);
 
-        int maxLeft = virtualLeft + Math.Max(0, virtualWidth - width);
-        int maxTop = virtualTop + Math.Max(0, virtualHeight - height);
+        if (monitors.Count == 0)
+        {
+            int w = GetSystemMetrics(SM_CXSCREEN);
+            int h = GetSystemMetrics(SM_CYSCREEN);
+            if (w > 0 && h > 0)
+            {
+                monitors.Add(new BallPlacement.MonitorWorkArea(0, 0, w, h, true));
+            }
+        }
 
-        return (
-            Math.Min(Math.Max(left, virtualLeft), Math.Max(virtualLeft, maxLeft)),
-            Math.Min(Math.Max(top, virtualTop), Math.Max(virtualTop, maxTop)));
+        return monitors;
     }
 
     private const int SM_CXSCREEN = 0;
     private const int SM_CYSCREEN = 1;
-    private const int SM_XVIRTUALSCREEN = 76;
-    private const int SM_YVIRTUALSCREEN = 77;
-    private const int SM_CXVIRTUALSCREEN = 78;
-    private const int SM_CYVIRTUALSCREEN = 79;
     private const int GWL_EXSTYLE = -20;
     private const long WS_EX_NOACTIVATE = 0x08000000;
     private const long WS_EX_TOOLWINDOW = 0x00000080;
     private const uint SWP_NOACTIVATE = 0x0010;
     private const uint MONITOR_DEFAULTTONEAREST = 2;
     private const int MDT_EFFECTIVE_DPI = 0;
+    private const uint MONITORINFOF_PRIMARY = 0x00000001;
     private static readonly nint HWND_TOPMOST = new(-1);
 
     [StructLayout(LayoutKind.Sequential)]
@@ -368,6 +507,23 @@ internal sealed class BallWindow : Window
         public int Right;
         public int Bottom;
     }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    private struct MONITORINFO
+    {
+        public int cbSize;
+        public RECT rcMonitor;
+        public RECT rcWork;
+        public uint dwFlags;
+    }
+
+    private delegate bool MonitorEnumProc(nint hMonitor, nint hdcMonitor, ref RECT lprcMonitor, nint dwData);
+
+    [DllImport("user32.dll")]
+    private static extern bool EnumDisplayMonitors(nint hdc, nint lprcClip, MonitorEnumProc lpfnEnum, nint dwData);
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    private static extern bool GetMonitorInfo(nint hMonitor, ref MONITORINFO lpmi);
 
     [DllImport("user32.dll")]
     private static extern bool GetCursorPos(out POINT lpPoint);
