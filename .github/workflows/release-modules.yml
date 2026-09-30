@@ -52,6 +52,10 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Generate module registry from plugin.json
+        shell: pwsh
+        run: ./build/Import-ModuleRegistryFromSource.ps1 -OutputPath 'artifacts/generated/module-registry.json'
+
       - name: Download latest released catalog when available
         id: previous
         shell: pwsh
@@ -161,6 +165,10 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Generate module registry from plugin.json
+        shell: pwsh
+        run: ./build/Import-ModuleRegistryFromSource.ps1 -OutputPath 'artifacts/generated/module-registry.json'
+
       - name: Build and test module
         shell: pwsh
         run: |
@@ -203,6 +211,10 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Generate module registry from plugin.json
+        shell: pwsh
+        run: ./build/Import-ModuleRegistryFromSource.ps1 -OutputPath 'artifacts/generated/module-registry.json'
+
       - name: Download module release inputs
         uses: actions/download-artifact@v4
         with:
@@ -223,7 +235,7 @@ jobs:
             -MetadataDirectory 'release-metadata/packages' `
             -OutputPath 'release-metadata/packages.json'
 
-      - name: Generate catalog
+      - name: Generate catalog from package plugin.json metadata
         shell: pwsh
         env:
           PREVIOUS_CATALOG: ${{ needs.select.outputs.previous_catalog }}
@@ -234,6 +246,7 @@ jobs:
             PackagesJson = 'release-metadata/packages.json'
             Repository = '${{ github.repository }}'
             OutputPath = 'release-metadata/module-catalog.json'
+            RequirePackageManifest = $true
           }
           if ($env:PREVIOUS_CATALOG -and (Test-Path -LiteralPath $env:PREVIOUS_CATALOG)) {
             $catalogArgs.PreviousCatalogPath = $env:PREVIOUS_CATALOG

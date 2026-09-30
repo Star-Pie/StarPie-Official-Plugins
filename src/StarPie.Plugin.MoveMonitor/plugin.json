@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "starpie.builtin.movemonitor",
+  "name": "窗口移到下一屏",
+  "description": "随 StarPie 分发的内置动作：窗口移到下一屏。可在「插件」页单独停用。",
+  "author": "StarPie Studio",
+  "homepage": "https://github.com/SoftBlack42/StarPie",
+  "license": "MIT",
+  "version": "1.0.1",
+  "apiVersion": "1.4",
+  "minHostVersion": "1.8.0-beta.1",
+  "maxHostVersion": null,
+  "targetFramework": "net8.0-windows",
+  "platform": "win-x64",
+  "assembly": "StarPie.Plugin.MoveMonitor.dll",
+  "entryType": "StarPie.Plugin.MoveMonitor.MoveMonitorPlugin",
+  "capabilities": [
+    "WindowControl"
+  ],
+  "claimedTypes": [
+    {
+      "typeName": "MoveMonitor",
+      "contributionId": "moveMonitor"
+    }
+  ],
+  "contributions": {
+    "actions": true,
+    "icons": false,
+    "i18n": false,
+    "styles": false,
+    "presets": false
+  },
+  "dependencies": [],
+  "icon": null,
+  "tags": [
+    "official",
+    "builtin"
+  ],
+  "features": [
+    {
+      "id": "moveMonitor",
+      "name": "窗口移到下一屏",
+      "description": "将当前窗口移动到下一个显示器。",
+      "category": "窗口管理"
+    }
+  ],
+  "release": {
+    "enabled": true
+  }
+}

@@ -110,6 +110,7 @@ else {
         dependencies = @()
         icon = $module.icon
         tags = @($module.tags)
+        features = @($module.features)
     }
     Write-JsonFile -Value $pluginManifest -Path (Join-Path $stagingRoot 'plugin.json')
 }

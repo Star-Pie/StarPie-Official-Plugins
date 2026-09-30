@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "starpie.builtin.folder",
+  "name": "打开文件夹",
+  "description": "随 StarPie 分发的内置动作：打开文件夹或定位到文件。可在「插件」页单独停用。",
+  "author": "StarPie Studio",
+  "homepage": "https://github.com/SoftBlack42/StarPie",
+  "license": "MIT",
+  "version": "1.0.1",
+  "apiVersion": "1.4",
+  "minHostVersion": "1.8.0-beta.1",
+  "maxHostVersion": null,
+  "targetFramework": "net8.0-windows",
+  "platform": "win-x64",
+  "assembly": "StarPie.Plugin.Folder.dll",
+  "entryType": "StarPie.Plugin.Folder.FolderPlugin",
+  "capabilities": [
+    "Process"
+  ],
+  "claimedTypes": [
+    {
+      "typeName": "Folder",
+      "contributionId": "folder"
+    },
+    {
+      "typeName": "OpenFolder",
+      "contributionId": "folder"
+    }
+  ],
+  "contributions": {
+    "actions": true,
+    "icons": false,
+    "i18n": false,
+    "styles": false,
+    "presets": false
+  },
+  "dependencies": [],
+  "icon": null,
+  "tags": [
+    "official",
+    "builtin"
+  ],
+  "features": [
+    {
+      "id": "folder",
+      "name": "打开文件夹",
+      "description": "打开文件夹或定位到指定文件。",
+      "category": "文件管理"
+    }
+  ],
+  "release": {
+    "enabled": true
+  }
+}

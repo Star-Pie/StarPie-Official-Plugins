@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "starpie.builtin.ocr",
+  "name": "截屏识字 (OCR)",
+  "description": "随 StarPie 分发的内置动作：框选屏幕区域并识别其中的文字。可在「插件」页单独停用。",
+  "author": "StarPie Studio",
+  "homepage": "https://github.com/SoftBlack42/StarPie",
+  "license": "MIT",
+  "version": "1.0.1",
+  "apiVersion": "1.4",
+  "minHostVersion": "1.8.0-beta.1",
+  "maxHostVersion": null,
+  "targetFramework": "net8.0-windows",
+  "platform": "win-x64",
+  "assembly": "StarPie.Plugin.Ocr.dll",
+  "entryType": "StarPie.Plugin.Ocr.OcrPlugin",
+  "capabilities": [
+    "ScreenCapture"
+  ],
+  "claimedTypes": [
+    {
+      "typeName": "Ocr",
+      "contributionId": "ocr"
+    },
+    {
+      "typeName": "ScreenOcr",
+      "contributionId": "ocr"
+    }
+  ],
+  "contributions": {
+    "actions": true,
+    "icons": false,
+    "i18n": false,
+    "styles": false,
+    "presets": false
+  },
+  "dependencies": [],
+  "icon": null,
+  "tags": [
+    "official",
+    "builtin"
+  ],
+  "features": [
+    {
+      "id": "ocr",
+      "name": "截屏识字",
+      "description": "框选屏幕区域并识别其中的文字。",
+      "category": "效率工具"
+    }
+  ],
+  "release": {
+    "enabled": true
+  }
+}

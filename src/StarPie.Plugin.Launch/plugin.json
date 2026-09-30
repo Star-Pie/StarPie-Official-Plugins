@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "starpie.builtin.launch",
+  "name": "启动程序",
+  "description": "随 StarPie 分发的内置动作：启动程序或应用。可在「插件」页单独停用。",
+  "author": "StarPie Studio",
+  "homepage": "https://github.com/SoftBlack42/StarPie",
+  "license": "MIT",
+  "version": "1.0.1",
+  "apiVersion": "1.4",
+  "minHostVersion": "1.8.0-beta.1",
+  "maxHostVersion": null,
+  "targetFramework": "net8.0-windows",
+  "platform": "win-x64",
+  "assembly": "StarPie.Plugin.Launch.dll",
+  "entryType": "StarPie.Plugin.Launch.LaunchPlugin",
+  "capabilities": [
+    "Process"
+  ],
+  "claimedTypes": [
+    {
+      "typeName": "Launch",
+      "contributionId": "launch"
+    }
+  ],
+  "contributions": {
+    "actions": true,
+    "icons": false,
+    "i18n": false,
+    "styles": false,
+    "presets": false
+  },
+  "dependencies": [],
+  "icon": null,
+  "tags": [
+    "official",
+    "builtin"
+  ],
+  "features": [
+    {
+      "id": "launch",
+      "name": "启动程序",
+      "description": "启动应用程序或其他可执行文件。",
+      "category": "系统工具"
+    }
+  ],
+  "release": {
+    "enabled": true
+  }
+}

@@ -24,9 +24,9 @@
     <AssemblyName>StarPie.Plugin.CadCommand</AssemblyName>
     <RootNamespace>StarPie.Plugin.CadCommand</RootNamespace>
 
-    <Version>1.0.2</Version>
-    <AssemblyVersion>1.0.2.0</AssemblyVersion>
-    <FileVersion>1.0.2.0</FileVersion>
+    <Version>1.0.3</Version>
+    <AssemblyVersion>1.0.3.0</AssemblyVersion>
+    <FileVersion>1.0.3.0</FileVersion>
     <Product>StarPie CAD 模拟按键与命令输入</Product>
     <Company>StarPie Studio</Company>
     <Description>StarPie 官方插件：专为 CAD 设计师优化的文本与模拟按键输入工具。可在「插件」页单独停用。</Description>

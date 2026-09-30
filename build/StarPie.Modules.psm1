@@ -61,17 +61,16 @@ function Write-JsonFile {
 function Get-ModuleRegistry {
     [CmdletBinding()]
     param([string]$RegistryPath)
-
     $root = Get-RepositoryRoot
-    if (-not $RegistryPath) {
-        $RegistryPath = Join-Path $root 'module-registry.json'
+    if ([string]::IsNullOrWhiteSpace($RegistryPath)) { $RegistryPath = if ($env:STARPIE_MODULE_REGISTRY) { $env:STARPIE_MODULE_REGISTRY } else { 'artifacts/generated/module-registry.json' } }
+    $resolvedPath = Resolve-RepositoryPath -Path $RegistryPath
+    if (-not (Test-Path -LiteralPath $resolvedPath)) {
+        $generator = Join-Path $root 'build/Import-ModuleRegistryFromSource.ps1'
+        if (-not (Test-Path -LiteralPath $generator)) { throw "Generated module registry is missing and the source importer was not found: $resolvedPath" }
+        & $generator -OutputPath $RegistryPath | Out-Null
     }
-
     $registry = Read-JsonFile -Path $RegistryPath
-    if ($registry.schemaVersion -ne 1) {
-        throw "Unsupported module registry schemaVersion: $($registry.schemaVersion)"
-    }
-
+    if ($registry.schemaVersion -ne 1) { throw "Unsupported generated module registry schemaVersion: $($registry.schemaVersion)" }
     return $registry
 }
 
@@ -99,7 +98,7 @@ function Get-ModuleById {
 
     $module = Get-EnabledModules -Registry $Registry | Where-Object { $_.id -eq $ModuleId } | Select-Object -First 1
     if ($null -eq $module) {
-        throw "Module '$ModuleId' is not present or not enabled in module-registry.json."
+        throw "Module '$ModuleId' is not present or not enabled in the generated module registry."
     }
 
     return $module

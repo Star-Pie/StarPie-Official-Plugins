@@ -29,7 +29,7 @@
   - 几何与交互自动回归全部通过 (`tests/starpie.plugin.floatingball/Validate-FloatingBall.ps1`)，包含负坐标屏、L形空隙、断屏回退、点击/拖动4px阈值、画刷冻结、拖拽过程写盘抑制、WndProc防递归与光标异常防护；
   - 插件 Release 构建零错误、零警告 (`dotnet build src/StarPie.Plugin.FloatingBall/FloatingBall.csproj -c Release --nologo`)；
   - 模块打包与包结构校验全部通过 (`build/Pack-Module.ps1` + `build/Verify-ModulePackage.ps1`)；
-  - 版本号三处一致（`.csproj`、`plugin.json`、`module-registry.json` 均为 1.0.2）；
+  - 版本号由 plugin.json 维护，并由 CI 校验其与 .csproj 和打包内容一致（当前为 1.0.2）；
   - `git diff --check` 检查通过，改动严格局限于官方悬浮球插件及配套测试与文档。
 - 人工（待验收，需在实机硬件环境核验）：
   - [待验收] 负坐标副屏（如主屏左上方）保存位置后重启，能够稳定恢复在负坐标副屏原位；

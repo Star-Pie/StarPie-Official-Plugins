@@ -88,6 +88,9 @@ public sealed class PluginManifest
     /// <summary>分类标签，最多 8 个。</summary>
     public List<string> Tags { get; set; } = new();
 
+    /// <summary>面向插件详情页的静态功能说明；不参与运行时动作路由。</summary>
+    public List<PluginFeature> Features { get; set; } = new();
+
     /// <summary>入口程序集的 SHA256（发布时由打包脚本回写）。留空表示不做完整性校验。</summary>
     public string? Sha256 { get; set; }
 
@@ -149,6 +152,25 @@ public sealed class PluginContributions
         if (Presets) parts.Add("预设模板");
         return parts.Count == 0 ? "无声明" : string.Join(" · ", parts);
     }
+}
+
+/// <summary>插件详情页使用的静态功能说明。</summary>
+public sealed class PluginFeature
+{
+    /// <summary>稳定的功能短 ID。</summary>
+    public string Id { get; set; } = "";
+
+    /// <summary>面向用户的功能名称。</summary>
+    public string Name { get; set; } = "";
+
+    /// <summary>功能说明。</summary>
+    public string Description { get; set; } = "";
+
+    /// <summary>功能分类。</summary>
+    public string Category { get; set; } = "";
+
+    /// <summary>可选图标 key。</summary>
+    public string? IconKey { get; set; }
 }
 
 /// <summary>插件间依赖声明。</summary>
