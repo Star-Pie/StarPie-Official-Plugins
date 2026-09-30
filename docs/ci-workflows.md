@@ -2,7 +2,7 @@
 
 ## Incremental validation
 
-`validate.yml` runs for pull requests and `main` pushes.
+`validate.yml` runs for pull requests (excluding documentation-only and workflow-only changes) and manual dispatch, but not for `main` pushes.
 
 ```text
 module-only change
@@ -18,7 +18,7 @@ shared build/schema/catalog/workflow change
 
 - manually;
 - weekly;
-- when shared build infrastructure changes.
+- not on `main` pushes.
 
 It builds, tests, packs and verifies every registered module and uploads temporary validation packages.
 

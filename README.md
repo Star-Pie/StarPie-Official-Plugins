@@ -99,11 +99,11 @@ release-metadata/            仅用于 CI 元数据，不提交 Git
 ## 工作流
 
 - `validate.yml`
-  - 在 Pull Request 和 `main` 分支推送时运行。
+  - 在 Pull Request 中按路径过滤运行（纯文档或仅工作流修改不触发），也可手动运行；不再在 `main` 推送时自动运行。
   - 只构建和测试本次 diff 影响的模块。
-  - 公共构建文件、catalog、workflow、Schema 或模块注册表变化时，触发全量验证。
+  - 触发验证的 PR 若涉及公共构建文件、catalog、Schema 等共享变更，将验证全部模块。
 - `full-validation.yml`
-  - 支持手动触发、每周定时触发，以及公共构建基础设施变化时触发。
+  - 支持手动触发和每周定时触发；不再在 `main` 推送时自动运行。
   - 构建和测试全部已注册模块。
 - `release-modules.yml`
   - 手动触发的正式发布工作流。
