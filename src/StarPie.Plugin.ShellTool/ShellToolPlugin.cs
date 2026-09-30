@@ -30,6 +30,7 @@ public sealed class ShellToolPlugin : IStarPiePlugin
 
         // ① 词条先登记：Descriptor 与 Parameters 会在属性访问时查当前语言文案。
         Texts.Register(context);
+        StarPie.OfficialPlugins.ProcessLaunchParameter.RegisterTexts(context);
 
         // ② 动作登记。短 ID 必须与 csproj 里认领串右侧的值逐字一致。
         context.Actions.Register(new ShellToolAction(context));

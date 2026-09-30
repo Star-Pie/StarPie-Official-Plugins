@@ -31,9 +31,9 @@
     <AssemblyName>StarPie.Plugin.ShellTool</AssemblyName>
     <RootNamespace>StarPie.Plugin.ShellTool</RootNamespace>
 
-    <Version>1.0.1</Version>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
+    <Version>1.1.0</Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
     <Product>StarPie 系统与右键工具</Product>
     <Company>StarPie Studio</Company>
     <Description>随 StarPie 分发的内置动作：执行系统工具与右键菜单功能。可在「插件」页单独停用。</Description>
@@ -41,6 +41,10 @@
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\ProcessLaunchParameter.cs" Link="ProcessLaunchParameter.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <!-- Private=false：不把 SDK 程序集复制到输出目录。生产物里必须只有这一枚 dll。 -->

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><IsPluginRegressionTest>true</IsPluginRegressionTest><TargetFramework>net8.0-windows</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\sdk\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj" />
+    <Compile Include="..\..\..\src\Shared\ProcessLaunchParameter.cs" Link="ProcessLaunchParameter.cs" />
+    <Compile Include="..\..\..\src\StarPie.Plugin.Launch\LaunchAction.cs" Link="LaunchAction.cs" />
+    <Compile Include="..\..\..\src\StarPie.Plugin.Launch\Texts.cs" Link="LaunchTexts.cs" />
+    <Compile Include="..\..\..\src\StarPie.Plugin.Command\CommandAction.cs" Link="CommandAction.cs" />
+    <Compile Include="..\..\..\src\StarPie.Plugin.Command\Texts.cs" Link="CommandTexts.cs" />
+    <Compile Include="..\..\..\src\StarPie.Plugin.ShellTool\ShellToolAction.cs" Link="ShellToolAction.cs" />
+    <Compile Include="..\..\..\src\StarPie.Plugin.ShellTool\Texts.cs" Link="ShellToolTexts.cs" />
+  </ItemGroup>
+</Project>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using StarPie.Plugin;
+using StarPie.OfficialPlugins;
 
 namespace StarPie.Plugin.ShellTool;
 
@@ -60,6 +61,7 @@ internal sealed class ShellToolAction : IActionContribution
             Placeholder = "copy_path",
             HelpText = T("shell.tool.verbHelp", Texts.ShellToolVerbHelp),
         },
+        ProcessLaunchParameter.Field(),
     };
 
     /// <summary>
@@ -69,6 +71,7 @@ internal sealed class ShellToolAction : IActionContribution
     public string? Validate(IReadOnlyDictionary<string, string> parameters)
     {
         string verb = Read(parameters);
+        if (!ProcessLaunchParameter.TryRead(parameters, false, out _)) return ProcessLaunchParameter.Invalid(_context);
         return string.IsNullOrWhiteSpace(verb) ? T("shell.tool.empty", Texts.ShellToolEmpty) : null;
     }
 
@@ -102,20 +105,22 @@ internal sealed class ShellToolAction : IActionContribution
             return Task.FromResult(ActionResult.Fail(Texts.ShellToolEmpty));
         }
 
+        if (!ProcessLaunchParameter.TryRead(input?.Parameters, false, out ProcessLaunchMode mode))
+            return Task.FromResult(ActionResult.Fail(ProcessLaunchParameter.Invalid(_context)));
+
         try
         {
-            if (!_context.Shell.Invoke(verb))
+            if (!_context.Shell.InvokeWithMode(verb, mode))
             {
-                return Task.FromResult(ActionResult.Fail(
-                    $"未能执行系统工具「{verb.Trim()}」。请确认该功能标识可用；具体原因见插件日志。"));
+                return Task.FromResult(ProcessLaunchParameter.NotStarted(_context));
             }
         }
         catch (PluginCapabilityDeniedException ex)
         {
             // 与 CommandAction 同一条处理：异常消息已写明怎么修，记进日志后给用户一句人话。
             _context.Log.Error("系统工具调用被宿主拒绝：本插件未声明 Process 能力", ex);
-            return Task.FromResult(ActionResult.Fail(
-                "本插件缺少「进程」能力声明，系统工具已被拒绝。请重新安装本插件，或联系插件作者。"));
+            return Task.FromResult(ActionResult.Ok(
+                "本插件缺少「进程」能力声明，系统工具已被拒绝。请重新安装本插件，或联系插件作者。", silent: false));
         }
 
         return Task.FromResult(ActionResult.Empty);
