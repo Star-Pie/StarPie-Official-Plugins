@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using StarPie.Plugin;
+using StarPie.OfficialPlugins;
 
 namespace StarPie.Plugin.Launch;
 
@@ -10,7 +11,7 @@ namespace StarPie.Plugin.Launch;
 /// 动作「启动程序」。对应配置里的 <c>Type="Launch"</c>。
 /// <para>
 /// <b>参数键用 <see cref="HostActionFields"/> 而不是自定义短名</b>：这个动作在用户配置里
-/// 仍然是老形态（<c>Parameter</c> / <c>Arguments</c> / <c>RunAsStandardUser</c> 三个裸字段），
+/// 仍然是老形态（路径和启动参数仍兼容裸字段；新的权限模式由插件保存在 ExtensionData），
 /// 宿主会在调用前用字段投影器现读现装成字典，键就是这些常量值。
 /// 用常量而不是裸字符串，是为了让「键写错」变成编译错误而不是运行期永远读到空值。
 /// </para>
@@ -64,15 +65,7 @@ internal sealed class LaunchAction : IActionContribution
             Type = ParameterFieldType.Text,
             Placeholder = "--portable",
         },
-        new()
-        {
-            Key = HostActionFields.RunAsStandardUser,
-            Label = T("launch.standardUser", Texts.LaunchStandardUser),
-            LabelKey = "launch.standardUser",
-            Type = ParameterFieldType.Bool,
-            DefaultValue = "false",
-            HelpText = T("launch.standardUserHelp", Texts.LaunchStandardUserHelp),
-        },
+        ProcessLaunchParameter.Field(legacyLaunch: true),
     };
 
     /// <summary>
@@ -86,6 +79,7 @@ internal sealed class LaunchAction : IActionContribution
             ? value ?? ""
             : "";
 
+        if (!ProcessLaunchParameter.TryRead(parameters, true, out _)) return ProcessLaunchParameter.Invalid(_context);
         return string.IsNullOrWhiteSpace(path) ? T("launch.empty", Texts.LaunchEmpty) : null;
     }
 
@@ -137,12 +131,18 @@ internal sealed class LaunchAction : IActionContribution
         }
 
         string arguments = input?.Parameter(HostActionFields.Arguments) ?? "";
-        bool runAsStandardUser = input?.Bool(HostActionFields.RunAsStandardUser) ?? false;
+        if (!ProcessLaunchParameter.TryRead(input?.Parameters, true, out ProcessLaunchMode mode))
+            return Task.FromResult(ActionResult.Fail(ProcessLaunchParameter.Invalid(_context)));
 
-        if (!_context.Host.Launch(path, arguments, runAsStandardUser))
+        try
         {
-            return Task.FromResult(ActionResult.Fail(
-                $"未能启动「{path}」。请确认该路径存在且可执行；具体原因见插件日志。"));
+            if (!_context.Host.LaunchWithMode(path, mode, arguments))
+                return Task.FromResult(ProcessLaunchParameter.NotStarted(_context));
+        }
+        catch (PluginCapabilityDeniedException ex)
+        {
+            _context.Log.Error("LaunchWithMode requires Process capability", ex);
+            return Task.FromResult(ProcessLaunchParameter.NotStarted(_context));
         }
 
         return Task.FromResult(ActionResult.Empty);

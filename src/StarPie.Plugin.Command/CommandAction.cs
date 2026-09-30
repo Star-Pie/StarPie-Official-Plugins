@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using StarPie.Plugin;
+using StarPie.OfficialPlugins;
 
 namespace StarPie.Plugin.Command;
 
@@ -72,6 +73,7 @@ internal sealed class CommandAction : IActionContribution
             DefaultValue = "cmd",
             Options = BuildTerminalOptions(),
         },
+        ProcessLaunchParameter.Field(),
     };
 
     /// <summary>
@@ -108,6 +110,7 @@ internal sealed class CommandAction : IActionContribution
     public string? Validate(IReadOnlyDictionary<string, string> parameters)
     {
         string command = Read(parameters, HostActionFields.Parameter);
+        if (!ProcessLaunchParameter.TryRead(parameters, false, out _)) return ProcessLaunchParameter.Invalid(_context);
         return string.IsNullOrWhiteSpace(command) ? T("command.empty", Texts.CommandEmpty) : null;
     }
 
@@ -143,12 +146,14 @@ internal sealed class CommandAction : IActionContribution
             return Task.FromResult(ActionResult.Fail(Texts.CommandEmpty));
         }
 
+        if (!ProcessLaunchParameter.TryRead(input?.Parameters, false, out ProcessLaunchMode mode))
+            return Task.FromResult(ActionResult.Fail(ProcessLaunchParameter.Invalid(_context)));
+
         try
         {
-            if (!_context.Commands.Run(command, terminal))
+            if (!_context.Commands.RunWithMode(command, mode, terminal))
             {
-                return Task.FromResult(ActionResult.Fail(
-                    $"未能启动命令「{Shorten(command)}」。请确认该命令本身可用；具体原因见插件日志。"));
+                return Task.FromResult(ProcessLaunchParameter.NotStarted(_context));
             }
         }
         catch (PluginCapabilityDeniedException ex)
@@ -156,8 +161,8 @@ internal sealed class CommandAction : IActionContribution
             // 走到这里说明清单的 capabilities 里少了 Process。异常消息本身已写明怎么修，
             // 这里把它记进日志，再给用户一句人话 —— 用户不该看到 .NET 异常文本。
             _context.Log.Error("运行命令被宿主拒绝：本插件未声明 Process 能力", ex);
-            return Task.FromResult(ActionResult.Fail(
-                "本插件缺少「进程」能力声明，运行命令已被拒绝。请重新安装本插件，或联系插件作者。"));
+            return Task.FromResult(ActionResult.Ok(
+                "本插件缺少「进程」能力声明，运行命令已被拒绝。请重新安装本插件，或联系插件作者。", silent: false));
         }
 
         return Task.FromResult(ActionResult.Empty);

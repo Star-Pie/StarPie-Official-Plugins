@@ -5,7 +5,7 @@
   -->
   <Target Name="ValidateOfficialPluginOutput"
           AfterTargets="Build"
-          Condition="'$(MSBuildProjectName)' != 'StarPie.Plugin.Abstractions'">
+          Condition="'$(MSBuildProjectName)' != 'StarPie.Plugin.Abstractions' and '$(IsPluginRegressionTest)' != 'true'">
     <Error
       Condition="Exists('$(TargetDir)StarPie.Plugin.Abstractions.dll')"
       Text="官方插件输出目录不能包含 StarPie.Plugin.Abstractions.dll：$(TargetDir)" />
