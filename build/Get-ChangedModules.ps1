@@ -32,7 +32,6 @@ try {
         'Directory.Build.targets',
         'global.json',
         'NuGet.config',
-        'module-registry.json',
         'StarPie.OfficialPlugins.sln'
     )
 

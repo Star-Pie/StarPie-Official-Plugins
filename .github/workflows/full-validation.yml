@@ -12,7 +12,7 @@ on:
       - 'Directory.Build.targets'
       - 'global.json'
       - 'NuGet.config'
-      - 'src/StarPie.Plugin.Abstractions/**'
+      - 'src/**'
       - 'build/**'
       - 'catalog/**'
 
@@ -34,6 +34,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
+
+      - name: Generate module registry from plugin.json
+        shell: pwsh
+        run: ./build/Import-ModuleRegistryFromSource.ps1 -OutputPath 'artifacts/generated/module-registry.json'
 
       - name: Build full module matrix
         id: modules
@@ -60,6 +64,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
+
+      - name: Generate module registry from plugin.json
+        shell: pwsh
+        run: ./build/Import-ModuleRegistryFromSource.ps1 -OutputPath 'artifacts/generated/module-registry.json'
 
       - name: Build and test module
         shell: pwsh

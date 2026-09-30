@@ -127,7 +127,7 @@ release-metadata/            仅用于 CI 元数据，不提交 Git
 已完成：
 
 1. 将 15 个官方模块工程迁入 `src/`。
-2. 填充 `module-registry.json`。
+2. 为每个官方模块维护完整的 src/**/plugin.json。
 3. 建立模块打包、catalog 生成、签名、增量发布与通道校验流水线。
 4. 建立模块包验证与宿主兼容性测试目录。
 

@@ -21,21 +21,22 @@ function Assert-Condition([bool]$Condition, [string]$Message) {
 Write-Host "=== Validating starpie.plugin.floatingball Module Contract & Geometry Regressions ===" -ForegroundColor Cyan
 
 # ---------------------------------------------------------------------------------
-# 1. Check module-registry.json
+# 1. Generate and check the temporary module registry
 # ---------------------------------------------------------------------------------
-$registryFile = Join-Path $root 'module-registry.json'
-Assert-Condition (Test-Path -LiteralPath $registryFile) "module-registry.json exists"
+$registryFile = Join-Path $root 'artifacts/generated/module-registry.json'
+& (Join-Path $root 'build/Import-ModuleRegistryFromSource.ps1') -OutputPath $registryFile
+Assert-Condition (Test-Path -LiteralPath $registryFile) "generated module registry exists"
 
 $registry = Get-Content -LiteralPath $registryFile -Raw -Encoding UTF8 | ConvertFrom-Json
 $module = @($registry.modules) | Where-Object { $_.id -eq 'starpie.plugin.floatingball' } | Select-Object -First 1
-Assert-Condition ($null -ne $module) "starpie.plugin.floatingball is registered in module-registry.json"
+Assert-Condition ($null -ne $module) "starpie.plugin.floatingball is registered in generated module registry"
 
 if ($module) {
     Assert-Condition ($module.name -eq '悬浮球') "Module name is '悬浮球'"
     Assert-Condition ($module.project -eq 'src/StarPie.Plugin.FloatingBall/FloatingBall.csproj') "Module project path is correct"
     Assert-Condition ($module.assembly -eq 'StarPie.Plugin.FloatingBall.dll') "Module assembly is 'StarPie.Plugin.FloatingBall.dll'"
     Assert-Condition ($module.targetFramework -eq 'net8.0-windows') "Module targetFramework is 'net8.0-windows'"
-    Assert-Condition ($module.version -eq '1.0.2') "Module version in registry is '1.0.2'"
+    Assert-Condition ($module.version -eq '1.0.3') "Module version in registry is '1.0.3'"
     Assert-Condition ($module.pluginId -eq 'starpie.plugin.floatingball') "Module pluginId is 'starpie.plugin.floatingball'"
     Assert-Condition ($module.contributionId -eq 'showBall') "Module contributionId is 'showBall'"
     Assert-Condition ($module.entryType -eq 'StarPie.Plugin.FloatingBall.FloatingBallPlugin') "Module entryType is correct"
@@ -53,7 +54,7 @@ Assert-Condition (Test-Path -LiteralPath $pluginJsonFile) "plugin.json exists"
 if (Test-Path -LiteralPath $pluginJsonFile) {
     $pluginJson = Get-Content -LiteralPath $pluginJsonFile -Raw -Encoding UTF8 | ConvertFrom-Json
     Assert-Condition ($pluginJson.id -eq 'starpie.plugin.floatingball') "plugin.json id is 'starpie.plugin.floatingball'"
-    Assert-Condition ($pluginJson.version -eq '1.0.2') "plugin.json version is '1.0.2'"
+    Assert-Condition ($pluginJson.version -eq '1.0.3') "plugin.json version is '1.0.3'"
     Assert-Condition ($pluginJson.apiVersion -eq '1.6') "plugin.json apiVersion is '1.6'"
     Assert-Condition ($pluginJson.minHostVersion -eq '1.8.0-beta.3') "plugin.json minHostVersion is '1.8.0-beta.3'"
     Assert-Condition ($pluginJson.assembly -eq 'StarPie.Plugin.FloatingBall.dll') "plugin.json assembly is 'StarPie.Plugin.FloatingBall.dll'"
@@ -68,7 +69,7 @@ Assert-Condition (Test-Path -LiteralPath $csprojPath) "FloatingBall.csproj exist
 if (Test-Path -LiteralPath $csprojPath) {
     $csprojXml = [xml](Get-Content -LiteralPath $csprojPath -Raw)
     $versionNode = $csprojXml.SelectSingleNode("//Version")
-    Assert-Condition ($null -ne $versionNode -and $versionNode.InnerText.Trim() -eq '1.0.2') "FloatingBall.csproj Version is '1.0.2'"
+    Assert-Condition ($null -ne $versionNode -and $versionNode.InnerText.Trim() -eq '1.0.3') "FloatingBall.csproj Version is '1.0.3'"
 
     $packageRefs = $csprojXml.SelectNodes("//PackageReference")
     Assert-Condition ($packageRefs.Count -eq 0) "FloatingBall.csproj has zero NuGet package references (zero NuGet constraint)"

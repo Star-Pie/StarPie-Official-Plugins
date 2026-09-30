@@ -33,6 +33,12 @@ foreach ($module in $enabled) {
     if ($entry.assetName -notmatch '\.spkg$') {
         $errors.Add("Invalid asset name for $($module.id)")
     }
+    $featureIds = @()
+    foreach ($feature in @($entry.features)) {
+        if ([string]::IsNullOrWhiteSpace($feature.id) -or [string]::IsNullOrWhiteSpace($feature.name)) { $errors.Add("Invalid feature metadata for $($module.id)") }
+        $featureIds += [string]$feature.id
+    }
+    if (@($featureIds | Group-Object | Where-Object Count -gt 1).Count -gt 0) { $errors.Add("Duplicate feature id in catalog for $($module.id)") }
 }
 
 foreach ($entry in @($catalog.modules)) {

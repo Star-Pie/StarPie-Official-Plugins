@@ -4,14 +4,12 @@ on:
   pull_request:
     paths-ignore:
       - '**/*.md'
-      - '**/*.json'
       - '.github/workflows/**'
   push:
     branches:
       - main
     paths-ignore:
       - '**/*.md'
-      - '**/*.json'
       - '.github/workflows/**'
   workflow_dispatch:
 
@@ -36,6 +34,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
+
+      - name: Generate module registry from plugin.json
+        shell: pwsh
+        run: ./build/Import-ModuleRegistryFromSource.ps1 -OutputPath 'artifacts/generated/module-registry.json'
 
       - name: Detect affected modules
         id: detect
@@ -77,6 +79,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
+
+      - name: Generate module registry from plugin.json
+        shell: pwsh
+        run: ./build/Import-ModuleRegistryFromSource.ps1 -OutputPath 'artifacts/generated/module-registry.json'
 
       - name: Build and test module
         shell: pwsh

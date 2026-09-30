@@ -19,9 +19,26 @@
       "apiVersion": "1.4",
       "minHostVersion": "1.8.0-beta.1",
       "maxHostVersion": null,
-      "typeClaims": ["Launch"],
-      "capabilities": ["Process"],
-      "signature": null
+      "typeClaims": [
+        "Launch"
+      ],
+      "capabilities": [
+        "Process"
+      ],
+      "signature": null,
+      "description": "启动应用程序或其他可执行文件。",
+      "author": "StarPie Studio",
+      "homepage": "https://github.com/Star-Pie/StarPie",
+      "license": "MIT",
+      "targetFramework": "net8.0-windows",
+      "features": [
+        {
+          "id": "launch",
+          "name": "启动程序",
+          "description": "启动应用程序或其他可执行文件。",
+          "category": "系统工具"
+        }
+      ]
     },
     {
       "id": "starpie.builtin.ocr",
@@ -35,8 +52,13 @@
       "apiVersion": "1.4",
       "minHostVersion": "1.8.0-beta.1",
       "maxHostVersion": null,
-      "typeClaims": ["Ocr", "ScreenOcr"],
-      "capabilities": ["ScreenCapture"],
+      "typeClaims": [
+        "Ocr",
+        "ScreenOcr"
+      ],
+      "capabilities": [
+        "ScreenCapture"
+      ],
       "signature": null
     }
   ]

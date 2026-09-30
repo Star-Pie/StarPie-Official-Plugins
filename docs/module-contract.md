@@ -1,8 +1,8 @@
 # Official Module Contract
 
-## Module registry entry
+## Module metadata and generated registry
 
-Every official module is declared in `module-registry.json`.
+Every official module is declared in src/**/plugin.json. CI generates a temporary registry from those manifests for build and release selection.
 
 Required fields:
 

@@ -20,9 +20,10 @@ function Assert-Condition([bool]$Condition, [string]$Message) {
 
 Write-Host "=== Validating starpie.plugin.keypadlayer Module Contract ===" -ForegroundColor Cyan
 
-# 1. Check module-registry.json
-$registryFile = Join-Path $root 'module-registry.json'
-Assert-Condition (Test-Path -LiteralPath $registryFile) "module-registry.json exists"
+# 1. Generate and check the temporary module registry
+$registryFile = Join-Path $root 'artifacts/generated/module-registry.json'
+& (Join-Path $root 'build/Import-ModuleRegistryFromSource.ps1') -OutputPath $registryFile
+Assert-Condition (Test-Path -LiteralPath $registryFile) "generated module registry exists"
 
 $registry = Get-Content -LiteralPath $registryFile -Raw -Encoding UTF8 | ConvertFrom-Json
 Assert-Condition ($registry.schemaVersion -eq 1) "Registry schemaVersion is 1"
@@ -30,14 +31,14 @@ Assert-Condition ($registry.sdkApiVersion -eq '1.4') "Registry top-level sdkApiV
 Assert-Condition ($registry.minimumHostVersion -eq '1.8.0-beta.1') "Registry top-level minimumHostVersion remains '1.8.0-beta.1' (INV-OLD-MODULE-COMPAT)"
 
 $module = @($registry.modules) | Where-Object { $_.id -eq 'starpie.plugin.keypadlayer' } | Select-Object -First 1
-Assert-Condition ($null -ne $module) "starpie.plugin.keypadlayer is registered in module-registry.json"
+Assert-Condition ($null -ne $module) "starpie.plugin.keypadlayer is registered in generated module registry"
 
 if ($module) {
     Assert-Condition ($module.name -eq '按键映射') "Module name is '按键映射'"
     Assert-Condition ($module.project -eq 'src/StarPie.Plugin.KeypadLayer/StarPie.Plugin.KeypadLayer.csproj') "Module project path is correct"
     Assert-Condition ($module.assembly -eq 'StarPie.Plugin.KeypadLayer.dll') "Module assembly is 'StarPie.Plugin.KeypadLayer.dll'"
     Assert-Condition ($module.targetFramework -eq 'net8.0-windows') "Module targetFramework is 'net8.0-windows'"
-    Assert-Condition ($module.version -eq '1.0.1') "Module version is '1.0.1'"
+    Assert-Condition ($module.version -eq '1.0.2') "Module version is '1.0.2'"
     Assert-Condition ($module.pluginId -eq 'starpie.plugin.keypadlayer') "Module pluginId is 'starpie.plugin.keypadlayer' (INV-MODULE-IDENTITY)"
     Assert-Condition ($module.contributionId -eq 'keypadLayer') "Module contributionId is 'keypadLayer' (INV-MODULE-IDENTITY)"
     Assert-Condition ($module.entryType -eq 'StarPie.Plugin.KeypadLayer.KeypadLayerPlugin') "Module entryType is 'StarPie.Plugin.KeypadLayer.KeypadLayerPlugin'"
@@ -198,7 +199,7 @@ if (Test-Path -LiteralPath $sdkSourceFile) {
 # 8. Check Preview formatting and custom mapping regression tests (INV-KEYMAP-PREVIEW)
 $builtDll = Join-Path $root 'src/StarPie.Plugin.KeypadLayer/bin/Release/net8.0-windows/StarPie.Plugin.KeypadLayer.dll'
 if (-not (Test-Path -LiteralPath $builtDll)) {
-    $builtDll = Join-Path $root 'artifacts/staging/starpie.plugin.keypadlayer/1.0.1/StarPie.Plugin.KeypadLayer.dll'
+    $builtDll = Join-Path $root 'artifacts/staging/starpie.plugin.keypadlayer/1.0.2/StarPie.Plugin.KeypadLayer.dll'
 }
 if (Test-Path -LiteralPath $builtDll) {
     $abstractionsDll = Join-Path $root 'sdk/StarPie.Plugin.Abstractions/bin/Release/net8.0-windows/StarPie.Plugin.Abstractions.dll'

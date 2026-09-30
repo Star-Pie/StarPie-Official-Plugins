@@ -26,6 +26,6 @@ It builds, tests, packs and verifies every registered module and uploads tempora
 
 `release-modules.yml` is manual and version-driven.
 
-It compares `module-registry.json` versions with the latest released catalog. Modules with no version change are not rebuilt or reuploaded.
+It generates a temporary registry from each module's plugin.json, then compares those versions with the latest released catalog. Modules with no version change are not rebuilt or reuploaded.
 
 The release job rejects non-dry-run execution unless repository variable `SIGNING_ENABLED` is `true`.

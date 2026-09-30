@@ -29,9 +29,9 @@
     <AssemblyName>StarPie.Plugin.Command</AssemblyName>
     <RootNamespace>StarPie.Plugin.Command</RootNamespace>
 
-    <Version>1.0.0</Version>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
     <Product>StarPie 运行命令</Product>
     <Company>StarPie Studio</Company>
     <Description>随 StarPie 分发的内置动作：在指定终端中执行命令行。可在「插件」页单独停用。</Description>

@@ -1,30 +1,54 @@
 {
   "schemaVersion": 1,
-
   "id": "starpie.plugin.floatingball",
   "name": "悬浮球",
   "description": "在屏幕上放一颗常驻悬浮球：点它呼出你自己的轮盘，选哪个扇区执行哪个。拖动改位置，可通过插件设置或动作收起。球由插件画，轮盘整体归宿主 —— 外观、扇区、体积、多屏 DPI 永远和你配的那一套一致。",
   "author": "StarPie Studio",
   "homepage": "https://github.com/Star-Pie/StarPie",
   "license": "MIT",
-  "version": "1.0.2",
-
+  "version": "1.0.3",
   "apiVersion": "1.6",
   "minHostVersion": "1.8.0-beta.3",
-
+  "maxHostVersion": null,
   "targetFramework": "net8.0-windows",
   "platform": "win-x64",
-
   "assembly": "StarPie.Plugin.FloatingBall.dll",
   "entryType": "StarPie.Plugin.FloatingBall.FloatingBallPlugin",
-
-  "capabilities": ["Ui", "Wheel"],
-
+  "capabilities": [
+    "Ui",
+    "Wheel"
+  ],
+  "claimedTypes": [],
   "contributions": {
     "actions": true,
     "icons": true,
     "i18n": true
   },
-
-  "tags": ["official", "plugin", "悬浮球", "轮盘", "常驻", "快捷入口"]
+  "dependencies": [],
+  "icon": null,
+  "tags": [
+    "official",
+    "plugin",
+    "悬浮球",
+    "轮盘",
+    "常驻",
+    "快捷入口"
+  ],
+  "features": [
+    {
+      "id": "showBall",
+      "name": "呼出悬浮球",
+      "description": "在屏幕上显示常驻悬浮球，并从悬浮球呼出轮盘。",
+      "category": "交互形态"
+    },
+    {
+      "id": "hideBall",
+      "name": "收起悬浮球",
+      "description": "隐藏当前显示的悬浮球。",
+      "category": "交互形态"
+    }
+  ],
+  "release": {
+    "enabled": true
+  }
 }
