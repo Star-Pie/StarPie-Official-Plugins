@@ -4,17 +4,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '17 18 * * 0'
-  push:
-    branches:
-      - main
-    paths:
-      - 'Directory.Build.props'
-      - 'Directory.Build.targets'
-      - 'global.json'
-      - 'NuGet.config'
-      - 'src/**'
-      - 'build/**'
-      - 'catalog/**'
 
 permissions:
   contents: read
