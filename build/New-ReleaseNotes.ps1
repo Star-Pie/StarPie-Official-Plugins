@@ -16,6 +16,7 @@ function Write-Utf8NoBom {
 }
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'StarPie.Modules.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'StarPie.Catalog.psm1') -Force
 
 $catalog = Read-JsonFile -Path $CatalogPath
 $changed = @{}
@@ -29,12 +30,13 @@ $lines.Add("Channel: ``$ReleaseChannel``")
 $lines.Add("Catalog version: ``$($catalog.catalogVersion)``")
 $lines.Add('')
 $lines.Add('This release represents the complete current official module set. Only changed module packages are attached;')
-$lines.Add('unchanged modules are referenced from their previous immutable release assets in `module-catalog.json`.')
+$lines.Add('catalog v2 retains immutable history, and each client selects its highest compatible module version.')
 $lines.Add('')
 $lines.Add('| Module | Version | Release status |')
 $lines.Add('|---|---:|---|')
-foreach ($module in @($catalog.modules | Sort-Object name)) {
-    if ($changed.ContainsKey($module.id)) {
+foreach ($group in @($catalog.modules | Sort-Object id)) {
+    $module = Get-LatestCatalogVersion $group
+    if ($changed.ContainsKey($group.id)) {
         $status = 'Updated in this release'
     }
     else {
