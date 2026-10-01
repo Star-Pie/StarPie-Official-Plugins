@@ -24,6 +24,10 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Validate catalog v2 history and schema
+        shell: pwsh
+        run: .\tests\catalog\Validate-CatalogV2.ps1
+
       - name: Generate module registry from plugin.json
         shell: pwsh
         run: ./build/Import-ModuleRegistryFromSource.ps1 -OutputPath 'artifacts/generated/module-registry.json'

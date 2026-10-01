@@ -7,6 +7,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'StarPie.Modules.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'StarPie.Catalog.psm1') -Force
 
 if ($ModuleIds) {
     $ModuleIds = @($ModuleIds | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
@@ -19,7 +20,8 @@ $previous = @{}
 if ($PreviousCatalogPath -and (Test-Path -LiteralPath $PreviousCatalogPath)) {
     $catalog = Read-JsonFile -Path $PreviousCatalogPath
     foreach ($module in @($catalog.modules)) {
-        $previous[$module.id] = $module.version
+        $latest = Get-LatestCatalogVersion $module
+        if ($null -ne $latest) { $previous[$module.id] = $latest.version }
     }
 }
 

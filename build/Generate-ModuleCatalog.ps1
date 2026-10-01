@@ -11,6 +11,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'StarPie.Modules.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'StarPie.Catalog.psm1') -Force
 
 $root = Get-RepositoryRoot
 $registry = Get-ModuleRegistry
@@ -26,6 +27,7 @@ $previousCatalog = $null
 $previousModules = @{}
 if ($PreviousCatalogPath -and (Test-Path -LiteralPath $PreviousCatalogPath)) {
     $previousCatalog = Read-JsonFile -Path $PreviousCatalogPath
+    if ($previousCatalog.schemaVersion -notin @(1,2)) { throw "Unsupported previous catalog schema: $($previousCatalog.schemaVersion)" }
     foreach ($item in @($previousCatalog.modules)) {
         $previousModules[$item.id] = $item
     }
@@ -68,8 +70,10 @@ foreach ($module in $enabled) {
 
         $packagePath = [string]$package.packagePath
         if (-not (Test-Path -LiteralPath $packagePath)) {
-            $packagePath = Join-Path $root ('artifacts/packages/' + $package.assetName)
+            $packagePath = Join-Path $root ('artifacts\packages\' + $package.assetName)
         }
+        if ((Get-FileHash -LiteralPath $packagePath -Algorithm SHA256).Hash -ine $package.sha256 -or
+            (Get-Item -LiteralPath $packagePath).Length -ne [long]$package.size) { throw "Package integrity metadata mismatch: $($module.id)" }
         $manifest = Read-PackagePluginManifest -PackagePath $packagePath
         if ($RequirePackageManifest -and (-not $manifest)) { throw "Unable to read plugin.json for module '$($module.id)'." }
         if ($manifest.id -and $manifest.id -ne $module.pluginId) { throw "Package plugin.json id mismatch for '$($module.id)': $($manifest.id)." }
@@ -99,26 +103,46 @@ foreach ($module in $enabled) {
             signature = $package.signature
         }
     }
-    elseif ($previousModules.ContainsKey($module.id)) {
-        $entry = $previousModules[$module.id]
-        $static = Get-ManifestMetadata -Module $module
-        foreach ($property in @('description', 'author', 'homepage', 'license', 'icon', 'tags', 'features', 'targetFramework')) {
-            if (-not ($entry.PSObject.Properties.Name -contains $property) -or $null -eq $entry.$property) { $entry | Add-Member -NotePropertyName $property -NotePropertyValue $static.$property -Force }
-        }
-        if ($entry.version -ne $module.version) {
-            throw "Module '$($module.id)' requires version '$($module.version)', but no new package was supplied and the previous catalog has '$($entry.version)'."
+    $history = @()
+    if ($previousModules.ContainsKey($module.id)) {
+        foreach ($old in @(Get-CatalogVersions $previousModules[$module.id])) {
+            $copy = [ordered]@{}
+            foreach ($property in $old.PSObject.Properties) { if ($property.Name -ne 'id') { $copy[$property.Name] = $property.Value } }
+            if (-not $copy['targetFramework']) {
+                # v1 元数据缺失时，从原 SHA-256 对应的历史包补齐，绝不从当前源清单猜测旧版本。
+                if ($old.sha256 -notmatch '^[a-fA-F0-9]{64}$' -or [long]$old.size -le 0 -or [long]$old.size -gt 100MB) { throw 'Invalid historical integrity metadata.' }
+                $historicalPath = Join-Path $root ('artifacts\catalog-history\' + $old.sha256 + '.spkg')
+                if (-not (Test-Path -LiteralPath $historicalPath)) {
+                    $uri = [uri]$old.packageUrl
+                    if ($uri.Scheme -ne 'https' -or $uri.Host -ne 'github.com' -or -not $uri.AbsolutePath.StartsWith('/Star-Pie/StarPie-Official-Plugins/releases/download/')) { throw 'Historical asset origin is invalid.' }
+                    New-Item -ItemType Directory -Path (Split-Path -Parent $historicalPath) -Force | Out-Null
+                    Invoke-WebRequest -Uri $uri -OutFile $historicalPath
+                }
+                if ((Get-FileHash -LiteralPath $historicalPath -Algorithm SHA256).Hash -ine $old.sha256) { throw 'Historical package SHA-256 mismatch.' }
+                $oldManifest = Read-PackagePluginManifest -PackagePath $historicalPath
+                if ($oldManifest.id -ne $module.id -or $oldManifest.version -ne $old.version) { throw 'Historical package identity mismatch.' }
+                foreach ($property in @('name','description','author','homepage','license','icon','tags','features','apiVersion','targetFramework','minHostVersion','maxHostVersion','capabilities')) {
+                    if ($null -ne $oldManifest.PSObject.Properties[$property]) { $copy[$property] = $oldManifest.$property }
+                }
+            }
+            $history += [pscustomobject]$copy
         }
     }
-    else {
-        throw "Module '$($module.id)' has no package in this release and no entry in the previous catalog."
+    if ($null -ne $entry) {
+        $newVersion = [ordered]@{}
+        foreach ($property in $entry.Keys) { if ($property -ne 'id') { $newVersion[$property] = $entry[$property] } }
+        $entry = [pscustomobject]$newVersion
     }
-
-    $catalogModules += $entry
+    $versions = @(Merge-CatalogVersions -Id $module.id -Previous $history -NewRelease $entry)
+    if (-not ($versions | Where-Object version -CEQ $module.version)) {
+        throw "Module '$($module.id)' requires version '$($module.version)', but no matching immutable package was supplied or retained."
+    }
+    $catalogModules += [ordered]@{ id = $module.id; versions = $versions }
 }
 
 $now = [DateTimeOffset]::UtcNow
 $catalog = [ordered]@{
-    schemaVersion = 1
+    schemaVersion = 2
     catalogVersion = $now.ToString('yyyy.MM.dd.HHmmss')
     releaseTag = $ReleaseTag
     releaseChannel = $ReleaseChannel

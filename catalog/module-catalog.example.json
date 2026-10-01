@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "catalogVersion": "2026.09.18.1",
   "releaseTag": "modules-2026.09.18.1",
   "releaseChannel": "beta",
@@ -9,57 +9,98 @@
   "modules": [
     {
       "id": "starpie.builtin.launch",
-      "name": "Launch",
-      "version": "1.0.0",
-      "releaseTag": "modules-2026.09.17.1",
-      "assetName": "StarPie.Plugin.Launch-1.0.0.spkg",
-      "packageUrl": "https://github.com/Star-Pie/StarPie-Official-Plugins/releases/download/modules-2026.09.17.1/StarPie.Plugin.Launch-1.0.0.spkg",
-      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "size": 10240,
-      "apiVersion": "1.4",
-      "minHostVersion": "1.8.0-beta.1",
-      "maxHostVersion": null,
-      "typeClaims": [
-        "Launch"
-      ],
-      "capabilities": [
-        "Process"
-      ],
-      "signature": null,
-      "description": "启动应用程序或其他可执行文件。",
-      "author": "StarPie Studio",
-      "homepage": "https://github.com/Star-Pie/StarPie",
-      "license": "MIT",
-      "targetFramework": "net8.0-windows",
-      "features": [
+      "versions": [
         {
-          "id": "launch",
-          "name": "启动程序",
+          "name": "Launch",
+          "version": "1.1.0",
+          "releaseTag": "modules-2026.09.17.1",
+          "assetName": "StarPie.Plugin.Launch-1.1.0.spkg",
+          "packageUrl": "https://github.com/Star-Pie/StarPie-Official-Plugins/releases/download/modules-2026.09.17.1/StarPie.Plugin.Launch-1.1.0.spkg",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "size": 10240,
+          "apiVersion": "1.8",
+          "minHostVersion": "1.8.0-beta.5",
+          "maxHostVersion": null,
+          "typeClaims": [
+            "Launch"
+          ],
+          "capabilities": [
+            "Process"
+          ],
+          "signature": null,
           "description": "启动应用程序或其他可执行文件。",
-          "category": "系统工具"
+          "author": "StarPie Studio",
+          "homepage": "https://github.com/Star-Pie/StarPie",
+          "license": "MIT",
+          "targetFramework": "net8.0-windows",
+          "features": [
+            {
+              "id": "launch",
+              "name": "启动程序",
+              "description": "启动应用程序或其他可执行文件。",
+              "category": "系统工具"
+            }
+          ]
+        },
+        {
+          "name": "Launch",
+          "version": "1.0.0",
+          "releaseTag": "modules-2026.09.17.1",
+          "assetName": "StarPie.Plugin.Launch-1.0.0.spkg",
+          "packageUrl": "https://github.com/Star-Pie/StarPie-Official-Plugins/releases/download/modules-2026.09.17.1/StarPie.Plugin.Launch-1.0.0.spkg",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "size": 10240,
+          "apiVersion": "1.4",
+          "minHostVersion": "1.8.0-beta.1",
+          "maxHostVersion": null,
+          "typeClaims": [
+            "Launch"
+          ],
+          "capabilities": [
+            "Process"
+          ],
+          "signature": null,
+          "description": "启动应用程序或其他可执行文件。",
+          "author": "StarPie Studio",
+          "homepage": "https://github.com/Star-Pie/StarPie",
+          "license": "MIT",
+          "targetFramework": "net8.0-windows",
+          "features": [
+            {
+              "id": "launch",
+              "name": "启动程序",
+              "description": "启动应用程序或其他可执行文件。",
+              "category": "系统工具"
+            }
+          ]
         }
       ]
     },
     {
       "id": "starpie.builtin.ocr",
-      "name": "Ocr",
-      "version": "1.0.1",
-      "releaseTag": "modules-2026.09.18.1",
-      "assetName": "StarPie.Plugin.Ocr-1.0.1.spkg",
-      "packageUrl": "https://github.com/Star-Pie/StarPie-Official-Plugins/releases/download/modules-2026.09.18.1/StarPie.Plugin.Ocr-1.0.1.spkg",
-      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-      "size": 11264,
-      "apiVersion": "1.4",
-      "minHostVersion": "1.8.0-beta.1",
-      "maxHostVersion": null,
-      "typeClaims": [
-        "Ocr",
-        "ScreenOcr"
-      ],
-      "capabilities": [
-        "ScreenCapture"
-      ],
-      "signature": null
+      "versions": [
+        {
+          "name": "Ocr",
+          "version": "1.0.1",
+          "releaseTag": "modules-2026.09.18.1",
+          "assetName": "StarPie.Plugin.Ocr-1.0.1.spkg",
+          "packageUrl": "https://github.com/Star-Pie/StarPie-Official-Plugins/releases/download/modules-2026.09.18.1/StarPie.Plugin.Ocr-1.0.1.spkg",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "size": 11264,
+          "apiVersion": "1.4",
+          "minHostVersion": "1.8.0-beta.1",
+          "maxHostVersion": null,
+          "typeClaims": [
+            "Ocr",
+            "ScreenOcr"
+          ],
+          "capabilities": [
+            "ScreenCapture"
+          ],
+          "signature": null,
+          "targetFramework": "net8.0-windows"
+        }
+      ]
     }
   ]
 }

@@ -1,56 +1,27 @@
 [CmdletBinding()]
 param([Parameter(Mandatory)][string]$CatalogPath)
-
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'StarPie.Modules.psm1') -Force
-
-$catalog = Read-JsonFile -Path $CatalogPath
+Import-Module (Join-Path $PSScriptRoot 'StarPie.Catalog.psm1') -Force
+$catalog = Read-JsonFile $CatalogPath
+if ($catalog.schemaVersion -ne 2) { throw 'Catalog schemaVersion must be 2.' }
 $registry = Get-ModuleRegistry
-$enabled = @(Get-EnabledModules -Registry $registry)
-
-$errors = New-Object System.Collections.Generic.List[string]
-$ids = @($catalog.modules | ForEach-Object { $_.id })
-$duplicates = @($ids | Group-Object | Where-Object Count -gt 1)
-foreach ($duplicate in $duplicates) {
-    $errors.Add("Duplicate module id in catalog: $($duplicate.Name)")
+$enabled = @(Get-EnabledModules $registry)
+$ids = @{}
+foreach ($group in @($catalog.modules)) {
+    if ($group.id -notmatch '^starpie\.' -or $ids.ContainsKey($group.id)) { throw "Invalid or duplicate catalog ID: $($group.id)" }
+    $ids[$group.id] = $true
+    foreach ($key in @('version','packageUrl','sha256','minHostVersion','apiVersion')) { if ($null -ne $group.PSObject.Properties[$key]) { throw "Legacy top-level version fields are forbidden: $($group.id)" } }
+    if ($null -eq $group.PSObject.Properties['versions'] -or @($group.versions).Count -eq 0) { throw "Empty history: $($group.id)" }
+    Merge-CatalogVersions -Id $group.id -Previous @($group.versions) | Out-Null
+    if ($enabled.id -notcontains $group.id) { throw "Module is not enabled in source registry: $($group.id)" }
 }
-
 foreach ($module in $enabled) {
-    $entry = @($catalog.modules | Where-Object { $_.id -eq $module.id }) | Select-Object -First 1
-    if ($null -eq $entry) {
-        $errors.Add("Catalog is missing module: $($module.id)")
-        continue
-    }
-    if ($entry.version -ne $module.version) {
-        $errors.Add("Catalog version mismatch for $($module.id): catalog=$($entry.version), registry=$($module.version)")
-    }
-    if ($entry.sha256 -notmatch '^[a-fA-F0-9]{64}$') {
-        $errors.Add("Invalid SHA-256 for $($module.id)")
-    }
-    if ($entry.packageUrl -notmatch '^https://') {
-        $errors.Add("Invalid package URL for $($module.id)")
-    }
-    if ($entry.assetName -notmatch '\.spkg$') {
-        $errors.Add("Invalid asset name for $($module.id)")
-    }
-    $featureIds = @()
-    foreach ($feature in @($entry.features)) {
-        if ([string]::IsNullOrWhiteSpace($feature.id) -or [string]::IsNullOrWhiteSpace($feature.name)) { $errors.Add("Invalid feature metadata for $($module.id)") }
-        $featureIds += [string]$feature.id
-    }
-    if (@($featureIds | Group-Object | Where-Object Count -gt 1).Count -gt 0) { $errors.Add("Duplicate feature id in catalog for $($module.id)") }
+    $entry = @($catalog.modules | Where-Object id -EQ $module.id) | Select-Object -First 1
+    if ($null -eq $entry -or -not ($entry.versions | Where-Object version -CEQ $module.version)) { throw "Current source version absent: $($module.id) $($module.version)" }
 }
-
-foreach ($entry in @($catalog.modules)) {
-    if ($ids -notcontains $entry.id) { continue }
-    if ($enabled.id -notcontains $entry.id) {
-        $errors.Add("Catalog contains module not enabled in registry: $($entry.id)")
-    }
+$schema = Join-Path (Get-RepositoryRoot) 'catalog/module-catalog.schema.json'
+if (Get-Command Test-Json -ErrorAction SilentlyContinue) {
+    if (-not (Test-Json -Json (Get-Content -LiteralPath $CatalogPath -Raw) -SchemaFile $schema -ErrorAction Stop)) { throw 'Catalog schema validation failed.' }
 }
-
-if ($errors.Count -gt 0) {
-    $errors | ForEach-Object { Write-Error $_ }
-    exit 1
-}
-
-Write-Host "Catalog verification passed: $CatalogPath ($($catalog.modules.Count) modules)."
+Write-Host "Catalog v2 verification passed: $CatalogPath ($($catalog.modules.Count) modules)."
