@@ -5,11 +5,16 @@ internal static class SoundMessages
     private static readonly Dictionary<string, string[]> Text = new()
     {
         ["settings.title"] = new[] { "轮盘音效", "輪盤音效", "Wheel sound", "ホイール効果音" },
-        ["settings.description"] = new[] { "需要安装、启用及按需预加载插件；未启用时宿主不会兜底。自定义参数通过方案文件导入/导出编辑，方案可用 ID 或名称选择。", "需要安裝、啟用及按需預載插件；未啟用時宿主不會備援。自訂參數透過方案檔匯入/匯出編輯，方案可用 ID 或名稱選擇。", "Install, enable and opt into preload to receive events. There is no host fallback. Edit custom parameters through profile import/export; select a profile by ID or name.", "導入、有効化、必要に応じて事前読み込みを設定してください。ホスト側の代替音声はありません。カスタム設定はファイルの読み書きで編集し、IDまたは名前で選択します。" },
+        ["settings.description"] = new[] { "主题选“自定义”后，可为各事件选择 16-bit PCM WAV（单/双声道，每个≤1MiB）；留空沿用所选方案，清空即恢复。文件仅引用、不复制，请勿移动。导入、导出及独立试听入口暂不提供。", "主題選「自訂」後，可為各事件選擇 16-bit PCM WAV（單/雙聲道，每個≤1MiB）；留空沿用所選方案，清空即恢復。檔案僅引用、不複製，請勿移動。匯入、匯出及獨立試聽入口暫不提供。", "Select Custom, then choose a 16-bit PCM mono/stereo WAV per event (up to 1 MiB each). Empty fields inherit the selected profile; clearing restores it. Files are referenced, not copied. Import, export and standalone preview controls are not available yet.", "テーマをカスタムにして、各イベントに16-bit PCM WAV（モノラル/ステレオ、各1MiBまで）を選択します。空欄は設定を継承し、クリアすると元に戻ります。ファイルはコピーされません。読み込み・書き出し・単独試聴の操作は現在ありません。" },
         ["settings.enabled"] = new[] { "启用音效", "啟用音效", "Enable sound", "効果音を有効にする" },
         ["settings.volume"] = new[] { "音量（0–1）", "音量（0–1）", "Volume (0–1)", "音量（0–1）" },
         ["settings.theme"] = new[] { "主题", "主題", "Theme", "テーマ" },
         ["settings.profileId"] = new[] { "自定义方案 ID 或名称", "自訂方案 ID 或名稱", "Custom profile ID or name", "カスタム設定のIDまたは名前" },
+        ["settings.popupWav"] = new[] { "呈现音效 WAV（可选）", "呈現音效 WAV（選填）", "Presented WAV (optional)", "表示 WAV（任意）" },
+        ["settings.hoverWav"] = new[] { "选择变化音效 WAV（可选）", "選擇變化音效 WAV（選填）", "Selection WAV (optional)", "選択 WAV（任意）" },
+        ["settings.expandWav"] = new[] { "展开音效 WAV（可选）", "展開音效 WAV（選填）", "Expand WAV (optional)", "展開 WAV（任意）" },
+        ["settings.executeWav"] = new[] { "确认音效 WAV（可选）", "確認音效 WAV（選填）", "Confirm WAV (optional)", "確定 WAV（任意）" },
+        ["settings.cancelWav"] = new[] { "取消音效 WAV（可选）", "取消音效 WAV（選填）", "Cancel WAV (optional)", "キャンセル WAV（任意）" },
         ["settings.onPopup"] = new[] { "轮盘呈现", "輪盤呈現", "Wheel presented", "ホイール表示" },
         ["settings.onHover"] = new[] { "选择变化", "選擇變化", "Selection feedback", "選択の効果音" },
         ["settings.onExpand"] = new[] { "子菜单展开", "子選單展開", "Submenu expanded", "サブメニュー展開" },

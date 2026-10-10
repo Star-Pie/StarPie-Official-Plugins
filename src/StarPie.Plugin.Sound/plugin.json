@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "starpie.plugin.sound",
   "name": "轮盘音效",
-  "description": "通过交互事件提供轮盘音效；管理播放、静音、主题及方案导入导出。需要用户安装、启用并按需开启预加载。",
+  "description": "通过交互事件提供轮盘音效；在插件设置页选择各事件的自定义 WAV，管理静音、音量和主题。需要用户安装、启用并按需开启预加载。",
   "author": "StarPie Studio",
   "homepage": "https://github.com/Star-Pie/StarPie-Official-Plugins",
   "license": "MIT",
@@ -19,7 +19,7 @@
   ],
   "claimedTypes": [],
   "contributions": {
-    "actions": true,
+    "actions": false,
     "icons": true,
     "i18n": true
   },
@@ -37,15 +37,9 @@
       "category": "交互反馈"
     },
     {
-      "id": "preview",
-      "name": "试听",
-      "description": "独立试听选定事件或完整流程。",
-      "category": "音效"
-    },
-    {
-      "id": "profiles",
-      "name": "方案管理",
-      "description": "通过文件导入导出自定义方案。",
+      "id": "custom-wav",
+      "name": "自定义音效文件",
+      "description": "在设置页为呈现、选择、展开、确认和取消选择 WAV；主题需设为自定义，留空沿用所选方案。",
       "category": "音效"
     }
   ],
