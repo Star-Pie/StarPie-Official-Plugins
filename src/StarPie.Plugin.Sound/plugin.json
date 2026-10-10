@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "starpie.plugin.sound",
+  "name": "轮盘音效",
+  "description": "通过交互事件提供轮盘音效；管理播放、静音、主题及方案导入导出。需要用户安装、启用并按需开启预加载。",
+  "author": "StarPie Studio",
+  "homepage": "https://github.com/Star-Pie/StarPie-Official-Plugins",
+  "license": "MIT",
+  "version": "1.0.0",
+  "apiVersion": "1.10",
+  "minHostVersion": "1.8.0-beta.7",
+  "maxHostVersion": null,
+  "targetFramework": "net8.0-windows",
+  "platform": "win-x64",
+  "assembly": "StarPie.Plugin.Sound.dll",
+  "entryType": "StarPie.Plugin.Sound.SoundPlugin",
+  "capabilities": [
+    "FileSystem"
+  ],
+  "claimedTypes": [],
+  "contributions": {
+    "actions": true,
+    "icons": true,
+    "i18n": true
+  },
+  "dependencies": [],
+  "tags": [
+    "official",
+    "sound",
+    "interaction"
+  ],
+  "features": [
+    {
+      "id": "feedback",
+      "name": "轮盘反馈",
+      "description": "观察轮盘语义，不改变动作或导航。",
+      "category": "交互反馈"
+    },
+    {
+      "id": "preview",
+      "name": "试听",
+      "description": "独立试听选定事件或完整流程。",
+      "category": "音效"
+    },
+    {
+      "id": "profiles",
+      "name": "方案管理",
+      "description": "通过文件导入导出自定义方案。",
+      "category": "音效"
+    }
+  ],
+  "release": {
+    "enabled": true
+  }
+}

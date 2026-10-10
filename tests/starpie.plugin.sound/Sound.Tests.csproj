@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0-windows</TargetFramework><AssemblyName>StarPie.Plugin.Sound.Tests</AssemblyName><IsPluginRegressionTest>true</IsPluginRegressionTest>
+    <StarPieSdkProject Condition="Exists('$(MSBuildThisFileDirectory)..\..\..\sdk\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj')">$(MSBuildThisFileDirectory)..\..\..\sdk\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj</StarPieSdkProject>
+    <StarPieSdkProject Condition="'$(StarPieSdkProject)' == ''">$(MSBuildThisFileDirectory)..\..\sdk\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj</StarPieSdkProject></PropertyGroup>
+  <ItemGroup><ProjectReference Include="..\..\src\StarPie.Plugin.Sound\Sound.csproj" /><ProjectReference Include="$(StarPieSdkProject)" /></ItemGroup>
+</Project>
