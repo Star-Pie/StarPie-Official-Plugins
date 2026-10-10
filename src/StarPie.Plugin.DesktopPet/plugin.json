@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.softblack42.desktoppet",
+  "name": "桌宠",
+  "description": "屏幕上的桌宠原型，轻点呼出轮盘，支持拖动与自定义素材。",
+  "author": "SoftBlack42",
+  "homepage": "https://github.com/SoftBlack42/StarPie",
+  "license": "MIT",
+  "version": "0.1.5",
+  "apiVersion": "1.11",
+  "minHostVersion": "1.8.0-beta.7",
+  "targetFramework": "net8.0-windows",
+  "platform": "win-x64",
+  "assembly": "StarPie.Plugin.DesktopPet.dll",
+  "entryType": "StarPie.Plugin.DesktopPet.DesktopPetPlugin",
+  "capabilities": [
+    "Ui",
+    "Wheel"
+  ],
+  "release": {
+    "enabled": false
+  },
+  "claimedTypes": [],
+  "contributions": {
+    "actions": true,
+    "icons": true,
+    "i18n": true,
+    "styles": false,
+    "presets": false
+  },
+  "tags": [
+    "桌宠",
+    "桌面伙伴",
+    "轮盘入口"
+  ]
+}
