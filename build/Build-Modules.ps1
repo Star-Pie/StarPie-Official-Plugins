@@ -58,8 +58,16 @@ foreach ($module in $modules) {
 
         foreach ($testProject in $candidates) {
             Write-Host "Testing module $($module.id): $($testProject.FullName)"
-            & dotnet test $testProject.FullName -c $Configuration --nologo --no-build
-            if ($LASTEXITCODE -ne 0) { throw "dotnet test failed for module '$($module.id)'." }
+            & dotnet build $testProject.FullName -c $Configuration --nologo
+            if ($LASTEXITCODE -ne 0) { throw "Test project build failed for module '$($module.id)'." }
+            [xml]$testXml = Get-Content -LiteralPath $testProject.FullName -Raw
+            $isConsole = @($testXml.SelectNodes('/Project/PropertyGroup/OutputType') | ForEach-Object { $_.InnerText }) -contains 'Exe'
+            if ($isConsole) {
+                & dotnet run --project $testProject.FullName -c $Configuration --no-build
+            } else {
+                & dotnet test $testProject.FullName -c $Configuration --nologo --no-build
+            }
+            if ($LASTEXITCODE -ne 0) { throw "Module test failed for module '$($module.id)'." }
         }
     }
 }

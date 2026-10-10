@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <AssemblyName>StarPie.Plugin.Sound</AssemblyName>
+    <Version>1.0.0</Version><AssemblyVersion>1.0.0.0</AssemblyVersion><FileVersion>1.0.0.0</FileVersion>
+    <Description>Interaction sound feedback, synthesis and profile storage.</Description>
+    <StarPieSdkProject Condition="'$(StarPieSdkProject)' == '' and Exists('$(MSBuildThisFileDirectory)..\..\..\sdk\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj')">$(MSBuildThisFileDirectory)..\..\..\sdk\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj</StarPieSdkProject>
+    <StarPieSdkProject Condition="'$(StarPieSdkProject)' == ''">$(MSBuildThisFileDirectory)..\..\sdk\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj</StarPieSdkProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(StarPieSdkProject)" GlobalPropertiesToRemove="BaseOutputPath;OutputPath"><Private>false</Private></ProjectReference>
+    <InternalsVisibleTo Include="StarPie.Plugin.Sound.Tests" />
+    <InternalsVisibleTo Include="test_sound_forensics" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyMetadata Include="StarPiePluginId" Value="starpie.plugin.sound" />
+    <AssemblyMetadata Include="StarPiePluginName" Value="轮盘音效" />
+    <AssemblyMetadata Include="StarPiePluginCapabilities" Value="FileSystem" />
+    <AssemblyMetadata Include="StarPiePluginApiVersion" Value="1.10" />
+    <AssemblyMetadata Include="StarPiePluginMinHostVersion" Value="1.8.0-beta.7" />
+    <AssemblyMetadata Include="StarPiePluginLicense" Value="MIT" />
+    <None Update="plugin.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

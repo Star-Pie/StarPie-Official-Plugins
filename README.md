@@ -2,7 +2,7 @@
 
 StarPie 官方内建动作模块的独立源码与发布仓库。
 
-> 当前状态：15 个官方动作插件已迁入本仓库，支持增量构建、`.spkg` 打包、签名 catalog 和 GitHub Release 发布。主程序提供手动刷新官方目录与安装入口；当前只验证包哈希，catalog 签名验证尚待接入。
+> 当前状态：15 个既有官方模块和 1 个音效插件源码候选位于本仓库，支持增量构建、`.spkg` 打包、签名 catalog 和 GitHub Release 发布。主程序提供手动刷新官方目录与安装入口；当前只验证包哈希，catalog 签名验证尚待接入。
 
 ## 仓库目标
 
@@ -19,7 +19,7 @@ StarPie 运行时实际加载的仍然是 DLL 程序集。`.spkg` 只是分发�
 
 ## 官方插件模块
 
-所有官方插件均以单动作模块形式发布，可以独立更新、启用或停用。下表中的“动作类型”是插件兼容的 StarPie 配置类型；历史别名用于继续支持旧配置。
+既有动作模块独立发布；音效模块同时注册交互观察、设置及三个管理动作，可以独立更新、启用或停用。下表中的“动作类型”是插件兼容的 StarPie 配置类型；历史别名用于继续支持旧配置。
 
 ### 启动与文件
 
@@ -64,7 +64,7 @@ StarPie 运行时实际加载的仍然是 DLL 程序集。`.spkg` 只是分发�
 ## 仓库结构
 
 ```text
-src/                         15 个官方插件源码
+src/                         16 个官方插件源码（含音效候选）
 sdk/                         与宿主共享的插件 SDK 契约快照
 tests/                       模块包验证与宿主兼容性测试预留目录
 build/                       构建、打包、catalog、校验与发布脚本
@@ -126,7 +126,7 @@ release-metadata/            仅用于 CI 元数据，不提交 Git
 
 已完成：
 
-1. 将 15 个官方模块工程迁入 `src/`。
+1. 将 15 个既有官方模块工程迁入 `src/`；beta.7 音效候选增加第 16 个模块。
 2. 为每个官方模块维护完整的 src/**/plugin.json。
 3. 建立模块打包、catalog 生成、签名、增量发布与通道校验流水线。
 4. 建立模块包验证与宿主兼容性测试目录。
@@ -135,3 +135,13 @@ release-metadata/            仅用于 CI 元数据，不提交 Git
 
 1. 在主程序中加入 catalog 签名验证（当前仅验证包大小与 SHA-256）。
 2. 持续验证远程目录、下载与离线加载链路。
+
+## 轮盘音效候选 `starpie.plugin.sound`
+
+- 源码：`src/StarPie.Plugin.Sound`，版本1.0.0，SDK1.10，最低宿主1.8.0-beta.7。只引用SDK/BCL，输出不得携带SDK DLL。
+- 用户须单独安装、启用并选择宿主预加载；不安装/禁用时宿主不提供音效兜底。插件不订阅旧Opening/Closed，不重复播放。
+- 通用设置：启用、音量、五个事件开关、主题与自定义方案ID/名称。细节通过可读JSON方案编辑：SourceType、WavePreset、BuiltInTheme、CustomFilePath（WAV）、PitchSemitones、DurationMs、RelativeVolume。
+- 三个后台动作：preview（event可选Flow）、importProfiles（path/activate/replace）、exportProfiles（path/profileId/bundle/overwrite）。路径需完整；默认不覆盖已有文件，不能替换主配置或插件私有配置。
+- 声明FileSystem：只读旧config.json与用户选定采样/方案，写插件私有sound.json和用户明确选定的导出文件。旧数据幂等迁移，未写原配置，私有文档/设置/方案/事件各层未知字段保留；同批重复方案ID拒绝，提交锁等待期间取消不会落盘；数据文件限8MiB，不把巨型方案JSON塞入SDK字符串设置。
+- 先校验并防护Custom自引用；静音是已消费结果、不更新真实播放时刻。单工作线程/单槽及45ms稳定、80ms间隔、稳定后150ms过期规则保留。宿主后台停用时在插件锁外最多等待5秒排空工作线程，超时明确失败并交由宿主判定是否需重启，不原生中断同步播放。试听等待真实后端完成，不把受理当成功。
+- 本地安全验证：`dotnet run --project tests/starpie.plugin.sound/Sound.Tests.csproj -c Release`；Mock音频，不创建UI/钩子，不执行真实插件动作。主仓库292项取证护栏已接到该生产模块和语义事件路径。打包/发布仍需单独授权与实机验收。
