@@ -18,7 +18,7 @@ function Assert-Condition([bool]$Condition, [string]$Message) {
     }
 }
 
-Write-Host "=== Validating io.github.softblack42.desktoppet Plugin Prototype ===" -ForegroundColor Cyan
+Write-Host "=== Validating starpie.plugin.desktoppet Plugin Prototype ===" -ForegroundColor Cyan
 
 # ---------------------------------------------------------------------------------
 # 1. Check plugin.json
@@ -27,10 +27,10 @@ $pluginJsonFile = Join-Path $root 'src/StarPie.Plugin.DesktopPet/plugin.json'
 Assert-Condition (Test-Path -LiteralPath $pluginJsonFile) "plugin.json exists"
 if (Test-Path -LiteralPath $pluginJsonFile) {
     $pluginJson = Get-Content -LiteralPath $pluginJsonFile -Raw -Encoding UTF8 | ConvertFrom-Json
-    Assert-Condition ($pluginJson.id -eq 'io.github.softblack42.desktoppet') "plugin.json id is 'io.github.softblack42.desktoppet'"
+    Assert-Condition ($pluginJson.id -eq 'starpie.plugin.desktoppet') "plugin.json id is 'starpie.plugin.desktoppet'"
     Assert-Condition ($pluginJson.author -eq 'SoftBlack42') "plugin author is SoftBlack42"
     Assert-Condition ($pluginJson.name -eq '桌宠') "plugin.json name is '桌宠'"
-    Assert-Condition ($pluginJson.version -eq '0.1.5') "plugin.json version is '0.1.5'"
+    Assert-Condition ($pluginJson.version -eq '0.1.6') "plugin.json version is '0.1.6'"
     Assert-Condition ($pluginJson.apiVersion -eq '1.11') "plugin.json apiVersion is '1.11'"
     Assert-Condition ($pluginJson.minHostVersion -eq '1.8.0-beta.7') "plugin.json minHostVersion is '1.8.0-beta.7'"
     Assert-Condition ($pluginJson.assembly -eq 'StarPie.Plugin.DesktopPet.dll') "plugin.json assembly is 'StarPie.Plugin.DesktopPet.dll'"
@@ -48,7 +48,7 @@ Assert-Condition (Test-Path -LiteralPath $csprojPath) "StarPie.Plugin.DesktopPet
 if (Test-Path -LiteralPath $csprojPath) {
     $csprojXml = [xml][System.IO.File]::ReadAllText($csprojPath, [System.Text.Encoding]::UTF8)
     $versionNode = $csprojXml.SelectSingleNode("//Version")
-    Assert-Condition ($null -ne $versionNode -and $versionNode.InnerText.Trim() -eq '0.1.5') "StarPie.Plugin.DesktopPet.csproj Version is '0.1.5'"
+    Assert-Condition ($null -ne $versionNode -and $versionNode.InnerText.Trim() -eq '0.1.6') "StarPie.Plugin.DesktopPet.csproj Version is '0.1.6'"
 
     $packageRefs = $csprojXml.SelectNodes("//PackageReference")
     Assert-Condition ($packageRefs.Count -eq 0) "StarPie.Plugin.DesktopPet.csproj has zero NuGet package references"
@@ -107,7 +107,7 @@ if (Test-Path -LiteralPath $outDll) {
     $attrDict = @{}
     foreach ($a in $attrs) { $attrDict[$a.Key] = $a.Value }
 
-    Assert-Condition ($attrDict['StarPiePluginId'] -eq 'io.github.softblack42.desktoppet') "Assembly metadata StarPiePluginId is 'io.github.softblack42.desktoppet'"
+    Assert-Condition ($attrDict['StarPiePluginId'] -eq 'starpie.plugin.desktoppet') "Assembly metadata StarPiePluginId is 'starpie.plugin.desktoppet'"
     Assert-Condition ($asm.GetCustomAttributes([System.Reflection.AssemblyCompanyAttribute], $false)[0].Company -eq 'SoftBlack42') "bare DLL author is SoftBlack42"
     Assert-Condition ($attrDict['StarPiePluginName'] -eq '桌宠') "Assembly metadata StarPiePluginName is '桌宠'"
     Assert-Condition ($attrDict['StarPiePluginCapabilities'] -eq 'Ui;Wheel') "Assembly metadata StarPiePluginCapabilities is 'Ui;Wheel'"
@@ -119,7 +119,7 @@ if (Test-Path -LiteralPath $outDll) {
 # 6. Build and run deterministic test suite
 # ---------------------------------------------------------------------------------
 Write-Host "--- Running DesktopPet Tests ---" -ForegroundColor Yellow
-$testProj = Join-Path $root 'tests/io.github.softblack42.desktoppet/DesktopPetTests.csproj'
+$testProj = Join-Path $root 'tests/starpie.plugin.desktoppet/DesktopPetTests.csproj'
 $testOutput = & dotnet run --project $testProj -c Release --nologo 2>&1
 $testExit = $LASTEXITCODE
 Write-Host ($testOutput -join "`n")
