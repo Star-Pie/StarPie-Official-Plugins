@@ -942,20 +942,23 @@ public static class Program
     {
         Console.WriteLine("\n--- 9. V3 Drag Assets (Hanging/Teddy), SHA-256 & Drag Sway Animation ---");
 
-        string v3Dir = @"G:\Users\2 Better\.codex\visualizations\2026\09\28\01a0e84e-617d-7752-bc81-e14d2bc9a2d1\stocking-desktop-pet-local-v3";
-        bool v3Exists = Directory.Exists(v3Dir);
-        Assert(v3Exists, "Local v3 asset directory exists on test machine");
-
+        // The neutral one-pixel fixture is portable and does not distribute private character art.
+        const string pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
+        const string expectedSha256 = "431CED6916A2A21A156E38701AFE55BBD7F88969FBBFC56D7FE099D47F265460";
+        string v3Dir = Path.Combine(Path.GetTempPath(), "starpie-neutral-v3-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(v3Dir);
         PetAssetManager v3Assets = new PetAssetManager();
-        if (v3Exists)
+        try
         {
+            foreach (string name in new[] { "idle", "blink", "react", "drag", "point_E", "point_SE", "point_S", "point_SW", "point_W", "point_NW", "point_N", "point_NE" })
+                File.WriteAllBytes(Path.Combine(v3Dir, name + ".png"), Convert.FromBase64String(pngBase64));
+            Assert(Directory.Exists(v3Dir), "Portable v3 asset directory exists in the isolated test fixture");
             string dragPng = Path.Combine(v3Dir, "drag.png");
             Assert(File.Exists(dragPng), "v3 drag.png exists");
 
             byte[] dragBytes = File.ReadAllBytes(dragPng);
             using var sha256 = System.Security.Cryptography.SHA256.Create();
             string actualSha256 = Convert.ToHexString(sha256.ComputeHash(dragBytes));
-            const string expectedSha256 = "AA0CAC111FB5AF77DC186859E6224DA1BD810A0278B36419F145CC0148253E8A";
             Assert(string.Equals(actualSha256, expectedSha256, StringComparison.OrdinalIgnoreCase),
                 $"v3 drag.png SHA-256 matches specification ({expectedSha256})", $"actual: {actualSha256}");
 
@@ -969,14 +972,13 @@ public static class Program
             var pointN = v3Assets.GetBitmapForFrame(PetFrameKind.PointN);
             Assert(pointN != null && pointN.IsFrozen, "PointN is decoded and frozen");
         }
-        else
+        finally
         {
-            // Synthetic fallback if running in sandbox without v3 files
-            string synDir = Path.Combine(Path.GetTempPath(), "StarPie_SynV3_" + Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(synDir);
-            CreateMinimalPng(Path.Combine(synDir, "idle.png"), 4, 4, 255, 0, 0);
-            CreateMinimalPng(Path.Combine(synDir, "drag.png"), 4, 4, 0, 255, 0);
-            v3Assets.LoadFromDirectory(synDir);
+            string full = Path.GetFullPath(v3Dir);
+            if (Path.GetDirectoryName(full) != Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar) ||
+                !Path.GetFileName(full).StartsWith("starpie-neutral-v3-", StringComparison.Ordinal))
+                throw new InvalidOperationException("Unexpected fixture cleanup path");
+            Directory.Delete(full, true);
         }
 
         // 9.2 状态机中的悬空平滑摆动计算 (±5°, 周期 1.0s, 正弦往返)
