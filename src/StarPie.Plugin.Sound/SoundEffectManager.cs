@@ -258,6 +258,7 @@ public static class SoundEffectManager
 	internal static Action? OnBeforeClaimLock { get; set; }
 	internal static Action<bool, SoundType, long>? OnHoverClaimEvaluated { get; set; }
 	internal static string? LastWavFallbackReason { get; set; }
+	internal const int MaxCustomWavBytes = 1024 * 1024;
 
 	private static readonly List<Thread> _harnessCreatedWorkers = new();
 	private static readonly object _harnessWorkerLock = new();
@@ -1989,7 +1990,16 @@ public static class SoundEffectManager
 		{
 			if (File.Exists(filePath) && filePath.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
 			{
-				byte[] data = File.ReadAllBytes(filePath);
+				using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+				if (stream.Length > MaxCustomWavBytes)
+				{
+					LastWavFallbackReason = $"WAV exceeds {MaxCustomWavBytes}-byte limit";
+					Warn($"[SoundEffectManager] Custom WAV fallback to synthesized click ({filePath}): {LastWavFallbackReason}");
+					return SynthesizeClick(44100, 1800, 900, 35, sliderVol);
+				}
+				// 五个事件缓存均须有界；先检查已打开文件，再分配，避免检查/重开竞态。
+				byte[] data = new byte[(int)stream.Length];
+				stream.ReadExactly(data);
 				byte[]? scaled = ScaleWavVolume(data, sliderVol, out string? reason);
 				if (scaled != null)
 				{

@@ -29,9 +29,7 @@ public sealed class SoundPlugin : IStarPiePlugin
         foreach (string key in SoundStore.SettingKeys)
             _tokens.Add(context.Settings.OnChanged(key, _ => Interlocked.Increment(ref _revision)));
         _tokens.Add(interactions.Interactions.Register(new FeedbackContribution(this)));
-        _tokens.Add(context.Actions.Register(new SoundPreviewAction(this, context)));
-        _tokens.Add(context.Actions.Register(new SoundImportAction(this, context)));
-        _tokens.Add(context.Actions.Register(new SoundExportAction(this, context)));
+        // 设置操作不是扇区动作；当前设置页只声明数据字段，不借用动作目录作为管理入口。
         // 这里只注册/迁移私有数据，不发声、不自动启用或改变宿主预加载偏好。
         context.Log.Info("Sound feedback registered. Enable host preload explicitly to receive startup wheel events.");
     }
@@ -48,6 +46,9 @@ public sealed class SoundPlugin : IStarPiePlugin
         fields.Add(new() { Key = "theme", LabelKey = "settings.theme", Type = ParameterFieldType.Enum, DefaultValue = defaults.SoundTheme,
             Options = new[] { "Mechanical", "Crisp", "Bubble", "Minimalist", "Custom" }.Select(t => new ParameterOption { Value = t, LabelKey = "theme." + t }).ToArray() });
         fields.Add(new() { Key = "profileId", LabelKey = "settings.profileId", Type = ParameterFieldType.Text, DefaultValue = defaults.ActiveCustomSoundProfileId, MaxLength = 128 });
+        foreach (var setting in SoundStore.WavSettings)
+            fields.Add(new() { Key = setting.Key, LabelKey = "settings." + setting.Key, Type = ParameterFieldType.File,
+                DefaultValue = "", ValidationRegex = SoundStore.WavPathPattern, MaxLength = 2048 });
         return fields;
     }
 

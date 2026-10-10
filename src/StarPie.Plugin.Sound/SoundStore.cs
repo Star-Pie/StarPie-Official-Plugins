@@ -28,7 +28,15 @@ internal sealed class SoundStore
         ("onHover", "SoundOnHover", true), ("onExpand", "SoundOnExpand", true),
         ("onExecute", "SoundOnExecute", true), ("onCancel", "SoundOnCancel", true)
     };
-    internal static IEnumerable<string> SettingKeys => Switches.Select(s => s.Key).Concat(new[] { "volume", "theme", "profileId" });
+    internal const string WavPathPattern = @"(?i)\A\s*(?:|[a-z]:[\\/][^\x00\r\n]*\.wav|\\\\[^\\/\x00\r\n]+[\\/][^\\/\x00\r\n]+[\\/][^\x00\r\n]*\.wav)\s*\z";
+    internal static readonly (string Key, SoundType Event)[] WavSettings =
+    {
+        ("popupWav", SoundType.WheelPopup), ("hoverWav", SoundType.SectorHover),
+        ("expandWav", SoundType.SubmenuExpand), ("executeWav", SoundType.ActionExecute),
+        ("cancelWav", SoundType.GestureCancel)
+    };
+    internal static IEnumerable<string> SettingKeys => Switches.Select(s => s.Key)
+        .Concat(new[] { "volume", "theme", "profileId" }).Concat(WavSettings.Select(s => s.Key));
     private readonly object _gate = new();
     private readonly IPluginSettings _settings;
     private readonly string _path;
@@ -86,7 +94,29 @@ internal sealed class SoundStore
             result.SoundTheme = _settings.Get("theme") ?? result.SoundTheme;
             result.ActiveCustomSoundProfileId = _settings.Get("profileId") ?? result.ActiveCustomSoundProfileId;
             Normalize(result, strict: false);
+            ApplyWavOverrides(result);
             return result;
+        }
+    }
+
+    private void ApplyWavOverrides(SoundPreferences preferences)
+    {
+        if (preferences.SoundTheme != "Custom") return;
+        var profile = preferences.CustomSoundProfiles.First(p => p.Id == preferences.ActiveCustomSoundProfileId);
+        foreach (var setting in WavSettings)
+        {
+            string? file = _settings.Get(setting.Key)?.Trim();
+            if (string.IsNullOrWhiteSpace(file) || !Path.IsPathFullyQualified(file) ||
+                !System.Text.RegularExpressions.Regex.IsMatch(file, WavPathPattern, System.Text.RegularExpressions.RegexOptions.CultureInvariant)) continue;
+            var entry = profile.Events.FirstOrDefault(e => e.EventType == setting.Event);
+            if (entry == null)
+            {
+                entry = new SoundEventConfig { EventType = setting.Event };
+                profile.Events.Add(entry);
+            }
+            // preferences 是深拷贝；文件覆盖不能改写所选方案，清空字段即可恢复。
+            entry.SourceType = SoundSourceType.CustomFile;
+            entry.CustomFilePath = file;
         }
     }
 

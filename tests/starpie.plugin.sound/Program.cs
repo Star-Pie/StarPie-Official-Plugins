@@ -269,12 +269,20 @@ internal static class Program
     {
         Reset(); var settings = new Settings(); var registry = new Registry(); string folder = Case("plugin");
         var plugin = new SoundPlugin(); plugin.Initialize(Context(settings, registry, folder));
-        Check(registry.Actions.Count == 3 && registry.Interactions.Count == 1 && registry.Page?.Fields.Count == 9, "SDK entry registers three actions, one observer and generic settings");
+        Check(registry.Actions.Count == 0 && registry.Interactions.Count == 1 && registry.Page?.Fields.Count == 14, "SDK entry registers no sector actions, one observer and fourteen generic settings");
         Check(!SoundEffectManager.IsRunning, "Initialize does not start playback thread or emit audio");
-        Check(settings.SubscriptionCount == 9, "settings subscriptions cover explicit keys only");
+        Check(settings.SubscriptionCount == 14, "settings subscriptions include all five WAV overrides");
         var textKeys = registry.Page!.Fields.Select(f => f.LabelKey!).Concat(registry.Actions.Select(a => a.Descriptor.DisplayNameKey!));
         foreach (string language in new[] { "zh-CN", "zh-TW", "en", "ja" }) Check(textKeys.All(k => registry.Languages[language].ContainsKey(k)), "settings/action words localized: " + language);
-        foreach (var action in registry.Actions) Check(action.Descriptor.Kind == ActionKind.Background && action.Validate(new Dictionary<string, string>()) != null, "action has background kind and rejects empty parameters: " + action.Descriptor.Id);
+        Check(registry.Page.Fields.Count(f => f.Type == ParameterFieldType.File && f.DefaultValue == "" && !f.Required) == 5, "five optional file pickers default to inheriting profile sounds");
+        Check(registry.Page.Fields.Select(f => f.Key).Distinct(StringComparer.Ordinal).Count() == 14, "declared setting keys are unique");
+        foreach (var field in registry.Page.Fields.Where(f => f.Type == ParameterFieldType.File))
+        {
+            var regex = new System.Text.RegularExpressions.Regex(field.ValidationRegex!, System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+            Check(!regex.IsMatch("sample.wav") && !regex.IsMatch(@"C:sample.wav") && !regex.IsMatch(@"\sample.wav"), "file field rejects relative and drive-relative paths: " + field.Key);
+            Check(regex.IsMatch(@"C:\音效\sample.WAV") && regex.IsMatch(@"\\server\share\sample.wav") && regex.IsMatch(""), "file field accepts absolute drive/UNC WAV or empty inheritance: " + field.Key);
+        }
+        Check(registry.Actions.All(a => a.Descriptor.Id is not ("preview" or "importProfiles" or "exportProfiles")), "configuration operations are absent from sector action catalog");
         var observer = registry.Interactions.Single();
         await observer.OnInteractionAsync(new(InteractionEventKind.Presented, 500, 1, InteractionSource.NormalGesture, "Global", InteractionTarget.Core), default);
         await observer.OnInteractionAsync(new(InteractionEventKind.SelectionChanged, 500, 2, InteractionSource.NormalGesture, "Global", new(InteractionTargetKind.SubSector, 2, 0)), default);
@@ -288,11 +296,91 @@ internal static class Program
         Reset();
         var denied = new SoundPlugin(); Throws(() => denied.Initialize(Context(new Settings(), new Registry(), Case("denied"), files: false)), "missing file capability is denied before IO/registration"); denied.Shutdown(); Reset();
     }
+    private static void TestWavOverrides()
+    {
+        string folder = Case("wav-overrides"), data = Path.Combine(folder, "data"); Directory.CreateDirectory(data);
+        string document = Path.Combine(data, "sound.json");
+        var profile = new CustomSoundProfile { Id = "kept", Name = "Kept", Events = new() { new() { EventType = SoundType.WheelPopup, SourceType = SoundSourceType.Mute }, new() { EventType = SoundType.ActionExecute, RelativeVolume = 0.35 } } };
+        var original = new SoundDocument { Preferences = new() { SoundTheme = "Custom", ActiveCustomSoundProfileId = "kept", CustomSoundProfiles = new() { profile } } };
+        string originalJson = JsonSerializer.Serialize(original, SoundStore.JsonOptions); File.WriteAllText(document, originalJson);
+        var settings = new Settings(); var store = new SoundStore(settings, data, Path.Combine(folder, "missing.json"));
+        string wav = Path.Combine(folder, "sample.wav");
+        File.WriteAllBytes(wav, SoundEffectManager.SynthesizeCustomEventSound(new() { WavePreset = "Sine1200", RelativeVolume = 1 }, 1));
+        var mappings = new[] { ("popupWav", SoundType.WheelPopup), ("hoverWav", SoundType.SectorHover), ("expandWav", SoundType.SubmenuExpand), ("executeWav", SoundType.ActionExecute), ("cancelWav", SoundType.GestureCancel) };
+        foreach (var (key, type) in mappings)
+        {
+            settings.Set(key, wav);
+            var current = store.ReadPreferences(); var selected = current.CustomSoundProfiles.Single(p => p.Id == "kept");
+            var entry = selected.Events.FirstOrDefault(e => e.EventType == type);
+            Check(entry?.SourceType == SoundSourceType.CustomFile && entry.CustomFilePath == wav, "WAV setting maps to correct event: " + key);
+            Check(selected.Events.Select(e => e.EventType).Distinct().Count() == selected.Events.Count, "overlay does not duplicate event: " + key);
+            settings.Set(key, "");
+            var cleared = store.ReadPreferences().CustomSoundProfiles.Single().Events;
+            Check(cleared.Count == profile.Events.Count && cleared.All(e => e.SourceType != SoundSourceType.CustomFile), "clearing WAV setting restores unmodified profile: " + key);
+        }
+        settings.Set("executeWav", wav); var volume = store.ReadPreferences().CustomSoundProfiles.Single().Events.Single(e => e.EventType == SoundType.ActionExecute);
+        Check(volume.RelativeVolume == 0.35, "file overlay preserves existing event relative volume");
+        settings.Set("theme", "Mechanical");
+        Check(store.ReadPreferences().CustomSoundProfiles.Single().Events.All(e => e.SourceType != SoundSourceType.CustomFile), "built-in theme ignores custom file overlays without clearing saved paths");
+        settings.Set("theme", "Custom"); settings.Set("onExecute", "false"); settings.Set("enabled", "false");
+        var disabled = store.ReadPreferences(); Check(!disabled.EnableSoundEffects && !disabled.SoundOnExecute, "WAV paths do not override master or event disable switches");
+        settings.Set("executeWav", "not-absolute.wav");
+        Check(store.ReadPreferences().CustomSoundProfiles.Single().Events.All(e => e.SourceType != SoundSourceType.CustomFile), "relative manually entered WAV path does not become process-relative IO");
+        settings.Set("executeWav", Path.Combine(folder, "not-a-wave.mp3"));
+        Check(store.ReadPreferences().CustomSoundProfiles.Single().Events.All(e => e.SourceType != SoundSourceType.CustomFile), "non-WAV setting cannot replace profile audio");
+        settings.Set("executeWav", null);
+        Check(store.ReadPreferences().CustomSoundProfiles.Single().Events.All(e => e.SourceType != SoundSourceType.CustomFile), "deleting a WAV setting key restores the original profile like host field clearing");
+        settings.Set("executeWav", wav); settings.Save();
+        var reloaded = new SoundStore(settings, data, Path.Combine(folder, "missing.json"));
+        Check(reloaded.ReadPreferences().CustomSoundProfiles.Single().Events.Single(e => e.EventType == SoundType.ActionExecute).CustomFilePath == wav, "stored file setting survives plugin store reload");
+        Check(File.ReadAllText(document) == originalJson && profile.Events.All(e => e.SourceType != SoundSourceType.CustomFile), "overlay never rewrites private profile document or original model");
+    }
+    private static void TestWavReadLimit()
+    {
+        string folder = Case("wav-size-limit"), file = Path.Combine(folder, "large.wav");
+        const int limit = 1024 * 1024;
+        byte[] wave = new byte[limit + 2];
+        using (var memory = new MemoryStream(wave, writable: true))
+        using (var writer = new BinaryWriter(memory))
+        {
+            writer.Write(System.Text.Encoding.ASCII.GetBytes("RIFF")); writer.Write(wave.Length - 8); writer.Write(System.Text.Encoding.ASCII.GetBytes("WAVEfmt "));
+            writer.Write(16); writer.Write((short)1); writer.Write((short)1); writer.Write(44100); writer.Write(88200); writer.Write((short)2); writer.Write((short)16);
+            writer.Write(System.Text.Encoding.ASCII.GetBytes("data")); writer.Write(wave.Length - 44);
+        }
+        File.WriteAllBytes(file, wave); SoundEffectManager.LastWavFallbackReason = null;
+        byte[] fallback = SoundEffectManager.TryLoadCustomWavFile(file, 0.6);
+        Check(fallback.Length < limit && SoundEffectManager.LastWavFallbackReason?.Contains("1048576", StringComparison.Ordinal) == true, "oversized valid PCM WAV falls back before whole-file allocation");
+        Array.Resize(ref wave, limit); BitConverter.GetBytes(limit - 8).CopyTo(wave, 4); BitConverter.GetBytes(limit - 44).CopyTo(wave, 40); File.WriteAllBytes(file, wave);
+        SoundEffectManager.LastWavFallbackReason = null;
+        Check(SoundEffectManager.TryLoadCustomWavFile(file, 0.6).Length == limit && SoundEffectManager.LastWavFallbackReason == null, "WAV exactly at size boundary is accepted");
+    }
+    private static async Task TestWavSettingsRefresh()
+    {
+        Reset(); var settings = new Settings(); var registry = new Registry(); string folder = Case("wav-refresh");
+        settings.Set("theme", "Custom"); var plugin = new SoundPlugin(); plugin.Initialize(Context(settings, registry, folder));
+        using var played = new ManualResetEventSlim(); byte[]? actual = null;
+        SoundEffectManager.PlaybackSink = (bytes, _) => { actual = bytes.ToArray(); played.Set(); };
+        string wav = Path.Combine(folder, "confirm.wav"); File.WriteAllBytes(wav, SoundEffectManager.SynthesizeCustomEventSound(new() { WavePreset = "Sine1200", RelativeVolume = 1 }, 1));
+        try
+        {
+            settings.Set("executeWav", wav); settings.Save();
+            var observer = registry.Interactions.Single();
+            await observer.OnInteractionAsync(new(InteractionEventKind.ActionCommitted, 801, 1, InteractionSource.NormalGesture, "Global", InteractionTarget.Core), default);
+            Check(played.Wait(3000) && actual != null && SoundEffectManager.Preferences.CustomSoundProfiles.Single(p => p.Id == SoundEffectManager.Preferences.ActiveCustomSoundProfileId).Events.Single(e => e.EventType == SoundType.ActionExecute).CustomFilePath == wav, "settings save applies WAV override through production observer and mock backend");
+            var selectedEvent = SoundEffectManager.Preferences.CustomSoundProfiles.Single(p => p.Id == SoundEffectManager.Preferences.ActiveCustomSoundProfileId).Events.Single(e => e.EventType == SoundType.ActionExecute);
+            byte[] expected = SoundEffectManager.SynthesizeCustomEventSound(selectedEvent, SoundEffectManager.Preferences.SoundVolume);
+            Check(actual != null && actual.SequenceEqual(expected), "production playback reaches scaled custom WAV bytes rather than previous cached tone");
+            played.Reset(); actual = null; settings.Set("executeWav", ""); settings.Save();
+            await observer.OnInteractionAsync(new(InteractionEventKind.ActionCommitted, 802, 1, InteractionSource.NormalGesture, "Global", InteractionTarget.Core), default);
+            Check(played.Wait(3000) && SoundEffectManager.Preferences.CustomSoundProfiles.Single(p => p.Id == SoundEffectManager.Preferences.ActiveCustomSoundProfileId).Events.Single(e => e.EventType == SoundType.ActionExecute).SourceType == SoundSourceType.ProceduralWave, "clearing path invalidates cache and restores active profile source");
+        }
+        finally { plugin.Shutdown(); Reset(); }
+    }
     private static async Task<int> Main()
     {
         Directory.CreateDirectory(Root); Environment.SetEnvironmentVariable("LOCALAPPDATA", Root); SoundEffectManager.TestMode = true;
         Console.WriteLine("No GUI, native audio, input, processes or real plugin actions; test root: " + Root);
-        try { TestMigration(); TestProfiles(); TestImportCommitSafety(); TestPrivateExtensions(); TestSilentClaim(false); TestSilentClaim(true); TestSilentInterleaving(); await TestPreviewCompletion(); await TestPlugin(); await TestShutdownDrain(); }
+        try { TestMigration(); TestProfiles(); TestImportCommitSafety(); TestWavOverrides(); TestWavReadLimit(); TestPrivateExtensions(); TestSilentClaim(false); TestSilentClaim(true); TestSilentInterleaving(); await TestPreviewCompletion(); await TestPlugin(); await TestShutdownDrain(); await TestWavSettingsRefresh(); }
         catch (Exception ex) { Check(false, ex.ToString()); }
         finally { Reset(); }
         Console.WriteLine($"Sound module: {_passed} passed, {_failed} failed."); return _failed == 0 ? 0 : 1;

@@ -138,10 +138,14 @@ release-metadata/            仅用于 CI 元数据，不提交 Git
 
 ## 轮盘音效候选 `starpie.plugin.sound`
 
-- 源码：`src/StarPie.Plugin.Sound`，版本1.0.0，SDK1.10，最低宿主1.8.0-beta.7。只引用SDK/BCL，输出不得携带SDK DLL。
-- 用户须单独安装、启用并选择宿主预加载；不安装/禁用时宿主不提供音效兜底。插件不订阅旧Opening/Closed，不重复播放。
-- 通用设置：启用、音量、五个事件开关、主题与自定义方案ID/名称。细节通过可读JSON方案编辑：SourceType、WavePreset、BuiltInTheme、CustomFilePath（WAV）、PitchSemitones、DurationMs、RelativeVolume。
-- 三个后台动作：preview（event可选Flow）、importProfiles（path/activate/replace）、exportProfiles（path/profileId/bundle/overwrite）。路径需完整；默认不覆盖已有文件，不能替换主配置或插件私有配置。
-- 声明FileSystem：只读旧config.json与用户选定采样/方案，写插件私有sound.json和用户明确选定的导出文件。旧数据幂等迁移，未写原配置，私有文档/设置/方案/事件各层未知字段保留；同批重复方案ID拒绝，提交锁等待期间取消不会落盘；数据文件限8MiB，不把巨型方案JSON塞入SDK字符串设置。
-- 先校验并防护Custom自引用；静音是已消费结果、不更新真实播放时刻。单工作线程/单槽及45ms稳定、80ms间隔、稳定后150ms过期规则保留。宿主后台停用时在插件锁外最多等待5秒排空工作线程，超时明确失败并交由宿主判定是否需重启，不原生中断同步播放。试听等待真实后端完成，不把受理当成功。
-- 本地安全验证：`dotnet run --project tests/starpie.plugin.sound/Sound.Tests.csproj -c Release`；Mock音频，不创建UI/钩子，不执行真实插件动作。主仓库292项取证护栏已接到该生产模块和语义事件路径。打包/发布仍需单独授权与实机验收。
+- 源码：`src/StarPie.Plugin.Sound`，候选版本1.0.0，SDK1.10，最低宿主1.8.0-beta.7。只引用SDK/BCL，输出不得携带SDK DLL。本轮不修改宿主或SDK，不打包/发布。
+- 用户须单独安装、启用并选择宿主预加载；不安装/禁用时宿主不提供音效兜底。Initialize及打开设置不发声，不订阅旧Opening/Closed。
+- 在插件卡片点击「设置」：保留启用、音量、五个事件开关、主题和自定义方案ID/名称；新增呈现、选择变化、展开、确认、取消五个WAV文件选择字段，宿主按现有File字段渲染「浏览」控件。
+- 先将主题选为「自定义」，再选择16-bit PCM WAV（单声道或双声道）。使用文件选择器或完整绝对路径（含UNC）；相对路径会显示校验错误。每个WAV最多1MiB，超过限制回退并记录诊断，避免五事件缓存突破后台内存目标；音频可以放任意稳定位置，不会自动复制或扫描。移动/删除文件会触发既有合成回退，设置页不是音频格式检测器。
+- 每个文件字段留空时沿用所选方案；清空后恢复该方案的原始配置。覆盖只作用于运行时深拷贝，不改写原方案、旧配置或私有sound.json；沿用事件相对音量，总音量及事件关闭仍生效。非自定义主题忽略这些覆盖但保留路径。
+- 移除公开动作 `preview` / `importProfiles` / `exportProfiles`：配置操作不属于扇区动作，该插件尚未发布，按用户要求继续保持1.0.0。原扇区若曾绑定这三项，将变为不可用；本轮不自动改写用户动作配置，请手动移除这些旧绑定。
+- 本轮只提供直接WAV自定义；导入/导出方案和独立试听按钮暂不提供，不能通过复选框或路径变化偷偷执行设置操作。已有方案、旧迁移数据及内部方案处理/试听行为保留，不删除用户资产；原方案ID/名称选择方式保持兼容。
+- 声明FileSystem：旧config.json只读迁移；WAV只在插件音频缓存刷新时读取，设置变更只增加revision。迁移幂等，显式false及文档/Preferences/方案/事件四层未知字段保留；数据文件限8MiB，不把大型JSON塞入SDK字符串设置。
+- 保留静音消费、Custom自引用防护、单槽/单工作线程及既有时限。宿主后台停用时在锁外最多等待5秒排空，超时明确失败，不原生中断同步播放。
+- 安全验证：`dotnet run --project tests/starpie.plugin.sound/Sound.Tests.csproj -c Release`；Mock音频，不创建UI/钩子、不执行真实插件动作。新增字段、继承/覆盖/清空/重载/主题/禁用及实际Mock播放行为均有回归；原方案IO/取消/ALC相关验证保留。
+- 人工验收：重新安装候选插件后，确认设置页出现五个浏览字段；自定义主题下各事件播放所选WAV，清空恢复原音色；开关及音量正常，手势动作列表不再出现三项设置操作。真实文件选择器、设备和声音仍须用户验收，自动测试不能替代。
