@@ -61,6 +61,17 @@ $changed=& (Join-Path $root 'build\Get-VersionChanges.ps1') -PreviousCatalogPath
 Assert-Condition (-not ($changed | ConvertFrom-Json).hasModules -and ($changed | ConvertFrom-Json).changed.Count -eq 0) 'v2 version change detection fails'
 & (Join-Path $root 'build\New-ReleaseNotes.ps1') -CatalogPath $args.OutputPath -ChangedModuleIds @($launch.id) -ReleaseTag test-catalog-v2 -ReleaseChannel beta -RepositoryUrl 'https://github.com/Star-Pie/StarPie-Official-Plugins' -OutputPath (Join-Path $OutputRoot 'notes.md')
 Assert-Condition ((Get-Content -LiteralPath (Join-Path $OutputRoot 'notes.md') -Raw).Contains('1.1.0')) 'release notes omit latest version'
+# Stable promotion keeps every immutable beta version, including old compatibility records.
+$args.PreviousCatalogPath=$args.OutputPath;$args.OutputPath=Join-Path $OutputRoot 'promoted.json';$args.ReleaseChannel='stable'
+& (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @args | Out-Null
+& (Join-Path $root 'build\Verify-Catalog.ps1') -CatalogPath $args.OutputPath
+$promoted=Read-JsonFile $args.OutputPath
+Assert-Condition ($promoted.releaseChannel -eq 'stable') 'stable promotion kept the beta output channel'
+foreach($group in $second.modules){
+    $retained=@($promoted.modules | Where-Object id -CEQ $group.id)
+    Assert-Condition ($retained.Count -eq 1 -and ($group.versions | ConvertTo-Json -Depth 100 -Compress) -ceq ($retained[0].versions | ConvertTo-Json -Depth 100 -Compress)) "stable promotion changed history for $($group.id)"
+}
+$args.ReleaseChannel='beta'
 # 移行 v1 输入，但 v2 输出绝不保留默认包。
 $v1=$first | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
 $v1.schemaVersion=1

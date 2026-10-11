@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "id": "io.github.softblack42.desktoppet",
+  "id": "starpie.plugin.desktoppet",
   "name": "桌宠",
-  "description": "屏幕上的桌宠原型，轻点呼出轮盘，支持拖动与自定义素材。",
+  "description": "屏幕上的桌宠，轻点呼出轮盘，支持拖动与自定义素材。",
   "author": "SoftBlack42",
-  "homepage": "https://github.com/SoftBlack42/StarPie",
+  "homepage": "https://github.com/Star-Pie/StarPie-Official-Plugins",
   "license": "MIT",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "apiVersion": "1.11",
   "minHostVersion": "1.8.0-beta.7",
   "targetFramework": "net8.0-windows",
@@ -18,7 +18,7 @@
     "Wheel"
   ],
   "release": {
-    "enabled": false
+    "enabled": true
   },
   "claimedTypes": [],
   "contributions": {
@@ -32,5 +32,19 @@
     "桌宠",
     "桌面伙伴",
     "轮盘入口"
+  ],
+  "features": [
+    {
+      "id": "togglePet",
+      "name": "桌宠",
+      "description": "显示或隐藏桌宠，点击呼出宿主轮盘。",
+      "category": "交互形态"
+    },
+    {
+      "id": "managePet",
+      "name": "管理桌宠",
+      "description": "导入、切换、排序及软删除用户自己的形象素材。",
+      "category": "交互形态"
+    }
   ]
 }

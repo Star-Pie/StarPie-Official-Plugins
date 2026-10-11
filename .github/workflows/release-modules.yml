@@ -11,6 +11,15 @@ on:
         options:
           - stable
           - beta
+      catalog_base_channel:
+        description: 'Catalog history source; use beta when promoting tested modules to stable'
+        required: true
+        default: same
+        type: choice
+        options:
+          - same
+          - stable
+          - beta
       module_ids:
         description: 'Optional comma-separated module IDs to consider; empty means all version changes'
         required: false
@@ -61,15 +70,18 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          CATALOG_BASE_CHANNEL: ${{ inputs.catalog_base_channel }}
         run: |
+          $baseChannel = $env:CATALOG_BASE_CHANNEL
+          if (-not $baseChannel -or $baseChannel -eq 'same') { $baseChannel = '${{ inputs.release_channel }}' }
           $catalogPath = [string](& ./build/Get-PreviousCatalog.ps1 `
-            -Channel '${{ inputs.release_channel }}' `
+            -Channel $baseChannel `
             -Repository '${{ github.repository }}')
           $catalogPath = $catalogPath.Trim()
 
           "catalog_path=$catalogPath" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
           if ($catalogPath) {
-            Write-Host "Using previous catalog for channel '${{ inputs.release_channel }}': $catalogPath"
+            Write-Host "Using previous catalog from '$baseChannel' for '${{ inputs.release_channel }}': $catalogPath"
           }
           else {
             Write-Host "No previous catalog found for channel '${{ inputs.release_channel }}'; all registered modules are eligible."
@@ -267,6 +279,9 @@ jobs:
             -ReleaseChannel '${{ inputs.release_channel }}' `
             -RepositoryUrl '${{ github.server_url }}/${{ github.repository }}' `
             -OutputPath 'release-metadata/release-notes.md'
+          if ($ids -contains 'starpie.plugin.desktoppet') {
+            Add-Content -LiteralPath 'release-metadata/release-notes.md' -Value ("`n" + (Get-Content -LiteralPath 'docs/desktop-pet-release.md' -Raw)) -Encoding utf8
+          }
 
       - name: Install cosign
         if: ${{ !inputs.dry_run && vars.SIGNING_ENABLED == 'true' }}
@@ -312,10 +327,13 @@ jobs:
         run: |
           $assets = @(Get-ChildItem -LiteralPath 'artifacts/packages' -Filter '*.spkg' -File | ForEach-Object FullName)
           if ($assets.Count -eq 0) { throw 'No module packages were produced.' }
+          $existingTag = @(git ls-remote origin 'refs/tags/${{ needs.select.outputs.release_tag }}')
+          if ($LASTEXITCODE -ne 0 -or $existingTag.Count -ne 0) { throw 'Release tag lookup failed or tag already exists; do not overwrite history.' }
 
           $releaseArgs = @(
             'release', 'create', '${{ needs.select.outputs.release_tag }}',
             '--repo', '${{ github.repository }}',
+            '--target', '${{ github.sha }}',
             '--title', "Official modules ${{ needs.select.outputs.release_tag }}",
             '--notes-file', 'release-metadata/release-notes.md',
             '--draft'

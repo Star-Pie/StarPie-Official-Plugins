@@ -1669,7 +1669,7 @@ public static class Program
 internal sealed class MockPluginContext : IPluginContext
 {
     private readonly string? _customDataDir;
-    public PluginMetadata Me { get; } = new() { Id = "io.github.softblack42.desktoppet" };
+    public PluginMetadata Me { get; } = new() { Id = "starpie.plugin.desktoppet" };
     public string PluginDirectory => AppContext.BaseDirectory;
     public string DataDirectory => _customDataDir ?? AppContext.BaseDirectory;
     public IPluginLogger Log { get; } = new MockPluginLogger();
