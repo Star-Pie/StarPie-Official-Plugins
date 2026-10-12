@@ -53,6 +53,7 @@ StarPie 运行时实际加载的仍然是 DLL 程序集。`.spkg` 只是分发�
 | 插件 | 插件 ID | 动作类型 | 基本功能 |
 |---|---|---|---|
 | 按键映射 | `starpie.plugin.keypadlayer` | `Plugin`（`keypadLayer`） | 通过轮盘开启或关闭自定义按键映射，将物理按键映射为目标按键；支持可视化配置，并在切换应用或长按 Esc 时安全释放。默认提供左手数字小键盘预设。 |
+| 按键宏与多步骤脚本 | `starpie.plugin.macro` | `Plugin`（`macro`） | 按顺序执行多步组合键、单键、逐字文本输入、剪贴板粘贴/复制与延时等待；提供可视化步骤编排器、实时录制、多行文本配置及 DSL 脚本双向同步。 |
 | 悬浮球 | `starpie.plugin.floatingball` | `Plugin`（`showBall`） | 显示可拖动悬浮球，点击呼出用户配置的轮盘。 |
 
 ### 行业与绘图工具

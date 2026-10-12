@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <PlatformTarget>x64</PlatformTarget>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>StarPie.Plugin.Macro.Tests</AssemblyName>
+    <RootNamespace>StarPie.Plugin.Macro.Tests</RootNamespace>
+    <IsPluginRegressionTest>true</IsPluginRegressionTest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\sdk\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\StarPie.Plugin.Macro\StarPie.Plugin.Macro.csproj" />
+  </ItemGroup>
+
+</Project>

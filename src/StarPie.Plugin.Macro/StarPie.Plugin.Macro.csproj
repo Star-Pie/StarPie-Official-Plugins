@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    StarPie 官方在线插件：按键宏与多步骤脚本 (StarPie.Plugin.Macro)
+    ========================================================================
+    面向无单一快捷键、需要按顺序执行多步菜单导航或连续按键的桌面应用场景：
+      - 轻量 DSL 脚本：支持 HOTKEY / KEY / TEXT / PASTE / CLIPBOARD / WAIT 指令；
+      - 轮盘焦点归还保护：支持可调前置延时 (preDelayMs) 与步间默认间隔 (stepDelayMs)；
+      - 宿主输入通道复用：通过 IHostActionInvoker 下发组合键与 Unicode 文本，零钩子死循环风险；
+      - 严格串行与取消响应：运行于 Sequential 动作队列，全程绑定 CancellationToken。
+
+    遵循官方模块规范：
+      1. 继承 Directory.Build.props 统一编译参数；
+      2. 引用 StarPie.Plugin.Abstractions，设置 Private=false；
+      3. 严禁携带主程序 StarPie.dll 或 Abstractions 产物。
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12.0</LangVersion>
+
+    <AssemblyName>StarPie.Plugin.Macro</AssemblyName>
+    <RootNamespace>StarPie.Plugin.Macro</RootNamespace>
+
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Product>StarPie 按键宏与多步骤脚本</Product>
+    <Company>StarPie Studio</Company>
+    <Description>StarPie 官方插件：按顺序执行多步组合键、单键、文本输入、剪贴板与延时等待，解决无单一快捷键的多步操作。</Description>
+
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Private=false：不把 SDK 程序集复制到输出目录。产物里必须只有这一枚 dll。 -->
+    <ProjectReference Include="..\..\sdk\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="StarPie.Plugin.Macro.Tests" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <MacroPluginId Condition="'$(MacroPluginId)' == ''">starpie.plugin.macro</MacroPluginId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="StarPiePluginId" Value="$(MacroPluginId)" />
+    <AssemblyMetadata Include="StarPiePluginName" Value="按键宏与多步骤脚本" />
+    <AssemblyMetadata Include="StarPiePluginCapabilities" Value="InputSimulation;Clipboard" />
+    <AssemblyMetadata Include="StarPiePluginLicense" Value="MIT" />
+    <AssemblyMetadata Include="StarPiePluginHomepage" Value="https://github.com/Star-Pie/StarPie" />
+    <AssemblyMetadata Include="StarPiePluginApiVersion" Value="1.4" />
+    <AssemblyMetadata Include="StarPiePluginMinHostVersion" Value="1.8.0-beta.1" />
+  </ItemGroup>
+
+</Project>
