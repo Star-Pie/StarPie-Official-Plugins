@@ -43,10 +43,16 @@ $first = Read-JsonFile $catalogPath
 Assert-Condition ($first.schemaVersion -eq 2 -and $first.modules.Count -eq $modules.Count) 'catalog v2 module count incorrect'
 foreach ($group in $first.modules) { Assert-Condition ($null -eq $group.PSObject.Properties['version'] -and $group.versions.Count -eq 1) 'legacy top-level default exists' }
 $launch = @($first.modules | Where-Object id -EQ 'starpie.builtin.launch')[0]
+$currentLaunchVersion = [string](@($modules | Where-Object id -EQ $launch.id)[0].version)
+Assert-Condition ((Compare-CatalogVersions $currentLaunchVersion '1.0.1') -gt 0) 'fixture historical version must precede the current module version'
 $old = $launch.versions[0] | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
 $old.version='1.0.1';$old.apiVersion='1.4';$old.minHostVersion='1.8.0-beta.1';$old.releaseTag='old-test';$old.assetName='StarPie.Plugin.Launch-1.0.1.spkg';$old.packageUrl='https://github.com/Star-Pie/StarPie-Official-Plugins/releases/download/old-test/StarPie.Plugin.Launch-1.0.1.spkg';$old.sha256=('b'*64);$old.size=1024
 $launch.versions += $old
-$previousPath=Join-Path $OutputRoot 'previous.json'; Write-JsonFile $first $previousPath
+# Feed unsorted history to the publisher; keep $first canonical for the later v1 fixture.
+$previousCatalog = $first | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
+$previousLaunch = @($previousCatalog.modules | Where-Object id -EQ $launch.id)[0]
+$previousLaunch.versions = @($previousLaunch.versions[1], $previousLaunch.versions[0])
+$previousPath=Join-Path $OutputRoot 'previous.json'; Write-JsonFile $previousCatalog $previousPath
 $emptyPath=Join-Path $OutputRoot 'empty-packages.json';[IO.File]::WriteAllText($emptyPath,'[]')
 $args.PackagesJson=$emptyPath;$args.PreviousCatalogPath=$previousPath;$args.OutputPath=Join-Path $OutputRoot 'second.json'
 & (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @args | Out-Null
@@ -56,11 +62,12 @@ $history=@($second.modules | Where-Object id -EQ $launch.id)[0].versions
 Assert-Condition ($history.Count -eq 2) 'historical version lost'
 Assert-Condition ((@($history | Where-Object version -EQ '1.0.1')[0]).minHostVersion -eq '1.8.0-beta.1') 'old requirements overwritten by current source'
 Assert-Condition ((@($history | Where-Object version -EQ '1.0.1')[0]).sha256 -eq ('b'*64)) 'historical hash changed'
-Assert-Condition ($history[0].version -eq '1.1.0') 'history not sorted'
+Assert-Condition (($history.version -join '|') -ceq (@($currentLaunchVersion, '1.0.1') -join '|')) 'history not sorted descending or versions changed'
 $changed=& (Join-Path $root 'build\Get-VersionChanges.ps1') -PreviousCatalogPath $args.OutputPath
 Assert-Condition (-not ($changed | ConvertFrom-Json).hasModules -and ($changed | ConvertFrom-Json).changed.Count -eq 0) 'v2 version change detection fails'
 & (Join-Path $root 'build\New-ReleaseNotes.ps1') -CatalogPath $args.OutputPath -ChangedModuleIds @($launch.id) -ReleaseTag test-catalog-v2 -ReleaseChannel beta -RepositoryUrl 'https://github.com/Star-Pie/StarPie-Official-Plugins' -OutputPath (Join-Path $OutputRoot 'notes.md')
-Assert-Condition ((Get-Content -LiteralPath (Join-Path $OutputRoot 'notes.md') -Raw).Contains('1.1.0')) 'release notes omit latest version'
+$expectedLaunchRow = "| $($launch.versions[0].name) | $currentLaunchVersion | Updated in this release |"
+Assert-Condition ((Get-Content -LiteralPath (Join-Path $OutputRoot 'notes.md')) -ccontains $expectedLaunchRow) 'release notes omit the latest launch module version'
 # Stable promotion keeps every immutable beta version, including old compatibility records.
 $args.PreviousCatalogPath=$args.OutputPath;$args.OutputPath=Join-Path $OutputRoot 'promoted.json';$args.ReleaseChannel='stable'
 & (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @args | Out-Null
