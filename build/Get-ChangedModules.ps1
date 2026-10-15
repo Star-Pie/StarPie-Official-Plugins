@@ -100,7 +100,11 @@ try {
         "has_modules=$($result.hasModules.ToString().ToLowerInvariant())" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
         "force_all=$($result.forceAll.ToString().ToLowerInvariant())" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
         "reason=$($result.reason)" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
-        "matrix=$($matrixModules | ConvertTo-Json -Compress -Depth 100)" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
+        $matrixJson = $matrixModules | ConvertTo-Json -Compress -Depth 100
+        if ($matrixJson -and -not $matrixJson.Trim().StartsWith('[')) {
+            $matrixJson = "[$matrixJson]"
+        }
+        "matrix=$matrixJson" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
     }
 
     $result | ConvertTo-Json -Depth 100
