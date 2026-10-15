@@ -21,6 +21,10 @@ public sealed class PluginManifest
     /// <summary>一句话简介。</summary>
     public string Description { get; set; } = "";
 
+    /// <summary>Optional UI translations readable without loading the plugin; absent locales keep the original labels.</summary>
+    public Dictionary<string, string> NameTranslations { get; set; } = new();
+    public Dictionary<string, string> DescriptionTranslations { get; set; } = new();
+
     /// <summary>作者或组织。</summary>
     public string Author { get; set; } = "";
 
@@ -154,21 +158,17 @@ public sealed class PluginContributions
     }
 }
 
-/// <summary>插件详情页使用的静态功能说明。</summary>
+/// <summary>插件详情页使用的静态功能说明。保留官方 SDK 1.11 的公开契约。</summary>
 public sealed class PluginFeature
 {
     /// <summary>稳定的功能短 ID。</summary>
     public string Id { get; set; } = "";
-
     /// <summary>面向用户的功能名称。</summary>
     public string Name { get; set; } = "";
-
     /// <summary>功能说明。</summary>
     public string Description { get; set; } = "";
-
     /// <summary>功能分类。</summary>
     public string Category { get; set; } = "";
-
     /// <summary>可选图标 key。</summary>
     public string? IconKey { get; set; }
 }

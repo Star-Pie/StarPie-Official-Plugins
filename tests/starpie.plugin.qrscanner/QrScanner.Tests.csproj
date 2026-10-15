@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net8.0-windows</TargetFramework>
+    <AssemblyName>StarPie.Plugin.QrScanner.Tests</AssemblyName><IsPluginRegressionTest>true</IsPluginRegressionTest>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/StarPie.Plugin.QrScanner/StarPie.Plugin.QrScanner.csproj" />
+    <ProjectReference Include="../../sdk/StarPie.Plugin.Abstractions/StarPie.Plugin.Abstractions.csproj" />
+  </ItemGroup>
+</Project>
