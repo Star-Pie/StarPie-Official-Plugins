@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <AssemblyName>StarPie.Plugin.QrScanner</AssemblyName>
+    <Version>0.1.0</Version><AssemblyVersion>0.1.0.0</AssemblyVersion><FileVersion>0.1.0.0</FileVersion>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <StarPieSdkProject Condition="'$(StarPieSdkProject)' == ''">$(MSBuildThisFileDirectory)..\..\sdk\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj</StarPieSdkProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(StarPieSdkProject)"><Private>false</Private></ProjectReference>
+    <PackageReference Include="ZXing.Net" Version="0.16.11" />
+    <InternalsVisibleTo Include="StarPie.Plugin.QrScanner.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyMetadata Include="StarPiePluginId" Value="starpie.plugin.qrscanner" />
+    <AssemblyMetadata Include="StarPiePluginName" Value="二维码扫描" />
+    <AssemblyMetadata Include="StarPiePluginCapabilities" Value="ScreenCapture;Ui;Clipboard;Process" />
+    <AssemblyMetadata Include="StarPiePluginApiVersion" Value="1.12" />
+    <AssemblyMetadata Include="StarPiePluginMinHostVersion" Value="1.8.0-beta.7" />
+    <AssemblyMetadata Include="StarPiePluginLicense" Value="MIT" />
+    <None Update="plugin.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="THIRD-PARTY-NOTICES.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="ZXing-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

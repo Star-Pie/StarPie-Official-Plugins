@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AssemblyName>QrSdk11LegacyFixture</AssemblyName>
+    <BaseOutputPath>$(CompatibilityOutputRoot)/legacy11/</BaseOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="LegacyPlugin.cs" />
+    <ProjectReference Include="$(CompatibilitySdkProject)"><Private>false</Private></ProjectReference>
+    <AssemblyMetadata Include="StarPiePluginId" Value="user.qrcompat.legacy" />
+    <AssemblyMetadata Include="StarPiePluginName" Value="SDK 1.11 compatibility fixture" />
+    <AssemblyMetadata Include="StarPiePluginApiVersion" Value="1.11" />
+    <AssemblyMetadata Include="StarPiePluginMinHostVersion" Value="1.8.0-beta.1" />
+    <AssemblyMetadata Include="StarPiePluginLicense" Value="MIT" />
+    <None Update="LegacyPlugin.json" CopyToOutputDirectory="PreserveNewest" TargetPath="plugin.json" />
+  </ItemGroup>
+</Project>

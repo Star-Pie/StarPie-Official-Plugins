@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <IsPluginRegressionTest>true</IsPluginRegressionTest>
+    <AssemblyName>QrSdkApiSurfaceProbe</AssemblyName>
+    <BaseOutputPath>$(CompatibilityOutputRoot)/api-surface/</BaseOutputPath>
+  </PropertyGroup>
+  <ItemGroup><Compile Include="ApiSurfaceProbe.cs" /></ItemGroup>
+</Project>

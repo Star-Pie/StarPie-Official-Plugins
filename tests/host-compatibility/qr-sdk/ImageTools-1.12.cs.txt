@@ -1,0 +1,92 @@
+namespace StarPie.Plugin;
+
+/// <summary>SDK 1.12 optional context. Older IPluginContext implementations are unchanged.</summary>
+public interface IImageCapturePluginContext : IPluginContext
+{
+    IHostImageCaptureService Images { get; }
+}
+
+/// <summary>SDK 1.12 optional context for host-themed, explicitly confirmed text results.</summary>
+public interface ITextResultPluginContext : IPluginContext
+{
+    IHostTextResultService TextResults { get; }
+}
+
+/// <summary>An owned, tightly packed BGRA32 snapshot in physical pixels; never persisted by the host.</summary>
+public sealed class CapturedImage
+{
+    public const int MaxPixels = 4 * 1024 * 1024;
+    public const int MaxDimension = 4096;
+
+    public int Width { get; }
+    public int Height { get; }
+    public int ScreenX { get; }
+    public int ScreenY { get; }
+    public byte[] Bgra32 { get; }
+
+    public CapturedImage(int width, int height, int screenX, int screenY, byte[] bgra32)
+    {
+        ArgumentNullException.ThrowIfNull(bgra32);
+        if (width < 1 || height < 1 || width > MaxDimension || height > MaxDimension ||
+            (long)width * height > MaxPixels || bgra32.Length != (long)width * height * 4)
+            throw new ArgumentException("Invalid or oversized BGRA32 image.");
+        Width = width;
+        Height = height;
+        ScreenX = screenX;
+        ScreenY = screenY;
+        Bgra32 = bgra32;
+    }
+}
+
+/// <summary>Local capture only, gated by ScreenCapture. No OCR, clipboard writes or network requests.</summary>
+public interface IHostImageCaptureService
+{
+    /// <summary>User selects a region. Escape, right click or window closure returns null.</summary>
+    Task<CapturedImage?> SelectRegionAsync(CancellationToken cancellationToken);
+
+    /// <summary>Captures around the current pointer, clipped to the virtual desktop. Radius is 64–1024 physical pixels.</summary>
+    Task<CapturedImage> CaptureAroundPointerAsync(int radius, CancellationToken cancellationToken);
+}
+
+/// <summary>A text result; opening is offered only for an absolute HTTP(S) address.</summary>
+public sealed class TextResultItem
+{
+    public string Text { get; init; } = "";
+    public string Format { get; init; } = "";
+}
+
+public enum TextResultOperation { Close, Copy, Open }
+
+/// <summary>The caller performs the chosen operation after the host window has closed.</summary>
+public sealed class TextResultSelection
+{
+    public int Index { get; init; } = -1;
+    public TextResultOperation Operation { get; init; }
+}
+
+/// <summary>Gated by Ui. Presents up to 32 results, performs no copy or navigation itself.</summary>
+public interface IHostTextResultService
+{
+    Task<TextResultSelection> ShowAsync(string title, IReadOnlyList<TextResultItem> items, CancellationToken cancellationToken);
+    /// <summary>Copies text after a user choice. Gated by Clipboard; safe from background actions.</summary>
+    Task<bool> CopyAsync(string text, CancellationToken cancellationToken);
+    /// <summary>Opens a validated HTTP(S) address in the default browser. Gated by Process.</summary>
+    Task<bool> OpenWebUrlAsync(string text, CancellationToken cancellationToken);
+}
+
+/// <summary>Shared URL policy for decoded, untrusted text. Does not infer schemes or fetch addresses.</summary>
+public static class TextResultUrl
+{
+    public static bool TryGetWebUrl(string text, out string url)
+    {
+        url = "";
+        if (string.IsNullOrWhiteSpace(text) || text.Any(char.IsControl) || text.Any(char.IsWhiteSpace))
+            return false;
+        if (!Uri.TryCreate(text, UriKind.Absolute, out Uri? value) ||
+            (value.Scheme != Uri.UriSchemeHttps && value.Scheme != Uri.UriSchemeHttp) ||
+            string.IsNullOrEmpty(value.Host) || value.UserInfo.Length != 0)
+            return false;
+        url = value.AbsoluteUri;
+        return true;
+    }
+}

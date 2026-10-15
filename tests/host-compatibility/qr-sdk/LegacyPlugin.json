@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "user.qrcompat.legacy",
+  "name": "SDK 1.11 compatibility fixture",
+  "description": "A no-action fixture for old-plugin loading compatibility.",
+  "author": "Compatibility tests",
+  "license": "MIT",
+  "version": "1.0.0",
+  "apiVersion": "1.11",
+  "minHostVersion": "1.8.0-beta.1",
+  "assembly": "QrSdk11LegacyFixture.dll",
+  "entryType": "LegacyPlugin",
+  "targetFramework": "net8.0-windows",
+  "platform": "win-x64",
+  "capabilities": [],
+  "contributions": { "actions": true }
+}

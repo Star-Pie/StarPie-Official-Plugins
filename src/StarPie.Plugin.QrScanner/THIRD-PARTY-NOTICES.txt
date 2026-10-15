@@ -1,0 +1,7 @@
+StarPie QR Scanner includes ZXing.Net 0.16.11 (zxing.dll).
+Project: https://github.com/micjahn/ZXing.Net
+License: Apache License, Version 2.0. See ZXing-LICENSE.txt.
+Copyright 2012 ZXing.Net authors.
+Upstream source tag: v0.16.11.0 (fd58f3c4a5d80ccf45ef1237899a65b0ba5b83a0).
+The complete upstream COPYING file is preserved as ZXing-LICENSE.txt.
+ZXing.Net is distributed without modifications; the StarPie integration is separate MIT-licensed code.
