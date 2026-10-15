@@ -39,49 +39,13 @@
       "id": "scanRegion",
       "name": "框选扫码",
       "description": "框选屏幕区域并识别其中的二维码。",
-      "category": "效率工具",
-      "nameTranslations": {
-        "en": "Scan a selected region",
-        "ja": "範囲を選択してスキャン",
-        "zh-CN": "框选扫码",
-        "zh-TW": "框選掃碼"
-      },
-      "descriptionTranslations": {
-        "en": "Select a screen region to recognize its QR codes.",
-        "ja": "画面の範囲を選択してQRコードを認識します。",
-        "zh-CN": "框选屏幕区域并识别其中的二维码。",
-        "zh-TW": "框選螢幕範圍並辨識其中的 QR 碼。"
-      },
-      "categoryTranslations": {
-        "en": "Productivity",
-        "ja": "効率化ツール",
-        "zh-CN": "效率工具",
-        "zh-TW": "效率工具"
-      }
+      "category": "效率工具"
     },
     {
       "id": "scanPointer",
       "name": "识别鼠标附近二维码",
       "description": "扫描鼠标周围区域并预览识别结果。",
-      "category": "效率工具",
-      "nameTranslations": {
-        "en": "Scan near the pointer",
-        "ja": "マウス付近のQRコードをスキャン",
-        "zh-CN": "识别鼠标附近二维码",
-        "zh-TW": "辨識滑鼠附近 QR 碼"
-      },
-      "descriptionTranslations": {
-        "en": "Scan around the pointer and review the results.",
-        "ja": "マウス付近をスキャンして結果を確認します。",
-        "zh-CN": "扫描鼠标周围区域并预览识别结果。",
-        "zh-TW": "掃描滑鼠周圍並預覽辨識結果。"
-      },
-      "categoryTranslations": {
-        "en": "Productivity",
-        "ja": "効率化ツール",
-        "zh-CN": "效率工具",
-        "zh-TW": "效率工具"
-      }
+      "category": "效率工具"
     }
   ],
   "release": {
