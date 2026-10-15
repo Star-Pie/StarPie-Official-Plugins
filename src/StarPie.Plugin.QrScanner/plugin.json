@@ -85,7 +85,7 @@
     }
   ],
   "release": {
-    "enabled": false
+    "enabled": true
   },
   "nameTranslations": {
     "zh-CN": "二维码扫描",
