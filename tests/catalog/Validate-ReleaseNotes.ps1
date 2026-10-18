@@ -20,6 +20,11 @@ function Assert-Condition([bool]$Value, [string]$Message) {
     if (-not $Value) { throw $Message }
     $script:checks++
 }
+function Assert-Fails([scriptblock]$Call, [string]$ExpectedMessage) {
+    $failed = $false
+    try { & $Call | Out-Null } catch { $failed = $_.Exception.Message.Contains($ExpectedMessage) }
+    Assert-Condition $failed 'Invalid release-note input was accepted.'
+}
 
 # 1. Prepare Mock Catalog with special characters and known versions
 $catalogObj = [ordered]@{
@@ -73,7 +78,7 @@ $catalogObj = [ordered]@{
             versions = @(
                 [ordered]@{
                     version = '1.0.0'
-                    name = '特殊字符测试 | Pipeline & Slashes'
+                    name = '特殊字符测试 | Pipeline & Slashes <b>'
                     releaseTag = 'modules-2026.10.01.1'
                     assetName = 'StarPie.Plugin.Special-1.0.0.spkg'
                     packageUrl = 'https://github.com/Star-Pie/StarPie-Official-Plugins/releases/download/modules-2026.10.01.1/StarPie.Plugin.Special-1.0.0.spkg'
@@ -137,20 +142,27 @@ Assert-Condition ($betaRaw -match '\[StarPie\.Plugin\.QrScanner-0\.1\.0\.spkg\]\
 Assert-Condition ($betaRaw -match '\[StarPie\.Plugin\.Command-1\.1\.1\.spkg\]\(https://github\.com/Star-Pie/StarPie-Official-Plugins/releases/download/modules-2026\.10\.13\.1/StarPie\.Plugin\.Command-1\.1\.1\.spkg\)') 'Command package historical download link missing or wrong.'
 
 # Check 7: Special character escaping (pipes in table)
-Assert-Condition ($betaRaw -match '特殊字符测试 \\\| Pipeline & Slashes') 'Special character pipe in module name must be escaped as \|.'
+Assert-Condition ($betaRaw.Contains('特殊字符测试 \| Pipeline &amp; Slashes &lt;b&gt;')) 'Module names must preserve literal pipes and HTML characters.'
 
 # Check 8: Compatibility data fidelity
 Assert-Condition ($betaRaw -match '1\.8\.0-beta\.7') 'MinHostVersion must match catalog.'
 Assert-Condition ($betaRaw -match 'API 1\.12') 'ApiVersion must match catalog.'
-Assert-Condition ($betaRaw -match 'StarPie v2\.0\.0\+') 'Must state StarPie v2.0.0+ compatibility.'
+Assert-Condition ($betaRaw -notmatch 'v2\.0\.0\+') 'Must not promise compatibility with all future hosts.'
+Assert-Condition ($betaRaw.Contains('社区 `.dll` 安装入口不接收 `.spkg`')) 'Installation guidance must distinguish official packages from community DLLs.'
+Assert-Condition ($betaRaw -notmatch '手动离线安装|解压内容放置') 'Unsupported manual installation route returned.'
+Assert-Condition ($betaRaw.Contains('ALC 不提供安全沙箱或进程级崩溃隔离')) 'In-process loading boundary must be stated accurately.'
+Assert-Condition ($betaRaw -notmatch '已通过完整回归|已通过增量打包') 'Generating notes must not invent verification results.'
 
 # ============================================================
 # Test Case B: Stable Release with No Changed Modules (Full Reference)
 # ============================================================
 $stableNotesPath = Join-Path $OutputRoot 'stable-notes.md'
+$stableCatalogPath = Join-Path $OutputRoot 'stable-catalog.json'
+$catalogObj.releaseChannel = 'stable'
+Write-JsonFile -Value $catalogObj -Path $stableCatalogPath
 
 & $scriptPath `
-    -CatalogPath $mockCatalogPath `
+    -CatalogPath $stableCatalogPath `
     -ChangedModuleIds @() `
     -ReleaseTag 'modules-stable-v2' `
     -ReleaseChannel 'stable' `
@@ -166,6 +178,38 @@ Assert-Condition ($stableRaw -match 'Stable 稳定正式版') 'Stable release no
 # Check 10: Zero updated modules handled cleanly
 Assert-Condition ($stableRaw -match '共收录 \*\*3\*\* 个官方模块（本次更新：\*\*0\*\* 个，历史沿用：\*\*3\*\* 个）') 'Stable statistics line mismatch.'
 Assert-Condition ($stableRaw -match '本次发布为模块目录同步与全量状态汇总，未包含新构建的独立模块安装包') 'Zero-change update summary text missing.'
+
+# Promotion changes publication metadata, not the original signed catalog.
+$catalogHash = (Get-FileHash $mockCatalogPath -Algorithm SHA256).Hash
+$inputArgs = @{
+    CatalogPath = $mockCatalogPath
+    ChangedModuleIds = @('starpie.plugin.qrscanner')
+    ReleaseTag = 'modules-test-tag'
+    ReleaseChannel = 'beta'
+    RepositoryUrl = 'https://github.com/Star-Pie/StarPie-Official-Plugins'
+    OutputPath = (Join-Path $OutputRoot 'promoted-notes.md')
+}
+& $scriptPath @inputArgs -PromotedRelease
+$promotedRaw = [IO.File]::ReadAllText($inputArgs.OutputPath)
+Assert-Condition ($promotedRaw.Contains('**发布通道**：正式发布（由预发布转正）')) 'Promoted release must state official GitHub status.'
+Assert-Condition ($promotedRaw.Contains('**原始目录通道**：`beta`')) 'Promotion must retain original beta catalog metadata.'
+Assert-Condition ($promotedRaw.Contains('未生成新的 stable 目录')) 'Promotion must not claim a newly signed stable catalog.'
+Assert-Condition ((Get-FileHash $mockCatalogPath -Algorithm SHA256).Hash -eq $catalogHash) 'Generating promoted notes changed the catalog.'
+
+$mismatchedArgs = $inputArgs.Clone()
+$mismatchedArgs.ReleaseChannel = 'stable'
+Assert-Fails { & $scriptPath @mismatchedArgs } 'ReleaseChannel must match'
+foreach ($invalidBanner in @('http://example.com/banner.svg', 'javascript:alert(1)', '/banner.svg', 'https://user:secret@example.com/banner.svg')) {
+    Assert-Fails { & $scriptPath @inputArgs -BannerUrl $invalidBanner } 'absolute HTTPS URLs without credentials'
+}
+foreach ($invalidRepository in @('http://github.com/Star-Pie/StarPie-Official-Plugins', 'https://user:secret@github.com/Star-Pie/StarPie-Official-Plugins')) {
+    $badArgs = $inputArgs.Clone()
+    $badArgs.RepositoryUrl = $invalidRepository
+    Assert-Fails { & $scriptPath @badArgs } 'absolute HTTPS URLs without credentials'
+}
+& $scriptPath @inputArgs -BannerUrl 'https://example.com/banner.svg?label="quoted"&x=1'
+$escapedRaw = [IO.File]::ReadAllText($inputArgs.OutputPath)
+Assert-Condition ($escapedRaw.Contains('label=&quot;quoted&quot;&amp;x=1')) 'Banner URL must be escaped in HTML attributes.'
 
 # ============================================================
 # Test Case C: Real Repository Catalog Validation

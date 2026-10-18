@@ -82,7 +82,7 @@
     <!-- Center Core Hub -->
     <circle cx="0" cy="0" r="28" fill="#0b1120" stroke="#38bdf8" stroke-width="2.5" />
     <!-- Star Icon in Center -->
-    <polygon points="0,-14 4,-4 14,-4 6,3 9,13 0,7 -9,13 -6,3 -14,-4 -4,-4" fill="#38bdf8" />
+    <path d="M -12,-16 Q -15,-18 -14,-13 L -5,17 Q -4,20 -2,16 L 3,4 L 17,-1 Q 21,-3 16,-5 Z" fill="#dcd6ff" />
 
     <!-- Decorative Satellite Dots -->
     <circle cx="0" cy="-105" r="4" fill="#38bdf8" />
@@ -107,12 +107,12 @@
 
     <!-- Subtitle / English Title -->
     <text x="300" y="156" font-size="17" font-weight="500" fill="#94a3b8">
-      Official High-Performance Modular Ecosystem for StarPie Radial Menu
+      Official Plugins for Your StarPie Radial Menu
     </text>
 
     <!-- Tagline & Architecture Core Pillars -->
     <text x="300" y="196" font-size="14" font-weight="400" fill="#cbd5e1">
-      <tspan fill="#38bdf8" font-weight="600">原生进程内加载</tspan> · 独立 ALC 隔离 · 每次发布仅打包变更模块 · 签名 Catalog 全量引用
+      <tspan fill="#38bdf8" font-weight="600">你的轮盘，按需扩展</tspan> · 启动与文件 · 窗口管理 · 输入工具 · 桌面交互
     </text>
 
     <!-- 4 Highlighting Badges (Bottom Row) -->
@@ -127,22 +127,22 @@
       <!-- Badge 2: StarPie v2.0.0+ -->
       <g transform="translate(196, 0)">
         <rect x="0" y="0" width="190" height="42" rx="8" fill="url(#badgeGrad)" stroke="#334155" stroke-width="1" />
-        <text x="14" y="19" font-size="11" font-weight="500" fill="#94a3b8">宿主兼容</text>
+        <text x="14" y="19" font-size="11" font-weight="500" fill="#94a3b8">推荐宿主</text>
         <text x="14" y="34" font-size="14" font-weight="700" fill="#818cf8">StarPie v2.0.0 正式版</text>
       </g>
 
       <!-- Badge 3: Verification & Security -->
       <g transform="translate(402, 0)">
         <rect x="0" y="0" width="205" height="42" rx="8" fill="url(#badgeGrad)" stroke="#334155" stroke-width="1" />
-        <text x="14" y="19" font-size="11" font-weight="500" fill="#94a3b8">安全机制</text>
-        <text x="14" y="34" font-size="14" font-weight="700" fill="#c084fc">SHA-256 验签 · 故障隔离</text>
+        <text x="14" y="19" font-size="11" font-weight="500" fill="#94a3b8">完整性检查</text>
+        <text x="14" y="34" font-size="14" font-weight="700" fill="#c084fc">签名目录 · SHA-256</text>
       </g>
 
       <!-- Badge 4: Zero Telemetry -->
       <g transform="translate(623, 0)">
         <rect x="0" y="0" width="195" height="42" rx="8" fill="url(#badgeGrad)" stroke="#334155" stroke-width="1" />
         <text x="14" y="19" font-size="11" font-weight="500" fill="#94a3b8">分发模式</text>
-        <text x="14" y="34" font-size="14" font-weight="700" fill="#34d399">手动按需 · 零后台联网</text>
+        <text x="14" y="34" font-size="14" font-weight="700" fill="#34d399">按需安装 · 独立更新</text>
       </g>
     </g>
   </g>

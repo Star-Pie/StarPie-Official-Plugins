@@ -1,123 +1,41 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="100%" height="auto">
-  <defs>
-    <linearGradient id="flowBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0a0f1d" />
-      <stop offset="100%" stop-color="#0e172a" />
-    </linearGradient>
-    <linearGradient id="stepGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0284c7" />
-      <stop offset="100%" stop-color="#0369a1" />
-    </linearGradient>
-    <linearGradient id="stepGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6366f1" />
-      <stop offset="100%" stop-color="#4f46e5" />
-    </linearGradient>
-    <linearGradient id="stepGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#8b5cf6" />
-      <stop offset="100%" stop-color="#7c3aed" />
-    </linearGradient>
-    <linearGradient id="stepGrad4" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#10b981" />
-      <stop offset="100%" stop-color="#059669" />
-    </linearGradient>
-    <filter id="stepShadow" x="-5%" y="-5%" width="110%" height="110%">
-      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#000000" flood-opacity="0.3" />
-    </filter>
-  </defs>
-
-  <!-- Background Canvas -->
-  <rect width="1200" height="360" rx="16" fill="url(#flowBg)" stroke="#1e293b" stroke-width="2" />
-
-  <g font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
-    <!-- Header -->
-    <text x="48" y="44" font-size="20" font-weight="800" fill="#f8fafc">StarPie 官方插件安装与调用流程 (Installation &amp; Execution Lifecycle)</text>
-    <text x="48" y="68" font-size="13" font-weight="400" fill="#94a3b8">
-      遵循「零隐式联网 · 显式知情同意 · 独立沙箱隔离 · 故障自愈保护」的端到端安全规范
-    </text>
-
-    <!-- Flow Connecting Lines (Behind Cards) -->
-    <path d="M 180,180 L 1020,180" stroke="#334155" stroke-width="3" stroke-dasharray="6 6" />
-
-    <!-- Step 1: 发现与获取 -->
-    <g transform="translate(48, 98)" filter="url(#stepShadow)">
-      <rect width="255" height="180" rx="12" fill="#111827" stroke="#1e293b" stroke-width="1.5" />
-      <!-- Step Badge -->
-      <circle cx="36" cy="36" r="16" fill="url(#stepGrad1)" />
-      <text x="36" y="42" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
-      <text x="64" y="42" font-size="15" font-weight="700" fill="#f1f5f9">发现与获取</text>
-
-      <text x="20" y="80" font-size="12" font-weight="600" fill="#38bdf8">在线获取（推荐）</text>
-      <text x="20" y="100" font-size="11" fill="#94a3b8">打开 StarPie 设置 → 插件与扩展</text>
-      <text x="20" y="118" font-size="11" fill="#94a3b8">点击「刷新官方目录」自动同步</text>
-
-      <path d="M 20,132 L 235,132" stroke="#1e293b" stroke-width="1" />
-      <text x="20" y="152" font-size="11" font-weight="600" fill="#cbd5e1">离线通道：</text>
-      <text x="75" y="152" font-size="11" fill="#64748b">从 Release 下载 .spkg 包</text>
-    </g>
-
-    <!-- Arrow 1 to 2 -->
-    <polygon points="314,180 304,174 304,186" fill="#38bdf8" />
-
-    <!-- Step 2: 完整性与契约校验 -->
-    <g transform="translate(328, 98)" filter="url(#stepShadow)">
-      <rect width="255" height="180" rx="12" fill="#111827" stroke="#1e293b" stroke-width="1.5" />
-      <!-- Step Badge -->
-      <circle cx="36" cy="36" r="16" fill="url(#stepGrad2)" />
-      <text x="36" y="42" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
-      <text x="64" y="42" font-size="15" font-weight="700" fill="#f1f5f9">完整性与契约校验</text>
-
-      <text x="20" y="80" font-size="12" font-weight="600" fill="#818cf8">双重防篡改防损坏</text>
-      <text x="20" y="100" font-size="11" fill="#94a3b8">校验包 SHA-256 与文件大小</text>
-      <text x="20" y="118" font-size="11" fill="#94a3b8">比对 module.manifest 与清单</text>
-
-      <path d="M 20,132 L 235,132" stroke="#1e293b" stroke-width="1" />
-      <text x="20" y="152" font-size="11" font-weight="600" fill="#cbd5e1">宿主检查：</text>
-      <text x="75" y="152" font-size="11" fill="#64748b">核验 minHost 与 API 兼容性</text>
-    </g>
-
-    <!-- Arrow 2 to 3 -->
-    <polygon points="594,180 584,174 584,186" fill="#818cf8" />
-
-    <!-- Step 3: 解压与 ALC 隔离 -->
-    <g transform="translate(608, 98)" filter="url(#stepShadow)">
-      <rect width="255" height="180" rx="12" fill="#111827" stroke="#1e293b" stroke-width="1.5" />
-      <!-- Step Badge -->
-      <circle cx="36" cy="36" r="16" fill="url(#stepGrad3)" />
-      <text x="36" y="42" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
-      <text x="64" y="42" font-size="15" font-weight="700" fill="#f1f5f9">沙箱解压与隔离</text>
-
-      <text x="20" y="80" font-size="12" font-weight="600" fill="#c084fc">程序集独立生命周期</text>
-      <text x="20" y="100" font-size="11" fill="#94a3b8">解压至 %LOCALAPPDATA% 数据区</text>
-      <text x="20" y="118" font-size="11" fill="#94a3b8">独立 AssemblyLoadContext 加载</text>
-
-      <path d="M 20,132 L 235,132" stroke="#1e293b" stroke-width="1" />
-      <text x="20" y="152" font-size="11" font-weight="600" fill="#cbd5e1">安全默认：</text>
-      <text x="75" y="152" font-size="11" fill="#64748b">安装后默认未启用，需手动勾选</text>
-    </g>
-
-    <!-- Arrow 3 to 4 -->
-    <polygon points="874,180 864,174 864,186" fill="#c084fc" />
-
-    <!-- Step 4: 轮盘扇区编排 -->
-    <g transform="translate(888, 98)" filter="url(#stepShadow)">
-      <rect width="264" height="180" rx="12" fill="#111827" stroke="#1e293b" stroke-width="1.5" />
-      <!-- Step Badge -->
-      <circle cx="36" cy="36" r="16" fill="url(#stepGrad4)" />
-      <text x="36" y="42" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
-      <text x="64" y="42" font-size="15" font-weight="700" fill="#f1f5f9">轮盘编排与调用</text>
-
-      <text x="20" y="80" font-size="12" font-weight="600" fill="#34d399">肌肉记忆与高频触发</text>
-      <text x="20" y="100" font-size="11" fill="#94a3b8">在动作画布中拖拽至指定扇区</text>
-      <text x="20" y="118" font-size="11" fill="#94a3b8">租约守护：超时保护与异常隔离</text>
-
-      <path d="M 20,132 L 244,132" stroke="#1e293b" stroke-width="1" />
-      <text x="20" y="152" font-size="11" font-weight="600" fill="#cbd5e1">零依赖残留：</text>
-      <text x="92" y="152" font-size="11" fill="#64748b">停用后安全卸载释放资源</text>
-    </g>
-
-    <!-- Footer Note -->
-    <text x="48" y="318" font-size="12" fill="#64748b">
-      💡 提示：StarPie 发行包不随包预装任何外部网络代码；用户拥有对每个官方模块是否下载、何时启用、分配何种权限的完全控制权。
-    </text>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 650" role="img" aria-labelledby="title desc">
+<title id="title">四步，把需要的功能放进轮盘</title><desc id="desc">官方插件通过客户端目录安装，下载与更新由你操作。</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101426"/><stop offset="1" stop-color="#0b1120"/></linearGradient></defs>
+<rect width="1100" height="650" rx="20" fill="url(#bg)"/>
+<g font-family="Segoe UI, Microsoft YaHei, sans-serif">
+<text x="40" y="49" font-size="28" font-weight="700" fill="#f3f1ff">四步，把需要的功能放进轮盘</text>
+<text x="40" y="81" font-size="17" fill="#b5bdd3">官方插件通过客户端目录安装，下载与更新由你操作。</text>
+<g transform="translate(40 110)">
+<rect width="500" height="215" rx="14" fill="#161d30" stroke="#303952"/>
+<text x="24" y="45" font-size="26" font-weight="700" fill="#67b8f5">01</text>
+<text x="77" y="44" font-size="23" font-weight="700" fill="#f2f3ff">刷新目录</text>
+<text x="24" y="89" font-size="19" fill="#dce2f0">设置 → 插件与扩展</text>
+<text x="24" y="124" font-size="19" fill="#dce2f0">在官方插件区域点击「刷新目录」</text>
+<text x="24" y="159" font-size="19" fill="#dce2f0">选择需要的模块，无需全部安装</text>
+</g>
+<g transform="translate(560 110)">
+<rect width="500" height="215" rx="14" fill="#161d30" stroke="#303952"/>
+<text x="24" y="45" font-size="26" font-weight="700" fill="#a59bff">02</text>
+<text x="77" y="44" font-size="23" font-weight="700" fill="#f2f3ff">安装模块</text>
+<text x="24" y="89" font-size="19" fill="#dce2f0">选择模块并点击「安装」</text>
+<text x="24" y="124" font-size="19" fill="#dce2f0">由客户端核对大小、哈希与兼容性</text>
+<text x="24" y="159" font-size="19" fill="#dce2f0">模块文件由宿主管理</text>
+</g>
+<g transform="translate(40 345)">
+<rect width="500" height="215" rx="14" fill="#161d30" stroke="#303952"/>
+<text x="24" y="45" font-size="26" font-weight="700" fill="#cf9bfa">03</text>
+<text x="77" y="44" font-size="23" font-weight="700" fill="#f2f3ff">按需启用</text>
+<text x="24" y="89" font-size="19" fill="#dce2f0">根据需要启用已安装模块</text>
+<text x="24" y="124" font-size="19" fill="#dce2f0">在插件列表中管理、停用或卸载</text>
+<text x="24" y="159" font-size="19" fill="#dce2f0">官方包通过目录安装，不走社区导入</text>
+</g>
+<g transform="translate(560 345)">
+<rect width="500" height="215" rx="14" fill="#161d30" stroke="#303952"/>
+<text x="24" y="45" font-size="26" font-weight="700" fill="#66d2c0">04</text>
+<text x="77" y="44" font-size="23" font-weight="700" fill="#f2f3ff">配置使用</text>
+<text x="24" y="89" font-size="19" fill="#dce2f0">轮盘动作中选择插件动作与参数</text>
+<text x="24" y="124" font-size="19" fill="#dce2f0">桌宠、悬浮球等也可通过设置管理</text>
+<text x="24" y="159" font-size="19" fill="#dce2f0">轮盘音效在插件设置中选择主题</text>
+</g>
+<text x="40" y="610" font-size="17" fill="#b5bdd3">安装流程示意，非实际界面截图。.spkg 为官方分发容器；社区手动导入入口仅接收 .dll。</text>
+</g></svg>

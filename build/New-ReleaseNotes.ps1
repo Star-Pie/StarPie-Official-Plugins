@@ -6,7 +6,8 @@ param(
   [Parameter(Mandatory)][ValidateSet('stable','beta')][string]$ReleaseChannel,
   [Parameter(Mandatory)][uri]$RepositoryUrl,
   [Parameter(Mandatory)][string]$OutputPath,
-  [string]$BannerUrl
+  [string]$BannerUrl,
+  [switch]$PromotedRelease
 )
 
 $ErrorActionPreference = 'Stop'
@@ -25,8 +26,18 @@ function Write-Utf8NoBom {
 function Escape-MarkdownTableCell {
     param([string]$Text)
     if ([string]::IsNullOrEmpty($Text)) { return '' }
-    return $Text.Replace('|', '\|').Replace("`r", '').Replace("`n", ' ')
+    return [System.Security.SecurityElement]::Escape($Text).Replace('|', '\|').Replace("`r", '').Replace("`n", ' ')
 }
+
+function Assert-HttpsUrl {
+    param([string]$Value)
+    $parsed = $null
+    if (-not [uri]::TryCreate($Value, [UriKind]::Absolute, [ref]$parsed) -or
+        $parsed.Scheme -ne 'https' -or [string]::IsNullOrWhiteSpace($parsed.Host) -or $parsed.UserInfo) {
+        throw 'Repository and banner URLs must use absolute HTTPS URLs without credentials.'
+    }
+}
+Assert-HttpsUrl $RepositoryUrl.AbsoluteUri
 
 function Format-FileSize {
     param([long]$Bytes)
@@ -39,7 +50,7 @@ function Format-FileSize {
     return "$Bytes B"
 }
 
-# Resolve banner URL to an accessible HTTPS absolute URL
+# Resolve the banner to an absolute HTTPS URL; publishing checks accessibility.
 if ([string]::IsNullOrWhiteSpace($BannerUrl)) {
     $repoClean = $RepositoryUrl.AbsoluteUri.TrimEnd('/')
     if ($RepositoryUrl.Host -eq 'github.com') {
@@ -48,8 +59,13 @@ if ([string]::IsNullOrWhiteSpace($BannerUrl)) {
         $BannerUrl = "$repoClean/raw/main/docs/media/starpie-plugins-banner.svg"
     }
 }
+Assert-HttpsUrl $BannerUrl
+$bannerAttribute = [System.Security.SecurityElement]::Escape($BannerUrl)
 
 $catalog = Read-JsonFile -Path $CatalogPath
+if ($ReleaseChannel -cne $catalog.releaseChannel) {
+    throw 'ReleaseChannel must match the original catalog releaseChannel.'
+}
 $changed = @{}
 foreach ($id in $ChangedModuleIds) { $changed[$id] = $true }
 
@@ -74,18 +90,19 @@ $updatedCount = $updatedModules.Count
 $referencedCount = $totalModules - $updatedCount
 $isBeta = ($ReleaseChannel -eq 'beta')
 
-$channelDisplay = if ($isBeta) { 'beta (公测预发布 / Pre-release)' } else { 'stable (稳定正式版 / Stable Release)' }
-$channelBadge = if ($isBeta) { 'Beta Pre-release' } else { 'Stable Official' }
-$channelDescription = if ($isBeta) {
-    '本发布为 **Beta 预发布通道** 产物。已通过增量打包、本地契约校验与目录签名验证；StarPie 主程序可在「插件与扩展」中直接刷新获取。'
+$channelDisplay = if ($PromotedRelease) { '正式发布（由预发布转正）' } elseif ($isBeta) { 'beta (公测预发布 / Pre-release)' } else { 'stable (稳定正式版 / Stable Release)' }
+$channelDescription = if ($PromotedRelease) {
+    "本 GitHub Release 已由预发布转为**正式发布**。原标签、插件包、目录及签名文件保持不变；目录中的 ``$ReleaseChannel`` 是创建时的原始签名字段，本次未改写，也未生成新的 stable 目录。"
+} elseif ($isBeta) {
+    '本发布使用 **Beta 预发布通道**。请依据下表中的最低宿主版本与 SDK 契约选择兼容模块。'
 } else {
-    '本发布为 **Stable 稳定正式版** 产物。已通过完整回归测试与目录签名校验，建议所有生产环境用户更新使用。'
+    '本发布使用 **Stable 稳定正式版** 通道。各模块的宿主与 SDK 要求见下表；通道标识不代替实际测试记录。'
 }
 
 $lines = New-Object System.Collections.Generic.List[string]
 
 # 1. Top Brand Banner
-$lines.Add("<p align=""center""><img src=""$BannerUrl"" alt=""StarPie 官方插件与模块发布"" width=""100%"" /></p>")
+$lines.Add("<p align=""center""><img src=""$bannerAttribute"" alt=""StarPie 官方插件与模块发布"" width=""100%"" /></p>")
 $lines.Add('')
 
 # 2. Release Header & Overview
@@ -94,12 +111,19 @@ $lines.Add("# StarPie 官方插件发布 ($ReleaseTag)")
 $lines.Add('')
 $lines.Add("> - **发布标签**：``$ReleaseTag``")
 $lines.Add("> - **发布通道**：$channelDisplay")
+$lines.Add("> - **原始目录通道**：``$ReleaseChannel``")
 $lines.Add("> - **目录版本**：``$catalogVersion``")
-$lines.Add("> - **宿主兼容**：支持 **StarPie v2.0.0+** 正式版及对应更新版本")
+$lines.Add('> - **宿主兼容**：以各模块的最低宿主版本与 SDK 契约为准')
 $lines.Add("> - **模块统计**：共收录 **$totalModules** 个官方模块（本次更新：**$updatedCount** 个，历史沿用：**$referencedCount** 个）")
 $lines.Add('')
 $lines.Add($channelDescription)
 $lines.Add('')
+if ($changed.ContainsKey('starpie.plugin.qrscanner')) {
+    $lines.Add('### 本次看点：二维码扫描')
+    $lines.Add('')
+    $lines.Add('支持框选屏幕区域，或扫描鼠标附近的二维码。本地解码后先预览内容，再由你选择复制或打开网页链接；不会自动打开识别结果。')
+    $lines.Add('')
+}
 
 # 3. Updated Modules Section
 if ($updatedCount -gt 0) {
@@ -129,30 +153,28 @@ $lines.Add('### 📦 安装与使用指引 (Installation Guide)')
 $lines.Add('')
 $lines.Add('1. **StarPie 客户端内一键刷新与安装（推荐）**：')
 $lines.Add('   - 打开 StarPie 宿主程序，进入「**设置**」→「**插件与扩展**」页面；')
-$lines.Add('   - 点击顶部「**刷新官方目录**」或「**检查更新**」，客户端将自动同步最新的签名目录；')
+$lines.Add('   - 在官方插件区域点击「**刷新目录**」，获取模块列表；')
 $lines.Add('   - 在模块列表中找到所需插件，点击「**安装**」，完成后勾选「**启用**」即可生效。')
-$lines.Add('2. **手动离线安装 (.spkg)**：')
-$lines.Add('   - 在下方模块列表中点击直接下载所需模块的 `.spkg` 文件；')
-$lines.Add('   - 打开 StarPie「**插件与扩展**」页面，点击「**手动安装插件**」选择下载的包文件完成解包与登记；')
-$lines.Add('   - 或直接将解压内容放置于 `%LOCALAPPDATA%\StarPie\plugin-data\` 对应目录。')
-$lines.Add('3. **安全性与完整性防护**：')
+$lines.Add('2. **关于下方下载链接**：')
+$lines.Add('   - `.spkg` 是官方分发容器，直链用于归档与检查。官方插件请通过客户端目录安装；社区 `.dll` 安装入口不接收 `.spkg`。')
+$lines.Add('3. **完整性与加载边界**：')
 $lines.Add('   - 每次发布的模块包均具有唯一的 SHA-256 哈希；')
 $lines.Add('   - 客户端下载时将严格验证文件大小与 SHA-256，拒绝任何不匹配或损坏的包；')
-$lines.Add('   - 模块在独立的 AssemblyLoadContext (ALC) 沙箱中加载，异常被自动隔离，不影响宿主本体。')
+$lines.Add('   - 模块使用独立 AssemblyLoadContext (ALC) 管理加载与卸载，仍运行在宿主进程内；ALC 不提供安全沙箱或进程级崩溃隔离。')
 $lines.Add('')
 
 # 5. Host Compatibility & Runtime Notes
 $lines.Add('### ⚙️ 宿主兼容性与运行时环境 (Compatibility & Runtime)')
 $lines.Add('')
-$lines.Add('- **主程序兼容性**：支持 StarPie v2.0.0 正式版及以上版本。')
+$lines.Add('- **主程序兼容性**：客户端根据各模块的最低宿主版本、版本范围与 SDK 契约选择兼容版本。')
 $lines.Add('- **目标运行时**：.NET 8.0 WPF 进程内架构，Windows 10 / 11 (x64)。')
-$lines.Add('- **契约规范**：严格限定于 SDK 抽象层与 BCL，零外部隐式动态库污染。')
+$lines.Add('- **依赖规范**：插件引用公共 SDK；二维码扫描另含 ZXing.Net 解码依赖。分发包不携带主程序或私有 SDK 副本。')
 $lines.Add('')
 
 # 6. Complete Official Modules Table
 $lines.Add('### 📋 完整官方模块清单与下载 (Complete Module Registry & Direct Downloads)')
 $lines.Add('')
-$lines.Add('本发布代表当前官方启用的完整模块集。未变更模块继续保留其历史不可变 Release 资产与下载链接；客户端按需选择最高兼容版本。')
+$lines.Add('本发布列出完整的官方可选模块集。未变更模块继续保留其历史不可变 Release 资产与下载链接；客户端按需选择最高兼容版本。')
 $lines.Add('')
 $lines.Add('| 模块名称 | 插件 ID | 版本 | 发布状态 | 最低宿主 | SDK 契约 | 下载资产 (.spkg) |')
 $lines.Add('|:---|:---|:---:|:---|:---:|:---:|:---|')

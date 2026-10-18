@@ -118,4 +118,5 @@ $previousResult=& (Join-Path $root 'build\Get-PreviousCatalog.ps1') -Channel bet
 $boot=Read-JsonFile $previousResult
 Assert-Condition ($boot.schemaVersion -eq 2 -and (@($boot.modules | Where-Object id -EQ $launch.id)[0]).versions.Count -eq 2) 'v1 bootstrap lost superseded versions'
 Remove-Item -LiteralPath Function:\gh
+& (Join-Path $PSScriptRoot 'Validate-ReleaseNotes.ps1')
 Write-Host "PASS: $script:checks catalog publisher/schema/history checks; all assets are local fixtures. Output: $OutputRoot"
