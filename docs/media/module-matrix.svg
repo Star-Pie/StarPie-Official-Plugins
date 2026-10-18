@@ -1,0 +1,224 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" width="100%" height="auto">
+  <defs>
+    <linearGradient id="matrixBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#818cf8" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+    <filter id="cardShadow" x="-2%" y="-2%" width="104%" height="106%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1200" height="640" rx="16" fill="url(#matrixBg)" stroke="#1e293b" stroke-width="2" />
+
+  <g font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+    <!-- Header Section -->
+    <text x="48" y="52" font-size="24" font-weight="800" fill="#f8fafc">StarPie 官方模块全景架构 (19 Modules Matrix)</text>
+    <text x="48" y="78" font-size="14" font-weight="400" fill="#94a3b8">
+      所有模块以独立程序集契约开发，通过不可变 <tspan fill="#38bdf8">.spkg</tspan> 分发，由 StarPie 主程序按需加载至独立 ALC 沙箱
+    </text>
+
+    <!-- Top-Right Status Badge -->
+    <g transform="translate(980, 32)">
+      <rect x="0" y="0" width="172" height="34" rx="17" fill="#1e293b" stroke="#334155" />
+      <circle cx="16" cy="17" r="5" fill="#10b981" />
+      <text x="28" y="22" font-size="12" font-weight="600" fill="#cbd5e1">19 个模块全部已启用</text>
+    </g>
+
+    <!-- Card 1: 启动与文件交互 (5 模块) -->
+    <g transform="translate(48, 105)" filter="url(#cardShadow)">
+      <rect width="536" height="235" rx="12" fill="#111827" stroke="#1e293b" stroke-width="1.5" />
+      <rect width="536" height="4" rx="2" fill="#38bdf8" />
+      <text x="20" y="32" font-size="16" font-weight="700" fill="#f1f5f9">🚀 基础启动与文件交互</text>
+      <text x="440" y="32" font-size="12" font-weight="600" fill="#38bdf8">5 个内置动作</text>
+
+      <!-- Rows -->
+      <!-- Launch -->
+      <g transform="translate(20, 48)">
+        <rect width="496" height="32" rx="6" fill="#1e293b" opacity="0.6" />
+        <text x="14" y="21" font-size="13" font-weight="600" fill="#e2e8f0">启动程序 (Launch)</text>
+        <text x="220" y="21" font-size="12" fill="#64748b">starpie.builtin.launch</text>
+        <rect x="420" y="6" width="64" height="20" rx="4" fill="#0369a1" />
+        <text x="452" y="20" font-size="11" font-weight="600" fill="#e0f2fe" text-anchor="middle">v1.1.1</text>
+      </g>
+      <!-- Folder -->
+      <g transform="translate(20, 84)">
+        <rect width="496" height="32" rx="6" fill="#1e293b" opacity="0.4" />
+        <text x="14" y="21" font-size="13" font-weight="600" fill="#e2e8f0">打开文件夹 (Folder)</text>
+        <text x="220" y="21" font-size="12" fill="#64748b">starpie.builtin.folder</text>
+        <rect x="420" y="6" width="64" height="20" rx="4" fill="#1e293b" stroke="#334155" />
+        <text x="452" y="20" font-size="11" font-weight="600" fill="#94a3b8" text-anchor="middle">v1.0.1</text>
+      </g>
+      <!-- WebUrl -->
+      <g transform="translate(20, 120)">
+        <rect width="496" height="32" rx="6" fill="#1e293b" opacity="0.6" />
+        <text x="14" y="21" font-size="13" font-weight="600" fill="#e2e8f0">打开网址 (WebUrl)</text>
+        <text x="220" y="21" font-size="12" fill="#64748b">starpie.builtin.weburl</text>
+        <rect x="420" y="6" width="64" height="20" rx="4" fill="#1e293b" stroke="#334155" />
+        <text x="452" y="20" font-size="11" font-weight="600" fill="#94a3b8" text-anchor="middle">v1.0.1</text>
+      </g>
+      <!-- Command -->
+      <g transform="translate(20, 156)">
+        <rect width="496" height="32" rx="6" fill="#1e293b" opacity="0.4" />
+        <text x="14" y="21" font-size="13" font-weight="600" fill="#e2e8f0">运行命令 (Command)</text>
+        <text x="220" y="21" font-size="12" fill="#64748b">starpie.builtin.command</text>
+        <rect x="420" y="6" width="64" height="20" rx="4" fill="#0369a1" />
+        <text x="452" y="20" font-size="11" font-weight="600" fill="#e0f2fe" text-anchor="middle">v1.1.1</text>
+      </g>
+      <!-- ShellTool -->
+      <g transform="translate(20, 192)">
+        <rect width="496" height="32" rx="6" fill="#1e293b" opacity="0.6" />
+        <text x="14" y="21" font-size="13" font-weight="600" fill="#e2e8f0">系统与右键 (ShellTool)</text>
+        <text x="220" y="21" font-size="12" fill="#64748b">starpie.builtin.shelltool</text>
+        <rect x="420" y="6" width="64" height="20" rx="4" fill="#0369a1" />
+        <text x="452" y="20" font-size="11" font-weight="600" fill="#e0f2fe" text-anchor="middle">v1.1.1</text>
+      </g>
+    </g>
+
+    <!-- Card 2: 窗口管理与布局 (5 模块) -->
+    <g transform="translate(616, 105)" filter="url(#cardShadow)">
+      <rect width="536" height="235" rx="12" fill="#111827" stroke="#1e293b" stroke-width="1.5" />
+      <rect width="536" height="4" rx="2" fill="#818cf8" />
+      <text x="20" y="32" font-size="16" font-weight="700" fill="#f1f5f9">🪟 窗口管理与桌面布局</text>
+      <text x="440" y="32" font-size="12" font-weight="600" fill="#818cf8">5 个内置动作</text>
+
+      <!-- Rows -->
+      <!-- SwitchWindow -->
+      <g transform="translate(20, 48)">
+        <rect width="496" height="32" rx="6" fill="#1e293b" opacity="0.6" />
+        <text x="14" y="21" font-size="13" font-weight="600" fill="#e2e8f0">切换窗口 (SwitchWindow)</text>
+        <text x="220" y="21" font-size="12" fill="#64748b">starpie.builtin.switchwindow</text>
+        <rect x="420" y="6" width="64" height="20" rx="4" fill="#1e293b" stroke="#334155" />
+        <text x="452" y="20" font-size="11" font-weight="600" fill="#94a3b8" text-anchor="middle">v1.0.1</text>
+      </g>
+      <!-- MoveMonitor -->
+      <g transform="translate(20, 84)">
+        <rect width="496" height="32" rx="6" fill="#1e293b" opacity="0.4" />
+        <text x="14" y="21" font-size="13" font-weight="600" fill="#e2e8f0">窗口移至下屏 (MoveMonitor)</text>
+        <text x="220" y="21" font-size="12" fill="#64748b">starpie.builtin.movemonitor</text>
+        <rect x="420" y="6" width="64" height="20" rx="4" fill="#1e293b" stroke="#334155" />
+        <text x="452" y="20" font-size="11" font-weight="600" fill="#94a3b8" text-anchor="middle">v1.0.1</text>
+      </g>
+      <!-- Tile -->
+      <g transform="translate(20, 120)">
+        <rect width="496" height="32" rx="6" fill="#1e293b" opacity="0.6" />
+        <text x="14" y="21" font-size="13" font-weight="600" fill="#e2e8f0">平铺窗口 (Tile)</text>
+        <text x="220" y="21" font-size="12" fill="#64748b">starpie.builtin.tile</text>
+        <rect x="420" y="6" width="64" height="20" rx="4" fill="#1e293b" stroke="#334155" />
+        <text x="452" y="20" font-size="11" font-weight="600" fill="#94a3b8" text-anchor="middle">v1.0.1</text>
+      </g>
+      <!-- ToggleTopmost -->
+      <g transform="translate(20, 156)">
+        <rect width="496" height="32" rx="6" fill="#1e293b" opacity="0.4" />
+        <text x="14" y="21" font-size="13" font-weight="600" fill="#e2e8f0">置顶/取消置顶 (Topmost)</text>
+        <text x="220" y="21" font-size="12" fill="#64748b">starpie.builtin.toggletopmost</text>
+        <rect x="420" y="6" width="64" height="20" rx="4" fill="#1e293b" stroke="#334155" />
+        <text x="452" y="20" font-size="11" font-weight="600" fill="#94a3b8" text-anchor="middle">v1.0.1</text>
+      </g>
+      <!-- WindowOpacity -->
+      <g transform="translate(20, 192)">
+        <rect width="496" height="32" rx="6" fill="#1e293b" opacity="0.6" />
+        <text x="14" y="21" font-size="13" font-weight="600" fill="#e2e8f0">窗口透明度 (Opacity)</text>
+        <text x="220" y="21" font-size="12" fill="#64748b">starpie.builtin.windowopacity</text>
+        <rect x="420" y="6" width="64" height="20" rx="4" fill="#1e293b" stroke="#334155" />
+        <text x="452" y="20" font-size="11" font-weight="600" fill="#94a3b8" text-anchor="middle">v1.0.1</text>
+      </g>
+    </g>
+
+    <!-- Card 3: 系统控制与识别 (2 模块) -->
+    <g transform="translate(48, 355)" filter="url(#cardShadow)">
+      <rect width="536" height="200" rx="12" fill="#111827" stroke="#1e293b" stroke-width="1.5" />
+      <rect width="536" height="4" rx="2" fill="#34d399" />
+      <text x="20" y="32" font-size="16" font-weight="700" fill="#f1f5f9">⚙️ 系统能力与视觉识别</text>
+      <text x="440" y="32" font-size="12" font-weight="600" fill="#34d399">2 个核心动作</text>
+
+      <!-- System -->
+      <g transform="translate(20, 52)">
+        <rect width="496" height="42" rx="6" fill="#1e293b" opacity="0.6" />
+        <text x="14" y="26" font-size="14" font-weight="600" fill="#e2e8f0">系统控制 (System)</text>
+        <text x="180" y="26" font-size="12" fill="#64748b">starpie.builtin.system</text>
+        <text x="320" y="26" font-size="11" fill="#94a3b8">锁屏/音量/任务视图</text>
+        <rect x="430" y="11" width="54" height="20" rx="4" fill="#1e293b" stroke="#334155" />
+        <text x="457" y="25" font-size="11" font-weight="600" fill="#94a3b8" text-anchor="middle">v1.0.1</text>
+      </g>
+      <!-- OCR -->
+      <g transform="translate(20, 106)">
+        <rect width="496" height="42" rx="6" fill="#1e293b" opacity="0.6" />
+        <text x="14" y="26" font-size="14" font-weight="600" fill="#e2e8f0">截屏识字 (OCR)</text>
+        <text x="180" y="26" font-size="12" fill="#64748b">starpie.builtin.ocr</text>
+        <text x="320" y="26" font-size="11" fill="#94a3b8">区域框选与文字提取</text>
+        <rect x="430" y="11" width="54" height="20" rx="4" fill="#1e293b" stroke="#334155" />
+        <text x="457" y="25" font-size="11" font-weight="600" fill="#94a3b8" text-anchor="middle">v1.0.1</text>
+      </g>
+      <!-- OCR & System Note -->
+      <text x="20" y="180" font-size="11" fill="#64748b">随 StarPie 核心体验分发的轻量级内置能力，纯本地执行无外部调用</text>
+    </g>
+
+    <!-- Card 4: 输入增强与桌面扩展 (7 插件) -->
+    <g transform="translate(616, 355)" filter="url(#cardShadow)">
+      <rect width="536" height="200" rx="12" fill="#111827" stroke="#1e293b" stroke-width="1.5" />
+      <rect width="536" height="4" rx="2" fill="#f43f5e" />
+      <text x="20" y="32" font-size="16" font-weight="700" fill="#f1f5f9">🎮 输入增强与桌面扩展</text>
+      <text x="440" y="32" font-size="12" font-weight="600" fill="#f43f5e">7 个功能插件</text>
+
+      <g transform="translate(20, 48)">
+        <!-- 2-column compact list for 7 feature plugins -->
+        <!-- Col 1 -->
+        <g transform="translate(0, 0)">
+          <!-- Macro -->
+          <rect y="0" width="242" height="28" rx="4" fill="#1e293b" opacity="0.6" />
+          <text x="10" y="19" font-size="12" font-weight="600" fill="#f1f5f9">按键宏与多步脚本</text>
+          <text x="200" y="18" font-size="10" font-weight="600" fill="#94a3b8">v1.0.0</text>
+
+          <!-- KeypadLayer -->
+          <rect y="34" width="242" height="28" rx="4" fill="#1e293b" opacity="0.4" />
+          <text x="10" y="53" font-size="12" font-weight="600" fill="#f1f5f9">按键映射 (左手小键盘)</text>
+          <text x="200" y="52" font-size="10" font-weight="600" fill="#94a3b8">v1.0.2</text>
+
+          <!-- DesktopPet -->
+          <rect y="68" width="242" height="28" rx="4" fill="#1e293b" opacity="0.6" />
+          <text x="10" y="87" font-size="12" font-weight="600" fill="#f1f5f9">桌宠 (互动/呼出轮盘)</text>
+          <text x="200" y="86" font-size="10" font-weight="600" fill="#38bdf8">v0.1.6</text>
+
+          <!-- FloatingBall -->
+          <rect y="102" width="242" height="28" rx="4" fill="#1e293b" opacity="0.4" />
+          <text x="10" y="121" font-size="12" font-weight="600" fill="#f1f5f9">悬浮球 (常驻轻触呼出)</text>
+          <text x="200" y="120" font-size="10" font-weight="600" fill="#94a3b8">v1.0.3</text>
+        </g>
+
+        <!-- Col 2 -->
+        <g transform="translate(254, 0)">
+          <!-- CadCommand -->
+          <rect y="0" width="242" height="28" rx="4" fill="#1e293b" opacity="0.6" />
+          <text x="10" y="19" font-size="12" font-weight="600" fill="#f1f5f9">CAD 模拟按键与命令</text>
+          <text x="200" y="18" font-size="10" font-weight="600" fill="#94a3b8">v1.0.3</text>
+
+          <!-- Sound -->
+          <rect y="34" width="242" height="28" rx="4" fill="#1e293b" opacity="0.4" />
+          <text x="10" y="53" font-size="12" font-weight="600" fill="#f1f5f9">轮盘音效 (自定义 WAV)</text>
+          <text x="200" y="52" font-size="10" font-weight="600" fill="#94a3b8">v1.0.0</text>
+
+          <!-- QrScanner -->
+          <rect y="68" width="242" height="28" rx="4" fill="#831843" stroke="#f43f5e" stroke-width="1" />
+          <text x="10" y="87" font-size="12" font-weight="700" fill="#fecdd3">二维码扫描 (本地离线)</text>
+          <text x="200" y="86" font-size="10" font-weight="700" fill="#f43f5e">v0.1.0</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Bottom Summary Bar -->
+    <g transform="translate(48, 575)">
+      <rect width="1104" height="40" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1" />
+      <circle cx="20" cy="20" r="4" fill="#38bdf8" />
+      <text x="34" y="24" font-size="12" fill="#cbd5e1">
+        <tspan font-weight="600" fill="#ffffff">分发标准</tspan>：所有模块均使用独立的 AssemblyLoadContext 隔离加载 · 支持 StarPie v2.0.0+ 客户端在设置面板「插件与扩展」中一键刷新安装
+      </text>
+    </g>
+  </g>
+</svg>
