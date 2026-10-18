@@ -1,152 +1,115 @@
-# StarPie 官方插件仓库
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Star-Pie/StarPie/248b72362427e9d7492d0bcef55db0af31b3895b/assets/logo%20v2.jpg" width="88" alt="StarPie 项目图标" />
+</p>
+<p align="center">
+  <img src="docs/media/starpie-plugins-banner.svg" alt="StarPie 官方插件：19 个可选模块，按需安装" width="100%" />
+</p>
 
-StarPie 官方内建动作模块的独立源码与发布仓库。
+# StarPie 官方插件
 
-> 当前状态：15 个既有官方模块和 1 个音效插件源码候选位于本仓库，支持增量构建、`.spkg` 打包、签名 catalog 和 GitHub Release 发布。主程序提供手动刷新官方目录与安装入口；当前只验证包哈希，catalog 签名验证尚待接入。
+[![Modules](https://img.shields.io/badge/Modules-19-7c6ee6?style=flat-square)](#模块一览)
+[![Host](https://img.shields.io/badge/Host-StarPie_v2.0.0-547fea?style=flat-square)](https://github.com/Star-Pie/StarPie/releases/tag/v2.0.0)
+[![Packages](https://img.shields.io/badge/Packages-.spkg-29a99b?style=flat-square)](https://github.com/Star-Pie/StarPie-Official-Plugins/releases)
+[![License](https://img.shields.io/badge/License-MIT-8790a6?style=flat-square)](LICENSE)
 
-## 仓库目标
+把常用的启动、窗口、输入和桌面功能放进你的轮盘。这里维护 StarPie 官方插件的源码、构建脚本和独立安装包；主程序见 [StarPie](https://github.com/Star-Pie/StarPie)。
 
-本仓库负责维护从 StarPie 主程序中拆分出来的官方动作模块：
+**第一次使用？** [下载主程序](https://github.com/Star-Pie/StarPie/releases/latest) · [查看安装步骤](#安装与使用) · [浏览最新插件发布](https://github.com/Star-Pie/StarPie-Official-Plugins/releases/latest)
 
-- 所有官方模块集中在同一个仓库中维护；
-- 每个模块拥有独立版本号；
-- 每次只为发生变化的模块生成不可变发布资产；
-- 每次模块集合发布生成一份签名的 `module-catalog.json`；
-- 未变化模块不重复上传，由 catalog 引用其历史 Release 资产；
-- 发布通道分为 `stable` 和 `beta`，`beta` Release 会自动标记为 GitHub Pre-release。
+## 安装与使用
 
-StarPie 运行时实际加载的仍然是 DLL 程序集。`.spkg` 只是分发容器：StarPie 验证并解压后，再把其中的 DLL 交给现有插件运行时加载。
+建议使用当前的 **StarPie v2.0.0 正式版**。具体兼容条件以各模块的最低宿主版本与 SDK 契约为准，客户端会选择兼容版本。
 
-## 官方插件模块
+1. 打开 StarPie 设置，进入「**插件与扩展**」。
+2. 在「**官方插件**」区域点击「**刷新目录**」。
+3. 选择需要的模块，点击「**安装**」，再根据需要启用。
+4. 在轮盘动作配置中选择已启用插件提供的动作。轮盘音效等功能通过插件设置管理。
 
-既有动作模块独立发布；音效模块同时注册交互观察、设置及三个管理动作，可以独立更新、启用或停用。下表中的“动作类型”是插件兼容的 StarPie 配置类型；历史别名用于继续支持旧配置。
+<p align="center">
+  <img src="docs/media/installation-workflow.svg" alt="安装流程示意：刷新目录、核对与安装、按需启用、配置动作或插件设置" width="100%" />
+</p>
+
+以上为流程示意图。官方插件通过客户端目录下载和校验；Release 中的 `.spkg` 直链用于归档或检查，社区 `.dll` 手动安装入口不接收这种格式。请勿自行解压到内部数据目录绕过安装流程。
+
+## 模块一览
+
+当前目录包含 **19 个可选模块**。下图按使用场景分组，具体版本与下载链接见 [最新发布说明](https://github.com/Star-Pie/StarPie-Official-Plugins/releases/latest)。
+
+<p align="center">
+  <img src="docs/media/module-matrix.svg" alt="19 个官方模块：启动与文件 5 个、窗口管理 5 个、系统与识别 2 个、输入及桌面扩展 7 个" width="100%" />
+</p>
 
 ### 启动与文件
 
-| 插件 | 插件 ID | 动作类型 | 基本功能 |
-|---|---|---|---|
-| 启动程序 | `starpie.builtin.launch` | `Launch` | 选择可执行文件并启动；支持命令行参数和以标准用户身份运行。 |
-| 打开文件夹 | `starpie.builtin.folder` | `Folder`、`OpenFolder` | 打开指定目录或 Shell 命名空间；传入文件路径时打开所在目录并选中文件。 |
-| 打开网址 | `starpie.builtin.weburl` | `WebUrl`、`Url` | 使用默认浏览器或 Chrome、Edge、Firefox、自定义浏览器打开网址。 |
-| 运行命令 | `starpie.builtin.command` | `Command` | 在选定终端中执行命令行，适合需要保留终端窗口的命令。 |
-| 系统与右键工具 | `starpie.builtin.shelltool` | `ShellTool` | 调用资源管理器与系统 Shell 能力，例如复制路径、以管理员身份运行等。 |
+| 模块 | 版本 | 用途 |
+|:---|:---:|:---|
+| 启动程序 | 1.1.1 | 启动程序或应用，支持参数及标准用户运行方式。 |
+| 打开文件夹 | 1.0.1 | 打开目录，或在资源管理器中定位文件。 |
+| 打开网址 | 1.0.1 | 使用默认或指定浏览器打开网址。 |
+| 运行命令 | 1.1.1 | 在配置的终端中执行命令行。 |
+| 系统与右键工具 | 1.1.1 | 调用宿主提供的系统工具与右键菜单功能。 |
 
-### 窗口管理
+### 窗口与系统
 
-| 插件 | 插件 ID | 动作类型 | 基本功能 |
-|---|---|---|---|
-| 窗口移到下一屏 | `starpie.builtin.movemonitor` | `MoveMonitor` | 将当前窗口移动到枚举顺序中的下一个显示器；无额外参数。 |
-| 切换窗口 | `starpie.builtin.switchwindow` | `SwitchWindow` | 按任务栏从左到右的位置激活窗口，位置从 1 开始计数。 |
-| 平铺窗口 | `starpie.builtin.tile` | `Tile` | 按宿主提供的布局排列当前窗口，支持指定布局、顺序循环、反向循环和恢复。 |
-| 窗口置顶/取消置顶 | `starpie.builtin.toggletopmost` | `ToggleTopmost` | 切换当前窗口的置顶状态。 |
-| 窗口透明度 | `starpie.builtin.windowopacity` | `WindowOpacity` | 设置当前窗口透明度百分比，默认值为 80%，合法范围由宿主提供。 |
+| 模块 | 版本 | 用途 |
+|:---|:---:|:---|
+| 切换窗口 | 1.0.1 | 切换到任务栏指定位置的窗口。 |
+| 窗口移到下一屏 | 1.0.1 | 将当前窗口移到下一台显示器。 |
+| 平铺窗口 | 1.0.1 | 应用宿主提供的窗口布局。 |
+| 窗口置顶/取消置顶 | 1.0.1 | 切换当前窗口的置顶状态。 |
+| 窗口透明度 | 1.0.1 | 调节当前窗口的不透明度。 |
+| 系统控制 | 1.0.1 | 执行宿主提供的任务视图、音量、锁屏等预设。 |
+| 截屏识字 (OCR) | 1.0.1 | 框选区域，交给宿主配置的 OCR 服务处理。 |
 
-### 系统能力
+### 输入与桌面扩展
 
-| 插件 | 插件 ID | 动作类型 | 基本功能 |
-|---|---|---|---|
-| 系统控制 | `starpie.builtin.system` | `System` | 通过预设下拉执行最小化、任务视图、音量、锁屏、关机等系统操作。 |
-| 截屏识字 (OCR) | `starpie.builtin.ocr` | `Ocr`、`ScreenOcr` | 触发后现场框选屏幕区域，交给宿主 OCR 服务识别文字；无预配置参数。 |
+| 模块 | 版本 | 用途与入口 |
+|:---|:---:|:---|
+| 按键宏与多步骤脚本 | 1.0.0 | 编排组合键、文本输入、剪贴板及等待步骤。 |
+| 按键映射 | 1.0.2 | 开关自定义按键映射层，提供左手数字小键盘预设。 |
+| CAD 模拟按键与命令输入 | 1.0.3 | 面向 CAD 命令输入的文本与模拟按键工具。 |
+| 桌宠 | 0.1.6 | 点击呼出宿主轮盘，支持拖动、自定义素材与插件设置。 |
+| 悬浮球 | 1.0.3 | 通过悬浮球呼出你配置的轮盘，支持拖动与插件设置。 |
+| 轮盘音效 | 1.0.0 | 在插件设置中选择主题、音量及各事件的自定义 WAV。 |
+| 二维码扫描 | 0.1.0 | 框选或扫描鼠标附近二维码，预览后选择复制或打开网页链接。 |
 
-### 输入增强与按键映射
+## 分发与加载方式
 
-| 插件 | 插件 ID | 动作类型 | 基本功能 |
-|---|---|---|---|
-| 按键映射 | `starpie.plugin.keypadlayer` | `Plugin`（`keypadLayer`） | 通过轮盘开启或关闭自定义按键映射，将物理按键映射为目标按键；支持可视化配置，并在切换应用或长按 Esc 时安全释放。默认提供左手数字小键盘预设。 |
-| 按键宏与多步骤脚本 | `starpie.plugin.macro` | `Plugin`（`macro`） | 按顺序执行多步组合键、单键、逐字文本输入、剪贴板粘贴/复制与延时等待；提供可视化步骤编排器、实时录制、多行文本配置及 DSL 脚本双向同步。 |
-| 悬浮球 | `starpie.plugin.floatingball` | `Plugin`（`showBall`） | 显示可拖动悬浮球，点击呼出用户配置的轮盘。 |
+- **按需获取**：主程序发行包不携带官方插件 DLL；插件下载与更新由用户操作触发。
+- **完整目录，增量发布**：每次模块集发布包含全部模块的目录；只上传变更模块的包，其余模块继续引用历史 Release 的不可变资产。
+- **完整性检查**：签名目录提供包的大小、SHA-256 与兼容条件，客户端在安装流程中核对。
+- **进程内加载**：ALC 用于管理程序集加载与卸载，不是安全沙箱，也不提供进程级崩溃隔离。请仅安装信任的插件。
 
-### 行业与绘图工具
+`modules-2026.10.15.1` 已转为 GitHub 正式发布。其原始签名目录中的 `beta` 字段保留，标签、安装包和签名未改写；这与创建新的 stable 目录是不同操作。
 
-| 插件 | 插件 ID | 动作类型 | 基本功能 |
-|---|---|---|---|
-| CAD 模拟按键与命令输入 | `starpie.plugin.cadcommand` | `Plugin`（`cadCommand`） | 专为 CAD 设计师优化的命令与按键输入工具：内置 Unicode 防输入法拦截、^C^C 前置取消与空格/回车提交。 |
+<details>
+<summary><b>开发、验证与仓库维护</b></summary>
 
-## 仓库结构
+### 本地验证
 
-```text
-src/                         16 个官方插件源码（含音效候选）
-sdk/                         与宿主共享的插件 SDK 契约快照
-tests/                       模块包验证与宿主兼容性测试预留目录
-build/                       构建、打包、catalog、校验与发布脚本
-catalog/                     模块 catalog JSON Schema 与示例
-docs/                        发布模型、模块契约与安全模型文档
-templates/                   模块注册表与 plugin.json 示例
-.github/workflows/           增量验证、全量验证与发布工作流
-artifacts/                   仅用于 CI 产物，不提交 Git
-release-metadata/            仅用于 CI 元数据，不提交 Git
+```powershell
+./build/Build-Modules.ps1 -ModuleIds <module-id> -Configuration Release -RunTests
+./build/Pack-Module.ps1 -ModuleId <module-id> -Configuration Release -ReleaseTag local -OutputMetadataPath release-metadata/packages/<module-id>.json -Clean
+./build/Verify-ModulePackage.ps1 -PackagePath <package-path> -ModuleId <module-id>
+pwsh -NoProfile -File tests/catalog/Validate-CatalogV2.ps1
+pwsh -NoProfile -File tests/catalog/Validate-ReleaseNotes.ps1
 ```
 
-## 发布模型
+### 目录与发布约定
 
-完整说明见 [`docs/release-model.md`](docs/release-model.md)。
+| 路径 | 内容 |
+|:---|:---|
+| `src/` | 各模块源码与 `plugin.json` |
+| `sdk/` | 公共 SDK 契约快照 |
+| `build/` | 构建、打包、目录与发布说明生成 |
+| `tests/` | 契约、行为与目录验证 |
+| `docs/media/` | 品牌横幅、模块图和流程示意 |
+| `.github/workflows/` | PR 验证、全量检查与模块集发布 |
 
-整体行为如下：
+共享构建或发布脚本的变动会触发全量模块验证。发布工作流支持 stable/beta 通道与目录基线选择；已有历史包和签名目录不得通过改写来替换。详见 [发布模型](docs/release-model.md)、[安全模型](docs/security-model.md) 与 [贡献指南](CONTRIBUTING.md)。
 
-```text
-模块源码发生变化
--> 必须同步修改模块版本号
--> 只构建和测试发生变化的模块
--> 只为变化模块生成 .spkg
--> 创建一次模块集合 Release
--> Release 中只上传变化模块的 .spkg
--> 生成包含全部模块的 module-catalog.json
--> 未变化模块继续引用历史 Release 的包地址
--> Release 正文列出当前完整模块集合
-```
+插件引用公共 SDK；第三方依赖须符合仓库审批约定。二维码扫描包含 ZXing.Net 及对应许可声明。分发包不得携带主程序或私有 SDK 副本。
 
-发布时，历史 catalog 必须来自同一 `releaseChannel`。如果没有同通道历史版本，则该通道首次发布会构建完整模块集。
+</details>
 
-## 工作流
-
-- `validate.yml`
-  - 在 Pull Request 中按路径过滤运行（纯文档或仅工作流修改不触发），也可手动运行；不再在 `main` 推送时自动运行。
-  - 只构建和测试本次 diff 影响的模块。
-  - 触发验证的 PR 若涉及公共构建文件、catalog、Schema 等共享变更，将验证全部模块。
-- `full-validation.yml`
-  - 支持手动触发和每周定时触发；不再在 `main` 推送时自动运行。
-  - 构建和测试全部已注册模块。
-- `release-modules.yml`
-  - 手动触发的正式发布工作流。
-  - 只与同一 `stable` 或 `beta` 通道的最近 catalog 比较。
-  - 只构建、测试、打包和验证发生变化的模块。
-  - 为完整模块集合生成 catalog 和 Release 正文表格。
-  - 只向新 Release 上传变化模块的包。
-  - `stable` 创建正式 Release，`beta` 自动创建 Pre-release。
-  - 非 dry-run 发布必须满足 `SIGNING_ENABLED=true`，并对 catalog 执行 Cosign Keyless 签名和验签。
-
-## 开发环境要求
-
-- Windows
-- 由 `global.json` 选择的 .NET SDK
-- PowerShell 7
-- 用于发布工作流的 GitHub CLI
-- 用于正式签名发布的 `cosign` 或 GitHub Action 安装器
-
-## 当前进度
-
-已完成：
-
-1. 将 15 个既有官方模块工程迁入 `src/`；beta.7 音效候选增加第 16 个模块。
-2. 为每个官方模块维护完整的 src/**/plugin.json。
-3. 建立模块打包、catalog 生成、签名、增量发布与通道校验流水线。
-4. 建立模块包验证与宿主兼容性测试目录。
-
-待完成：
-
-1. 在主程序中加入 catalog 签名验证（当前仅验证包大小与 SHA-256）。
-2. 持续验证远程目录、下载与离线加载链路。
-
-## 轮盘音效候选 `starpie.plugin.sound`
-
-- 源码：`src/StarPie.Plugin.Sound`，候选版本1.0.0，SDK1.10，最低宿主1.8.0-beta.7。只引用SDK/BCL，输出不得携带SDK DLL。本轮不修改宿主或SDK，不打包/发布。
-- 用户须单独安装、启用并选择宿主预加载；不安装/禁用时宿主不提供音效兜底。Initialize及打开设置不发声，不订阅旧Opening/Closed。
-- 在插件卡片点击「设置」：保留启用、音量、五个事件开关、主题和自定义方案ID/名称；新增呈现、选择变化、展开、确认、取消五个WAV文件选择字段，宿主按现有File字段渲染「浏览」控件。
-- 先将主题选为「自定义」，再选择16-bit PCM WAV（单声道或双声道）。使用文件选择器或完整绝对路径（含UNC）；相对路径会显示校验错误。每个WAV最多1MiB，超过限制回退并记录诊断，避免五事件缓存突破后台内存目标；音频可以放任意稳定位置，不会自动复制或扫描。移动/删除文件会触发既有合成回退，设置页不是音频格式检测器。
-- 每个文件字段留空时沿用所选方案；清空后恢复该方案的原始配置。覆盖只作用于运行时深拷贝，不改写原方案、旧配置或私有sound.json；沿用事件相对音量，总音量及事件关闭仍生效。非自定义主题忽略这些覆盖但保留路径。
-- 移除公开动作 `preview` / `importProfiles` / `exportProfiles`：配置操作不属于扇区动作，该插件尚未发布，按用户要求继续保持1.0.0。原扇区若曾绑定这三项，将变为不可用；本轮不自动改写用户动作配置，请手动移除这些旧绑定。
-- 本轮只提供直接WAV自定义；导入/导出方案和独立试听按钮暂不提供，不能通过复选框或路径变化偷偷执行设置操作。已有方案、旧迁移数据及内部方案处理/试听行为保留，不删除用户资产；原方案ID/名称选择方式保持兼容。
-- 声明FileSystem：旧config.json只读迁移；WAV只在插件音频缓存刷新时读取，设置变更只增加revision。迁移幂等，显式false及文档/Preferences/方案/事件四层未知字段保留；数据文件限8MiB，不把大型JSON塞入SDK字符串设置。
-- 保留静音消费、Custom自引用防护、单槽/单工作线程及既有时限。宿主后台停用时在锁外最多等待5秒排空，超时明确失败，不原生中断同步播放。
-- 安全验证：`dotnet run --project tests/starpie.plugin.sound/Sound.Tests.csproj -c Release`；Mock音频，不创建UI/钩子、不执行真实插件动作。新增字段、继承/覆盖/清空/重载/主题/禁用及实际Mock播放行为均有回归；原方案IO/取消/ALC相关验证保留。
-- 人工验收：重新安装候选插件后，确认设置页出现五个浏览字段；自定义主题下各事件播放所选WAV，清空恢复原音色；开关及音量正常，手势动作列表不再出现三项设置操作。真实文件选择器、设备和声音仍须用户验收，自动测试不能替代。
+源码许可见 [MIT License](LICENSE)。

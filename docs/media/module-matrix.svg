@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 790" role="img" aria-labelledby="title desc">
+<title id="title">19 个官方模块，按你的习惯组合</title><desc id="desc">按场景选择功能；版本、兼容条件与下载链接见发布说明。</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101426"/><stop offset="1" stop-color="#0b1120"/></linearGradient></defs>
+<rect width="1100" height="790" rx="20" fill="url(#bg)"/>
+<g font-family="Segoe UI, Microsoft YaHei, sans-serif">
+<text x="40" y="49" font-size="28" font-weight="700" fill="#f3f1ff">19 个官方模块，按你的习惯组合</text>
+<text x="40" y="81" font-size="17" fill="#b5bdd3">按场景选择功能；版本、兼容条件与下载链接见发布说明。</text>
+<g transform="translate(40 110)">
+<rect width="500" height="290" rx="14" fill="#161d30" stroke="#303952"/>
+<rect x="0" width="500" height="4" rx="2" fill="#67b8f5"/>
+<text x="24" y="40" font-size="22" font-weight="700" fill="#f2f3ff">启动与文件</text>
+<text x="475" y="40" font-size="17" text-anchor="end" fill="#67b8f5">5 个</text>
+<circle cx="29" cy="70" r="3" fill="#67b8f5"/>
+<text x="44" y="76" font-size="19" fill="#dce2f0">启动程序</text>
+<circle cx="29" cy="100" r="3" fill="#67b8f5"/>
+<text x="44" y="106" font-size="19" fill="#dce2f0">打开文件夹</text>
+<circle cx="29" cy="130" r="3" fill="#67b8f5"/>
+<text x="44" y="136" font-size="19" fill="#dce2f0">打开网址</text>
+<circle cx="29" cy="160" r="3" fill="#67b8f5"/>
+<text x="44" y="166" font-size="19" fill="#dce2f0">运行命令</text>
+<circle cx="29" cy="190" r="3" fill="#67b8f5"/>
+<text x="44" y="196" font-size="19" fill="#dce2f0">系统与右键工具</text>
+</g>
+<g transform="translate(560 110)">
+<rect width="500" height="290" rx="14" fill="#161d30" stroke="#303952"/>
+<rect x="0" width="500" height="4" rx="2" fill="#a59bff"/>
+<text x="24" y="40" font-size="22" font-weight="700" fill="#f2f3ff">窗口管理</text>
+<text x="475" y="40" font-size="17" text-anchor="end" fill="#a59bff">5 个</text>
+<circle cx="29" cy="70" r="3" fill="#a59bff"/>
+<text x="44" y="76" font-size="19" fill="#dce2f0">切换窗口</text>
+<circle cx="29" cy="100" r="3" fill="#a59bff"/>
+<text x="44" y="106" font-size="19" fill="#dce2f0">窗口移到下一屏</text>
+<circle cx="29" cy="130" r="3" fill="#a59bff"/>
+<text x="44" y="136" font-size="19" fill="#dce2f0">平铺窗口</text>
+<circle cx="29" cy="160" r="3" fill="#a59bff"/>
+<text x="44" y="166" font-size="19" fill="#dce2f0">窗口置顶/取消置顶</text>
+<circle cx="29" cy="190" r="3" fill="#a59bff"/>
+<text x="44" y="196" font-size="19" fill="#dce2f0">窗口透明度</text>
+</g>
+<g transform="translate(40 420)">
+<rect width="500" height="290" rx="14" fill="#161d30" stroke="#303952"/>
+<rect x="0" width="500" height="4" rx="2" fill="#66d2c0"/>
+<text x="24" y="40" font-size="22" font-weight="700" fill="#f2f3ff">系统与识别</text>
+<text x="475" y="40" font-size="17" text-anchor="end" fill="#66d2c0">2 个</text>
+<circle cx="29" cy="70" r="3" fill="#66d2c0"/>
+<text x="44" y="76" font-size="19" fill="#dce2f0">系统控制</text>
+<circle cx="29" cy="100" r="3" fill="#66d2c0"/>
+<text x="44" y="106" font-size="19" fill="#dce2f0">截屏识字 (OCR)</text>
+<text x="24" y="169" font-size="17" fill="#adb8cf">系统预设与 OCR 服务由宿主提供。</text>
+<text x="24" y="197" font-size="17" fill="#adb8cf">识别引擎按你的宿主配置使用。</text>
+</g>
+<g transform="translate(560 420)">
+<rect width="500" height="290" rx="14" fill="#161d30" stroke="#303952"/>
+<rect x="0" width="500" height="4" rx="2" fill="#cf9bfa"/>
+<text x="24" y="40" font-size="22" font-weight="700" fill="#f2f3ff">输入与桌面扩展</text>
+<text x="475" y="40" font-size="17" text-anchor="end" fill="#cf9bfa">7 个</text>
+<circle cx="29" cy="70" r="3" fill="#cf9bfa"/>
+<text x="44" y="76" font-size="19" fill="#dce2f0">按键宏与多步骤脚本</text>
+<circle cx="29" cy="100" r="3" fill="#cf9bfa"/>
+<text x="44" y="106" font-size="19" fill="#dce2f0">按键映射</text>
+<circle cx="29" cy="130" r="3" fill="#cf9bfa"/>
+<text x="44" y="136" font-size="19" fill="#dce2f0">CAD 模拟按键与命令输入</text>
+<circle cx="29" cy="160" r="3" fill="#cf9bfa"/>
+<text x="44" y="166" font-size="19" fill="#dce2f0">桌宠</text>
+<circle cx="29" cy="190" r="3" fill="#cf9bfa"/>
+<text x="44" y="196" font-size="19" fill="#dce2f0">悬浮球</text>
+<circle cx="29" cy="220" r="3" fill="#cf9bfa"/>
+<text x="44" y="226" font-size="19" fill="#dce2f0">轮盘音效</text>
+<circle cx="29" cy="250" r="3" fill="#cf9bfa"/>
+<text x="44" y="256" font-size="19" fill="#dce2f0">二维码扫描</text>
+</g>
+<text x="40" y="755" font-size="18" fill="#b5bdd3">在 StarPie 设置 → 插件与扩展中按需安装；这是模块分组示意图。</text>
+</g></svg>

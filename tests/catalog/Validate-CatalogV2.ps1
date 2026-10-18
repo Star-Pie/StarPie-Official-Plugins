@@ -66,7 +66,7 @@ Assert-Condition (($history.version -join '|') -ceq (@($currentLaunchVersion, '1
 $changed=& (Join-Path $root 'build\Get-VersionChanges.ps1') -PreviousCatalogPath $args.OutputPath
 Assert-Condition (-not ($changed | ConvertFrom-Json).hasModules -and ($changed | ConvertFrom-Json).changed.Count -eq 0) 'v2 version change detection fails'
 & (Join-Path $root 'build\New-ReleaseNotes.ps1') -CatalogPath $args.OutputPath -ChangedModuleIds @($launch.id) -ReleaseTag test-catalog-v2 -ReleaseChannel beta -RepositoryUrl 'https://github.com/Star-Pie/StarPie-Official-Plugins' -OutputPath (Join-Path $OutputRoot 'notes.md')
-$expectedLaunchRow = "| $($launch.versions[0].name) | $currentLaunchVersion | Updated in this release |"
+$expectedLaunchRow = "| $($launch.versions[0].name) | ``$($launch.id)`` | $currentLaunchVersion | Updated in this release | $($launch.versions[0].minHostVersion) | $($launch.versions[0].apiVersion) | [$($launch.versions[0].assetName)](https://github.com/Star-Pie/StarPie-Official-Plugins/releases/download/test-catalog-v2/$($launch.versions[0].assetName)) |"
 Assert-Condition ((Get-Content -LiteralPath (Join-Path $OutputRoot 'notes.md')) -ccontains $expectedLaunchRow) 'release notes omit the latest launch module version'
 # Stable promotion keeps every immutable beta version, including old compatibility records.
 $args.PreviousCatalogPath=$args.OutputPath;$args.OutputPath=Join-Path $OutputRoot 'promoted.json';$args.ReleaseChannel='stable'
@@ -100,7 +100,7 @@ $corruptRecords=$records | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 1
 $corruptRecords[0].sha256=('d'*64)
 $corruptPath=Join-Path $OutputRoot 'corrupt-packages.json';Write-JsonFile @($corruptRecords) $corruptPath
 $args.PackagesJson=$corruptPath;$args.PreviousCatalogPath='';$args.OutputPath=Join-Path $OutputRoot 'corrupt.json'
-Assert-Fails { & (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @args }
+Assert-Fails { & (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @script:args }
 # Mock gh to prove v1 bootstrap collects versions superseded in older catalogs; no network.
 $global:fixtureCatalogs=@{}
 $recent=$v1 | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100;$recent.releaseTag='recent';$global:fixtureCatalogs['recent']=$recent
@@ -118,4 +118,5 @@ $previousResult=& (Join-Path $root 'build\Get-PreviousCatalog.ps1') -Channel bet
 $boot=Read-JsonFile $previousResult
 Assert-Condition ($boot.schemaVersion -eq 2 -and (@($boot.modules | Where-Object id -EQ $launch.id)[0]).versions.Count -eq 2) 'v1 bootstrap lost superseded versions'
 Remove-Item -LiteralPath Function:\gh
+& (Join-Path $PSScriptRoot 'Validate-ReleaseNotes.ps1')
 Write-Host "PASS: $script:checks catalog publisher/schema/history checks; all assets are local fixtures. Output: $OutputRoot"
