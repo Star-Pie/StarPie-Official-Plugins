@@ -1,5 +1,5 @@
 <p align="center">
- <img width="908" height="908" alt="logo_dark" src="https://github.com/user-attachments/assets/6b6da6ad-b708-414c-adf1-2479ec620b28" />
+ <img width="100" height="100" alt="logo_dark" src="https://github.com/user-attachments/assets/6b6da6ad-b708-414c-adf1-2479ec620b28" />
 </p>
 <p align="center">
   <img src="docs/media/starpie-plugins-banner.svg" alt="StarPie 官方插件：19 个可选模块，按需安装" width="100%" />
