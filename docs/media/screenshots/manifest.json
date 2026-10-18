@@ -1,0 +1,273 @@
+{
+  "hostVersion": "2.0.0",
+  "hostSourceCommit": "248b72362427e9d7492d0bcef55db0af31b3895b",
+  "captureMethod": "Real StarPie windows captured with Sky; isolated example configuration; no plugin actions invoked.",
+  "processing": "Contiguous crop and lossless PNG optimization only. Thumbnails preserve aspect ratio on a plain background.",
+  "screenshots": [
+    {
+      "pluginId": "starpie.builtin.launch",
+      "version": "1.1.1",
+      "file": "launch.png",
+      "rawSha256": "57fba4ac850efab4d2b753cd48fb8c6cd2ace7ee257996198b4a1da567c96dd2",
+      "crop": [
+        270,
+        549,
+        984,
+        835
+      ],
+      "sha256": "910ba52eee5959c09c1c6f77ae172310c9519dfce873a8b25b9037ead75a30cf",
+      "width": 714,
+      "height": 286
+    },
+    {
+      "pluginId": "starpie.builtin.folder",
+      "version": "1.0.1",
+      "file": "folder.png",
+      "rawSha256": "8ef4e7846ac89d9ee6edaf9b1b114fdd17c5b45d6f9d1b2048c7b87699bac037",
+      "crop": [
+        270,
+        549,
+        984,
+        847
+      ],
+      "sha256": "16518fac1be9451da289729db06a57247c139a4b506d6112e4c142dea129e24a",
+      "width": 714,
+      "height": 298
+    },
+    {
+      "pluginId": "starpie.builtin.weburl",
+      "version": "1.0.1",
+      "file": "weburl.png",
+      "rawSha256": "362a81e1b5036362863b784405c0950509c5c0c47de8f9773acd30281116709b",
+      "crop": [
+        270,
+        549,
+        984,
+        849
+      ],
+      "sha256": "562201f8717c791b8ca83687677360b4524d5b2534cc0fedcfa7acbccb5d10d3",
+      "width": 714,
+      "height": 300
+    },
+    {
+      "pluginId": "starpie.builtin.command",
+      "version": "1.1.1",
+      "file": "command.png",
+      "rawSha256": "43a26d4113a6f6c555169dd9d9cbce9ea81c3c1b0eff26a81cf8566cb4bc6235",
+      "crop": [
+        270,
+        549,
+        970,
+        884
+      ],
+      "sha256": "241ca0186b708045270e880bdb7dca666acadfd6cb46bd3430549d3ef637eb28",
+      "width": 700,
+      "height": 335
+    },
+    {
+      "pluginId": "starpie.builtin.shelltool",
+      "version": "1.1.1",
+      "file": "shelltool.png",
+      "rawSha256": "b1bf7ff78a6f5ffca2b158fd4e5eb2ac0b6b69a24245ee015df28346ec7e43cd",
+      "crop": [
+        494,
+        230,
+        1212,
+        790
+      ],
+      "sha256": "62c4ded69a31c559fca0297e2019d7ab530a31b5b2e2c5f1de3df9aea1e83b54",
+      "width": 718,
+      "height": 560
+    },
+    {
+      "pluginId": "starpie.builtin.switchwindow",
+      "version": "1.0.1",
+      "file": "switchwindow.png",
+      "rawSha256": "3a7449578042576e7fb1f241702a5c0bddaed56ddd83fb98bb65a49a8d5e081c",
+      "crop": [
+        270,
+        549,
+        970,
+        872
+      ],
+      "sha256": "530360be5b892e1c81311d6f4be1206843293d6c4645a212e90f685fa47a961e",
+      "width": 700,
+      "height": 323
+    },
+    {
+      "pluginId": "starpie.builtin.movemonitor",
+      "version": "1.0.1",
+      "file": "movemonitor.png",
+      "rawSha256": "ebc988b81314319973bc37dcf35bd2313adc2b492f8bb4dfc58708c95e737837",
+      "crop": [
+        270,
+        549,
+        984,
+        858
+      ],
+      "sha256": "98d70e19bea4393b1bb31dc2a251f9b2ce20955568eebe86b02b3e2ecedecd7b",
+      "width": 714,
+      "height": 309
+    },
+    {
+      "pluginId": "starpie.builtin.tile",
+      "version": "1.0.1",
+      "file": "tile.png",
+      "rawSha256": "e87ed13fe888061045971c1bfc9b499972d6834561006e27bc3607cdde742aba",
+      "crop": [
+        270,
+        549,
+        970,
+        886
+      ],
+      "sha256": "2fdc21d38cf0ab04d4b77468668787449826c4d5932e48ba6f31a4d9d9d9ec56",
+      "width": 700,
+      "height": 337
+    },
+    {
+      "pluginId": "starpie.builtin.toggletopmost",
+      "version": "1.0.1",
+      "file": "toggletopmost.png",
+      "rawSha256": "ffff5bb28b1d014700233b652d0cbdc50f0eea2be4a4a9015f7fbc7642b3958e",
+      "crop": [
+        270,
+        549,
+        984,
+        855
+      ],
+      "sha256": "533b756eb2dd266337e514336334bbc6e850951502e55419a1a31a53760b38a9",
+      "width": 714,
+      "height": 306
+    },
+    {
+      "pluginId": "starpie.builtin.windowopacity",
+      "version": "1.0.1",
+      "file": "windowopacity.png",
+      "rawSha256": "f3a6284c5b876aac65b777c4644c717a4dc5663b1f26bede3546f4b8ca9358d7",
+      "crop": [
+        270,
+        549,
+        970,
+        878
+      ],
+      "sha256": "0acc1ad3dfac542a2960a93a9caeaba89f4fcb488617194b48c86a285af89879",
+      "width": 700,
+      "height": 329
+    },
+    {
+      "pluginId": "starpie.builtin.system",
+      "version": "1.0.1",
+      "file": "system.png",
+      "rawSha256": "dddecfc440a6648e9d77949c10f356d8023ca3312b55dcad98ba7b224b4d9891",
+      "crop": [
+        270,
+        549,
+        984,
+        817
+      ],
+      "sha256": "e98223660c97c632d83cfb1034871ceaad5e9f95b944612cae12fce70e7f5632",
+      "width": 714,
+      "height": 268
+    },
+    {
+      "pluginId": "starpie.builtin.ocr",
+      "version": "1.0.1",
+      "file": "ocr.png",
+      "rawSha256": "dc001eeefb517421b88bb09eff7cc8000cb442f56555bafe0f0d929585d91abf",
+      "crop": [
+        270,
+        549,
+        984,
+        826
+      ],
+      "sha256": "3c079b02b26dfc7e26da3d1e756357329b7b6594dfecfd98b0af8fa3ba0f126d",
+      "width": 714,
+      "height": 277
+    },
+    {
+      "pluginId": "starpie.plugin.macro",
+      "version": "1.0.0",
+      "file": "macro.png",
+      "rawSha256": "e4c4603f52022afb088283c6dad64890e08ee0461246e55c9e8fec81f6dfa526",
+      "crop": [
+        270,
+        167,
+        970,
+        765
+      ],
+      "sha256": "73368941f8dcfe3fbeb5457796e04d5d86d97928d831a3ef6457da776c8da11d",
+      "width": 700,
+      "height": 598
+    },
+    {
+      "pluginId": "starpie.plugin.keypadlayer",
+      "version": "1.0.2",
+      "file": "keypadlayer.png",
+      "rawSha256": "62b67b5e526aefee19e36d981019901110e58b6f6881e963e4fe59e1f9f46da9",
+      "crop": null,
+      "sha256": "f01bff525387ca0a763d440ba6e1a413a2dbc52a035e183dd9081b97a6a6a62d",
+      "width": 740,
+      "height": 620
+    },
+    {
+      "pluginId": "starpie.plugin.cadcommand",
+      "version": "1.0.3",
+      "file": "cadcommand.png",
+      "rawSha256": "f1ef9031527d3c2737dcbee8a599ccf4797df4c403696ae82872e685c3c39642",
+      "crop": [
+        285,
+        166,
+        953,
+        714
+      ],
+      "sha256": "50af4285e4af5d825a5212c75f6a35dc7eb7480a4dbd1509f02b8ec9b1a1cfaf",
+      "width": 668,
+      "height": 548
+    },
+    {
+      "pluginId": "starpie.plugin.desktoppet",
+      "version": "0.1.6",
+      "file": "desktoppet.png",
+      "rawSha256": "3b0e755c0ae3a17e225bce0a3447ce91ca07bf6bb7d31166fa5e4509ab5e990f",
+      "crop": null,
+      "sha256": "be66a8024c1282ed3b722837ca4ead43af55c6d45f6a44ebfd9cfc010d5b0ddf",
+      "width": 480,
+      "height": 560
+    },
+    {
+      "pluginId": "starpie.plugin.floatingball",
+      "version": "1.0.3",
+      "file": "floatingball.png",
+      "rawSha256": "734dc73189c5882b8fbfe967e771b4ffb69088edbe18bcbb07baf6afcda49429",
+      "crop": null,
+      "sha256": "6375fcd33bbfacddf428678532c2c427e142062e8ff86f8c5fc86c0338dfc909",
+      "width": 480,
+      "height": 560
+    },
+    {
+      "pluginId": "starpie.plugin.sound",
+      "version": "1.0.0",
+      "file": "sound.png",
+      "rawSha256": "39cf863dc83720794ebc8e50c9ecb273ee9331088dbc411602b32251a152dc9f",
+      "crop": null,
+      "sha256": "e4cc2e9d04e4af687ac20bda35d8129af4583ea603ad165068de9c14a2754a68",
+      "width": 480,
+      "height": 560
+    },
+    {
+      "pluginId": "starpie.plugin.qrscanner",
+      "version": "0.1.0",
+      "file": "qrscanner.png",
+      "rawSha256": "4b2a65366ecb5a79b3ce16529a28f03788b28e33982594694c6fa6169ea94731",
+      "crop": [
+        270,
+        365,
+        970,
+        764
+      ],
+      "sha256": "ea7baeb61ff5b72bca5dbc256a334efc857cc628ef64b3d45b455d2cd0630508",
+      "width": 700,
+      "height": 399
+    }
+  ]
+}
