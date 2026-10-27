@@ -23,6 +23,13 @@ if ($runtime -eq 'assembly' -and -not (Test-Path -LiteralPath $assemblyPath)) {
     throw "Module assembly not found after build: $assemblyPath. Build module '$ModuleId' first."
 }
 if ($runtime -eq 'process') {
+    # payload 不随源码分发：由 payload.json 描述来源（仓库 + Release 标签 + sha256），
+    # 打包前取到输出目录。放在这里而不是 CI 步骤里，是为了让本地单独跑 Pack-Module 也自足。
+    $payloadDescriptor = Join-Path (Resolve-ModuleDirectory -Module $module) 'payload.json'
+    if (Test-Path -LiteralPath $payloadDescriptor) {
+        & (Join-Path $PSScriptRoot 'Fetch-ModulePayload.ps1') -ModuleId $ModuleId -DestinationDirectory $buildOutputDirectory
+    }
+
     # 进程插件没有程序集可校验，改成要求「构建产物里必须真有那个可执行文件」——
     # 否则打出来的包能装、一触发就报"文件不存在"，而错误发生在用户那边。
     $command0 = @($module.command) | Select-Object -First 1
