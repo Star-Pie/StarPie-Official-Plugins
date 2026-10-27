@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param([string]$OutputRoot)
 $ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
@@ -20,11 +20,16 @@ $registry = Get-ModuleRegistry
 $modules = @(Get-EnabledModules $registry)
 $records = @()
 Add-Type -AssemblyName System.IO.Compression.FileSystem
+# ZipArchiveMode 住在 System.IO.Compression 里，Windows PowerShell 5.1 下不会随 FileSystem 程序集一起载入。
+# CI 跑 pwsh 7 时这条是无害的重复加载。
+Add-Type -AssemblyName System.IO.Compression
 foreach ($module in $modules) {
     $source = Join-Path $root (Split-Path -Parent $module.project)
     $manifestPath = Join-Path $source 'plugin.json'
     $manifest = Get-Content -LiteralPath $manifestPath -Raw
-    $assetName = [IO.Path]::GetFileNameWithoutExtension($module.assembly) + '-' + $module.version + '.spkg'
+    # 进程插件没有程序集，包名退到打包工程名（与 Pack-Module.ps1 的规则一致）。
+    $assetBase = if ($module.assembly) { [IO.Path]::GetFileNameWithoutExtension($module.assembly) } else { [IO.Path]::GetFileNameWithoutExtension($module.project) }
+    $assetName = $assetBase + '-' + $module.version + '.spkg'
     $packagePath = Join-Path $OutputRoot $assetName
     $archive = [IO.Compression.ZipFile]::Open($packagePath,[IO.Compression.ZipArchiveMode]::Create)
     try {
@@ -42,6 +47,16 @@ $args = @{ReleaseTag='test-catalog-v2';ReleaseChannel='beta';PackagesJson=$packa
 $first = Read-JsonFile $catalogPath
 Assert-Condition ($first.schemaVersion -eq 2 -and $first.modules.Count -eq $modules.Count) 'catalog v2 module count incorrect'
 foreach ($group in $first.modules) { Assert-Condition ($null -eq $group.PSObject.Properties['version'] -and $group.versions.Count -eq 1) 'legacy top-level default exists' }
+# 运行时形态必须显式落进目录：客户端与审查工具要能分清"没写"和"是程序集"。
+# 进程插件还要保证没有退化成"靠目标框架猜"——它的目录条目里 runtime 只能是 process。
+$processModules = @($modules | Where-Object runtime -EQ 'process')
+Assert-Condition ($processModules.Count -ge 1) '缺少进程插件夹具：runtime 断言无从验证'
+foreach ($processModule in $processModules) {
+    $processEntry = @($first.modules | Where-Object id -CEQ $processModule.id)[0].versions[0]
+    Assert-Condition ($processEntry.runtime -eq 'process') "进程插件 $($processModule.id) 的目录条目丢失 runtime=process"
+}
+$assemblyEntry = @($first.modules | Where-Object id -CEQ 'starpie.builtin.launch')[0].versions[0]
+Assert-Condition ($assemblyEntry.runtime -eq 'assembly') '程序集插件的目录条目未显式标注 runtime=assembly'
 $launch = @($first.modules | Where-Object id -EQ 'starpie.builtin.launch')[0]
 $currentLaunchVersion = [string](@($modules | Where-Object id -EQ $launch.id)[0].version)
 Assert-Condition ((Compare-CatalogVersions $currentLaunchVersion '1.0.1') -gt 0) 'fixture historical version must precede the current module version'
