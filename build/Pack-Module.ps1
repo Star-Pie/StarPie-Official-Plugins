@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
   [Parameter(Mandatory)][string]$ModuleId,
   [string]$Configuration = 'Release',
@@ -16,10 +16,19 @@ $registry = Get-ModuleRegistry
 $module = Get-ModuleById -ModuleId $ModuleId -Registry $registry
 $projectDirectory = Resolve-ModuleDirectory -Module $module
 $buildOutputDirectory = Resolve-ModuleOutputDirectory -Module $module -Configuration $Configuration
-$assemblyPath = Join-Path $buildOutputDirectory $module.assembly
+$runtime = if ($module.runtime) { [string]$module.runtime } else { 'assembly' }
+$assemblyPath = if ($runtime -eq 'assembly') { Join-Path $buildOutputDirectory $module.assembly } else { $null }
 
-if (-not (Test-Path -LiteralPath $assemblyPath)) {
+if ($runtime -eq 'assembly' -and -not (Test-Path -LiteralPath $assemblyPath)) {
     throw "Module assembly not found after build: $assemblyPath. Build module '$ModuleId' first."
+}
+if ($runtime -eq 'process') {
+    # 进程插件没有程序集可校验，改成要求「构建产物里必须真有那个可执行文件」——
+    # 否则打出来的包能装、一触发就报"文件不存在"，而错误发生在用户那边。
+    $command0 = @($module.command) | Select-Object -First 1
+    if ([string]::IsNullOrWhiteSpace([string]$command0)) { throw "Module '$ModuleId' declares runtime=process but the registry entry has no command." }
+    $payloadPath = Join-Path $buildOutputDirectory ([string]$command0)
+    if (-not (Test-Path -LiteralPath $payloadPath)) { throw "Process plugin payload not found after build: $payloadPath. Build module '$ModuleId' first." }
 }
 
 $packageOutputDirectory = Join-Path $root $OutputDirectory
@@ -60,6 +69,10 @@ $allFiles = @(Get-ChildItem -LiteralPath $buildOutputDirectory -Recurse -File)
 foreach ($file in $allFiles) {
     $relative = ConvertTo-NormalizedRelativePath -BasePath $buildOutputDirectory -Path $file.FullName
     $fileName = $file.Name
+    # 进程插件的「打包工程」本身会产出一个空壳程序集（它只负责把 payload 复制到输出目录），
+    # 那枚 dll 不该进包：装到插件目录里只会让宿主把它当成一个找不到入口的托管插件。
+    # 注意判定依据是「工程文件名」而不是 $module.assembly —— 进程插件根本没有 assembly 字段。
+    if ($runtime -eq 'process' -and $fileName -eq (([System.IO.Path]::GetFileNameWithoutExtension($module.project)) + '.dll')) { continue }
     if ($excludeNames -contains $fileName) { continue }
     $skip = $false
     foreach ($pattern in $excludePatterns) {
@@ -115,7 +128,21 @@ else {
     Write-JsonFile -Value $pluginManifest -Path (Join-Path $stagingRoot 'plugin.json')
 }
 
-$assemblySha256 = Get-Sha256Hex -Path $assemblyPath
+# 完整性从"单程序集哈希"扩成"文件清单哈希"：进程插件没有入口程序集这个中心，
+# 而程序集插件本来就带一堆依赖，只校验主程序集等于只校验了其中一枚文件。
+$files = @(
+    Get-ChildItem -LiteralPath $stagingRoot -Recurse -File |
+        Where-Object { $_.Name -ne 'module.manifest.json' } |
+        ForEach-Object {
+            [ordered]@{
+                path = ConvertTo-NormalizedRelativePath -BasePath $stagingRoot -Path $_.FullName
+                sha256 = Get-Sha256Hex -Path $_.FullName
+                size = [int64]$_.Length
+            }
+        } |
+        Sort-Object { $_.path }
+)
+
 $moduleManifest = [ordered]@{
     schemaVersion = 1
     id = $module.id
@@ -124,15 +151,23 @@ $moduleManifest = [ordered]@{
     apiVersion = if ($module.apiVersion) { $module.apiVersion } else { $registry.sdkApiVersion }
     minHostVersion = if ($module.minHostVersion) { $module.minHostVersion } else { $registry.minimumHostVersion }
     maxHostVersion = $module.maxHostVersion
+    runtime = $runtime
     targetFramework = $module.targetFramework
-    assembly = $module.assembly
-    assemblySha256 = $assemblySha256
     typeClaims = @($module.typeClaims)
     capabilities = @($module.capabilities)
     releaseTag = $ReleaseTag
+    files = $files
+}
+
+if ($runtime -eq 'assembly') {
+    $assemblySha256 = Get-Sha256Hex -Path $assemblyPath
+    $moduleManifest['assembly'] = $module.assembly
+    $moduleManifest['assemblySha256'] = $assemblySha256
 }
 Write-JsonFile -Value $moduleManifest -Path (Join-Path $stagingRoot 'module.manifest.json')
-$assetName = "$([System.IO.Path]::GetFileNameWithoutExtension($module.assembly))-$($module.version).spkg"
+# 进程插件没有程序集，包名退到打包工程的文件名（与既有 StarPie.Plugin.*-版本.spkg 的形态一致）。
+$assetBase = if ($module.assembly) { [System.IO.Path]::GetFileNameWithoutExtension($module.assembly) } else { [System.IO.Path]::GetFileNameWithoutExtension($module.project) }
+$assetName = "$assetBase-$($module.version).spkg"
 $packagePath = Join-Path $packageOutputDirectory $assetName
 New-DeterministicZip -SourceDirectory $stagingRoot -DestinationPath $packagePath
 

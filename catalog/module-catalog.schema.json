@@ -87,8 +87,7 @@
         "minHostVersion",
         "maxHostVersion",
         "typeClaims",
-        "capabilities",
-        "targetFramework"
+        "capabilities"
       ],
       "properties": {
         "name": {
@@ -192,7 +191,17 @@
           }
         },
         "targetFramework": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "runtime": {
+          "type": "string",
+          "enum": [
+            "assembly",
+            "process"
+          ]
         },
         "description": {
           "type": "string"

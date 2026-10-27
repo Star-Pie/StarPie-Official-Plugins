@@ -1,9 +1,9 @@
-{
+﻿{
   "sourceRepository": "Star-Pie/StarPie",
   "sourcePath": "plugin/sdk/StarPie.Plugin.Abstractions",
-  "sourceCommit": "bc91ff555f3740f482d883f32ae0d170b82e8eff",
-  "apiVersion": "1.11",
-  "syncedAt": "2026-10-10T14:27:42.3718149Z",
+  "sourceCommit": "67fce9eed6275110e0d8a337ed9061fb655e3838",
+  "apiVersion": "1.14",
+  "syncedAt": "2026-10-27T22:31:56.9328618Z",
   "retainedRepositoryMetadataExtensions": [
     "PluginManifest.Features",
     "PluginFeature"

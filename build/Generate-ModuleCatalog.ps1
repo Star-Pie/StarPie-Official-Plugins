@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
   [Parameter(Mandatory)][string]$ReleaseTag,
   [Parameter(Mandatory)][ValidateSet('stable','beta')][string]$ReleaseChannel,
@@ -95,6 +95,7 @@ foreach ($module in $enabled) {
             sha256 = $package.sha256
             size = [int64]$package.size
             apiVersion = if ($manifest.apiVersion) { $manifest.apiVersion } else { $package.apiVersion }
+            runtime = if ($manifest.runtime) { ([string]$manifest.runtime).Trim().ToLowerInvariant() } else { 'assembly' }
             targetFramework = $manifest.targetFramework
             minHostVersion = if ($manifest.minHostVersion) { $manifest.minHostVersion } else { $package.minHostVersion }
             maxHostVersion = $manifest.maxHostVersion
