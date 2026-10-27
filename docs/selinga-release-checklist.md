@@ -16,20 +16,61 @@
 
 ## 第 1 步：发布 Selinga，拿到哈希
 
+先构建并取哈希（这一步与是否有 `gh` 无关）：
+
 ```powershell
-# 在 Selinga-plugin 仓库
-git tag v0.5.0
-git push origin v0.5.0
-
-# 用构建产物做资产（二进制来自同一份源码，可复现）
+cd D:\IO\Rust_obj\Selinga-plugin
 cargo build --release -p selinga-app
-gh release create v0.5.0 ./target/release/selinga.exe --title "Selinga v0.5.0" --notes "识图翻译插件版"
-
-# 取哈希（小写十六进制）
 (Get-FileHash .\target\release\selinga.exe -Algorithm SHA256).Hash.ToLowerInvariant()
 ```
 
-**验收**：`gh release view v0.5.0 -R Sunse666/Selinga --json assets` 里能看到 `selinga.exe`，大小与本地一致。
+然后二选一发布。**资产名必须逐字是 `selinga.exe`**，否则 `payload.json` 的 `assetName` 对不上。
+
+### 方式 A：网页（无需任何 CLI）
+
+1. 打开 `https://github.com/Sunse666/Selinga/releases/new`
+2. Tag 填 `v0.5.0`，Target 选 `main`（或你发布版所在的分支）
+3. 标题写 `Selinga v0.5.0`
+4. **Attach binaries** 拖入 `target\release\selinga.exe`
+5. Publish release
+
+### 方式 B：REST API（可脚本化，只需一个 PAT）
+
+PAT 需要 `repo` 权限（fine-grained 则为 Contents: Read and write）。
+
+```powershell
+$repo  = 'Sunse666/Selinga'
+$token = Read-Host -AsSecureString
+$plain = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+           [Runtime.InteropServices.Marshal]::SecureStringToBSTR($token))
+$headers = @{ Authorization = "Bearer $plain"; 'X-GitHub-Api-Version' = '2022-11-28' }
+
+# 1) 建 release（tag 不存在时会按 target_commitish 自动创建）
+$body = @{ tag_name = 'v0.5.0'; name = 'Selinga v0.5.0'; target_commitish = 'main'; draft = $false } | ConvertTo-Json
+$release = Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/$repo/releases" `
+  -Headers $headers -ContentType 'application/json' -Body $body
+
+# 2) 上传资产（注意走 uploads.github.com 且用二进制流）
+$upload = "https://uploads.github.com/repos/$repo/releases/$($release.id)/assets?name=selinga.exe"
+Invoke-RestMethod -Method Post -Uri $upload -Headers $headers `
+  -ContentType 'application/octet-stream' `
+  -InFile '.\target\release\selinga.exe' | Out-Null
+```
+
+### 验收（同样不需要 gh）
+
+```powershell
+# 资产存在且大小一致
+$r = Invoke-RestMethod "https://api.github.com/repos/$repo/releases/tags/v0.5.0"
+$r.assets | Select-Object name, size, state
+
+# 或者最直接的：用打包脚本自己证明能下载到、哈希对得上
+./build/Fetch-ModulePayload.ps1 -ModuleId starpie.plugin.selinga `
+  -DestinationDirectory src/StarPie.Plugin.Selinga/bin/Release/net8.0-windows
+```
+
+最后那条是**最强验收**：不带 `-PayloadPath` 就说明走的是真实下载路径 + 哈希校验，
+它通过等于"第 1 步真的成功了"，而不只是"文件传上去了"。
 
 ## 第 2 步：更新 payload.json 并在本地打通
 
@@ -59,6 +100,9 @@ gh release create v0.5.0 ./target/release/selinga.exe --title "Selinga v0.5.0" -
 ```powershell
 gh variable set SIGNING_ENABLED --body "true" -R Star-Pie/StarPie-Official-Plugins
 ```
+
+没有 `gh` 时走网页：仓库 → **Settings → Secrets and variables → Actions → Variables → New repository variable**，
+名字 `SIGNING_ENABLED`，值 `true`。
 
 签名是 **keyless cosign**（GitHub OIDC），不需要自备密钥；工作流用 `sigstore/cosign-installer`，签完立即 `cosign verify-blob` 自证，身份固定在
 `release-modules.yml@<ref>`。所以**发布必须从该 ref 触发**（通常是 `main`），换分支会签出另一个身份。
@@ -92,8 +136,12 @@ gh workflow run release-modules.yml -R Star-Pie/StarPie-Official-Plugins \
   -f release_channel=beta -f catalog_base_channel=same -f module_ids=starpie.plugin.selinga -f dry_run=false
 ```
 
-**验收**：`gh release view modules-<tag> -R Star-Pie/StarPie-Official-Plugins --json assets` 中包含
-`module-catalog.json`、`module-catalog.sigstore.json`、`.spkg` 与 `.spkg.sigstore.json`。
+没有 `gh` 时，这两次触发都可以在网页上做：
+`https://github.com/Star-Pie/StarPie-Official-Plugins/actions/workflows/release-modules.yml`
+→ `Run workflow` → 选分支（**必须是第 4 步里那个 ref**）→ 填同样四个输入。空跑产物在该次 run 页面的 Artifacts 区下载。
+
+**验收**（网页即可）：`https://github.com/Star-Pie/StarPie-Official-Plugins/releases` 里最新那个
+`modules-<tag>` 的 Assets 应包含 `module-catalog.json`、`module-catalog.sigstore.json`、`.spkg` 与 `.spkg.sigstore.json`。
 
 ## 第 6 步：客户端验证
 
