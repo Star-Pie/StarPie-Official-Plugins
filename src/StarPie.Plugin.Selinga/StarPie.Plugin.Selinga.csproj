@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    进程插件的「打包工程」。
+    ==================================================================
+    runtime=process 的模块没有 C# 源码：它只是一个目录，里面放 plugin.json 与
+    由 payload.json 描述的可执行文件。之所以仍然保留一个 csproj，是因为整个构建
+    /打包/目录链路都以"工程 → bin/&lt;配置&gt;/&lt;TFM&gt; → .spkg"为骨架（见
+    Resolve-ModuleOutputDirectory），少了工程就得给这套流程开第二条路。
+
+    因此这里刻意不编译任何代码：EnableDefaultCompileItems=false，
+    产物里只需要 plugin.json 与 payload（payload 由 Fetch-ModulePayload.ps1
+    在打包前放进输出目录，不随源码分发）。
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <AssemblyName>StarPie.Plugin.Selinga</AssemblyName>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="plugin.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
