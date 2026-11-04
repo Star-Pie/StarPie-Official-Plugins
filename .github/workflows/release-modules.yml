@@ -378,3 +378,15 @@ jobs:
             release-metadata/module-catalog.json
             release-metadata/release-notes.md
           if-no-files-found: error
+
+  sync-atomgit:
+    name: Mirror published module release to AtomGit
+    needs: [select, compose]
+    if: ${{ !inputs.dry_run && vars.ATOMGIT_MIRROR_ENABLED == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/atomgit-release.yml
+    with:
+      tag: ${{ needs.select.outputs.release_tag }}
+    secrets:
+      ATOMGIT_TOKEN: ${{ secrets.ATOMGIT_TOKEN }}
