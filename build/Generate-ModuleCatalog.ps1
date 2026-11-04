@@ -6,7 +6,8 @@ param(
   [string]$PreviousCatalogPath = 'catalog/module-catalog.json',
   [Parameter(Mandatory)][string]$Repository,
   [Parameter(Mandatory)][string]$OutputPath,
-  [switch]$RequirePackageManifest
+  [switch]$RequirePackageManifest,
+  [AllowEmptyCollection()][string[]]$ReleasedModuleIds
 )
 
 $ErrorActionPreference = 'Stop'
@@ -16,6 +17,10 @@ Import-Module (Join-Path $PSScriptRoot 'StarPie.Catalog.psm1') -Force
 $root = Get-RepositoryRoot
 $registry = Get-ModuleRegistry
 $enabled = @(Get-EnabledModules -Registry $registry)
+$scopedRelease = $PSBoundParameters.ContainsKey('ReleasedModuleIds')
+$selected = if ($scopedRelease) { Get-CatalogReleaseSelection -ModuleIds $ReleasedModuleIds -EnabledModules $enabled }
+if ($scopedRelease -and -not $PSBoundParameters.ContainsKey('PreviousCatalogPath')) { throw 'Selected releases require an explicit history path (empty only when no history exists).' }
+if ($PreviousCatalogPath -and $PSBoundParameters.ContainsKey('PreviousCatalogPath') -and -not (Test-Path -LiteralPath $PreviousCatalogPath -PathType Leaf)) { throw "Previous catalog not found: $PreviousCatalogPath" }
 
 $packagesRaw = if (Test-Path -LiteralPath $PackagesJson) { Get-Content -LiteralPath $PackagesJson -Raw } else { $PackagesJson }
 $packages = @($packagesRaw | ConvertFrom-Json -Depth 100)
@@ -29,6 +34,7 @@ if ($PreviousCatalogPath -and (Test-Path -LiteralPath $PreviousCatalogPath)) {
     $previousCatalog = Read-JsonFile -Path $PreviousCatalogPath
     if ($previousCatalog.schemaVersion -notin @(1,2)) { throw "Unsupported previous catalog schema: $($previousCatalog.schemaVersion)" }
     foreach ($item in @($previousCatalog.modules)) {
+        if ($previousModules.ContainsKey($item.id)) { throw "Duplicate previous module: $($item.id)" }
         $previousModules[$item.id] = $item
     }
 }
@@ -57,10 +63,22 @@ function Get-ManifestMetadata {
 }
 
 $newPackages = @{}
-foreach ($package in $packages) { $newPackages[$package.id] = $package }
+foreach ($package in $packages) {
+    if ($newPackages.ContainsKey($package.id) -or ($scopedRelease -and -not $selected.Contains($package.id))) { throw "Duplicate or unrequested package: $($package.id)" }
+    $newPackages[$package.id] = $package
+}
+if ($scopedRelease) {
+    foreach ($id in $selected) { if (-not $newPackages.ContainsKey($id)) { throw "Selected package is missing: $id" } }
+}
 
 $catalogModules = @()
-foreach ($module in $enabled) {
+$catalogSources = @($enabled)
+if ($scopedRelease) {
+    # A single-module release must not implicitly withdraw disabled or removed source modules.
+    foreach ($id in $previousModules.Keys) { if ($enabled.id -cnotcontains $id) { $catalogSources += [pscustomobject]@{ id = $id } } }
+}
+foreach ($module in $catalogSources) {
+    if ($scopedRelease -and -not $selected.Contains($module.id) -and -not $previousModules.ContainsKey($module.id)) { continue }
     $entry = $null
     if ($newPackages.ContainsKey($module.id)) {
         $package = $newPackages[$module.id]
@@ -135,10 +153,10 @@ foreach ($module in $enabled) {
         $entry = [pscustomobject]$newVersion
     }
     $versions = @(Merge-CatalogVersions -Id $module.id -Previous $history -NewRelease $entry)
-    if (-not ($versions | Where-Object version -CEQ $module.version)) {
+    if ((-not $scopedRelease -or $selected.Contains($module.id)) -and -not ($versions | Where-Object version -CEQ $module.version)) {
         throw "Module '$($module.id)' requires version '$($module.version)', but no matching immutable package was supplied or retained."
     }
-    $catalogModules += [ordered]@{ id = $module.id; versions = $versions }
+    $catalogModules += [pscustomobject]@{ id = $module.id; versions = $versions }
 }
 
 $now = [DateTimeOffset]::UtcNow
@@ -153,5 +171,6 @@ $catalog = [ordered]@{
     modules = $catalogModules
 }
 
+if ($scopedRelease) { Assert-CatalogHistoryPreserved -Catalog ([pscustomobject]$catalog) -PreviousCatalog $previousCatalog -Selected $selected -EnabledModules $enabled }
 Write-JsonFile -Value $catalog -Path $OutputPath
 $catalog | ConvertTo-Json -Depth 100

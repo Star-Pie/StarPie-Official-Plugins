@@ -251,6 +251,7 @@ jobs:
         shell: pwsh
         env:
           PREVIOUS_CATALOG: ${{ needs.select.outputs.previous_catalog }}
+          CHANGED_IDS: ${{ needs.select.outputs.changed_ids }}
         run: |
           $catalogArgs = @{
             ReleaseTag = '${{ needs.select.outputs.release_tag }}'
@@ -259,12 +260,12 @@ jobs:
             Repository = '${{ github.repository }}'
             OutputPath = 'release-metadata/module-catalog.json'
             RequirePackageManifest = $true
-          }
-          if ($env:PREVIOUS_CATALOG -and (Test-Path -LiteralPath $env:PREVIOUS_CATALOG)) {
-            $catalogArgs.PreviousCatalogPath = $env:PREVIOUS_CATALOG
+            ReleasedModuleIds = @($env:CHANGED_IDS -split ',')
+            PreviousCatalogPath = $env:PREVIOUS_CATALOG
           }
           ./build/Generate-ModuleCatalog.ps1 @catalogArgs
-          ./build/Verify-Catalog.ps1 -CatalogPath 'release-metadata/module-catalog.json'
+          ./build/Verify-Catalog.ps1 -CatalogPath 'release-metadata/module-catalog.json' `
+            -ReleasedModuleIds $catalogArgs.ReleasedModuleIds -PreviousCatalogPath $env:PREVIOUS_CATALOG
 
       - name: Generate release notes
         shell: pwsh

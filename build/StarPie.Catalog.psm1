@@ -87,4 +87,65 @@ function Merge-CatalogVersions {
     return $versions.ToArray()
 }
 
-Export-ModuleMember -Function Get-CatalogProperty,ConvertTo-CatalogVersion,Compare-CatalogVersions,Get-CatalogVersions,Get-LatestCatalogVersion,Assert-CatalogRelease,Merge-CatalogVersions
+function Get-CatalogReleaseSelection {
+    param([AllowEmptyCollection()][string[]]$ModuleIds,[object[]]$EnabledModules)
+    $selected = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($value in $ModuleIds) {
+        foreach ($part in @($value -split ',')) {
+            $id = $part.Trim()
+            if (-not $id -or $EnabledModules.id -cnotcontains $id -or -not $selected.Add($id)) {
+                throw "Invalid, duplicate or disabled release module: $id"
+            }
+        }
+    }
+    if ($selected.Count -eq 0) { throw 'An explicit release selection must not be empty.' }
+    return ,$selected
+}
+
+function Assert-CatalogHistoryPreserved {
+    param([Parameter(Mandatory)]$Catalog,[object]$PreviousCatalog,[Parameter(Mandatory)]$Selected,[object[]]$EnabledModules)
+    $previous = @{}
+    $previousGroups = if ($null -ne $PreviousCatalog) { @($PreviousCatalog.modules) } else { @() }
+    foreach ($group in $previousGroups) {
+        if ($null -eq $group) { continue }
+        if ($previous.ContainsKey($group.id)) { throw "Duplicate previous module: $($group.id)" }
+        $previous[$group.id] = $group
+    }
+    $actual = @{}
+    foreach ($group in @($Catalog.modules)) {
+        if ($actual.ContainsKey($group.id) -or (-not $Selected.Contains($group.id) -and -not $previous.ContainsKey($group.id))) {
+            throw "Unexpected or duplicate module in selected release: $($group.id)"
+        }
+        $actual[$group.id] = $group
+    }
+    foreach ($id in $previous.Keys) {
+        if (-not $actual.ContainsKey($id)) { throw "Historical module was removed: $id" }
+        $oldVersions = @(Get-CatalogVersions $previous[$id])
+        $newVersions = @(Get-CatalogVersions $actual[$id])
+        foreach ($old in $oldVersions) {
+            $retained = @($newVersions | Where-Object version -CEQ $old.version)
+            if ($retained.Count -ne 1) { throw "Historical version was removed: $id $($old.version)" }
+            foreach ($property in $old.PSObject.Properties) {
+                if ($property.Name -eq 'id') { continue } # v1 entries have the ID on the release record.
+                $value = $retained[0].PSObject.Properties[$property.Name]
+                if ($null -eq $value -or
+                    (ConvertTo-Json -InputObject $property.Value -Depth 100 -Compress) -cne
+                    (ConvertTo-Json -InputObject $value.Value -Depth 100 -Compress)) {
+                    throw "Historical metadata was changed: $id $($old.version) $($property.Name)"
+                }
+            }
+        }
+        $expectedCount = $oldVersions.Count
+        if ($Selected.Contains($id)) {
+            $source = @($EnabledModules | Where-Object id -CEQ $id)[0]
+            if (-not ($oldVersions | Where-Object version -CEQ $source.version)) { $expectedCount++ }
+        }
+        if ($newVersions.Count -ne $expectedCount) { throw "Unrequested versions in selected release: $id" }
+    }
+    foreach ($id in $Selected) {
+        if (-not $actual.ContainsKey($id)) { throw "Selected module is missing: $id" }
+        if (-not $previous.ContainsKey($id) -and @($actual[$id].versions).Count -ne 1) { throw "Unexpected initial history: $id" }
+    }
+}
+
+Export-ModuleMember -Function Get-CatalogProperty,ConvertTo-CatalogVersion,Compare-CatalogVersions,Get-CatalogVersions,Get-LatestCatalogVersion,Assert-CatalogRelease,Merge-CatalogVersions,Get-CatalogReleaseSelection,Assert-CatalogHistoryPreserved
