@@ -17,9 +17,10 @@
   "claimedTypes": [],
   "contributions": { "actions": true, "icons": false, "i18n": true },
   "dependencies": [],
+  "tags": ["official", "input", "keyboard"],
   "features": [
     { "id": "show", "name": "呼出小键盘", "description": "连续点击输入，切换应用或按Esc关闭。", "category": "输入工具" },
     { "id": "configure", "name": "编辑自定义键盘", "description": "管理命名方案和全键盘模板和自定义按键行列。", "category": "配置" }
   ],
-  "release": { "enabled": false }
+  "release": { "enabled": true }
 }

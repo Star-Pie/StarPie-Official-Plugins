@@ -41,6 +41,12 @@ foreach ($moduleDirectory in Get-ChildItem -LiteralPath $sourceRoot -Directory |
     $firstClaim = @($claims | Select-Object -First 1)
     $contributionId = if ($firstClaim.Count -gt 0 -and $null -ne $firstClaim[0].PSObject.Properties['contributionId']) { [string]$firstClaim[0].contributionId } else { '' }
     if ([string]::IsNullOrWhiteSpace($contributionId)) { $contributionId = $fallbackContributionId }
+    # Some modules expose several actions from one plugin class rather than an
+    # *Action.cs file. Their manifest features provide explicit action identities.
+    if ([string]::IsNullOrWhiteSpace($contributionId)) {
+        $firstFeature = @($manifest.features | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_.id) } | Select-Object -First 1)
+        if ($firstFeature.Count -gt 0) { $contributionId = [string]$firstFeature[0].id }
+    }
     if ([string]::IsNullOrWhiteSpace($contributionId)) { throw "Unable to determine contributionId for '$($manifest.id)'." }
     $enabled = $true
     if ($manifest.release -and $null -ne $manifest.release.PSObject.Properties['enabled']) { $enabled = [bool]$manifest.release.enabled }
@@ -48,6 +54,9 @@ foreach ($moduleDirectory in Get-ChildItem -LiteralPath $sourceRoot -Directory |
         id = [string]$manifest.id; name = [string]$manifest.name; project = ConvertTo-NormalizedRelativePath -BasePath $root -Path $projectFile.FullName; assembly = [string]$manifest.assembly; targetFramework = [string]$manifest.targetFramework; version = [string]$manifest.version; pluginId = [string]$manifest.id; contributionId = $contributionId; entryType = [string]$manifest.entryType; typeClaims = @($typeClaims); capabilities = @($manifest.capabilities); releaseDirectory = $moduleDirectory.Name; description = [string]$manifest.description; author = [string]$manifest.author; license = if ($manifest.license) { [string]$manifest.license } else { 'MIT' }; homepage = [string]$manifest.homepage; icon = $manifest.icon; tags = @($manifest.tags); features = @($manifest.features); enabled = $enabled; apiVersion = [string]$manifest.apiVersion; minHostVersion = [string]$manifest.minHostVersion; maxHostVersion = $manifest.maxHostVersion; runtime = $runtime; command = @($manifest.command); actions = @($manifest.actions)
     }
 }
-$registry = [ordered]@{ schemaVersion = 1; sdkApiVersion = '1.14'; minimumHostVersion = '1.8.0-beta.1'; modules = $modules }
+$sdkSource = Get-Content -LiteralPath (Join-Path $root 'sdk/StarPie.Plugin.Abstractions/PluginApi.cs') -Raw -Encoding UTF8
+$sdkVersion = [regex]::Match($sdkSource, 'public\s+const\s+string\s+ApiVersion\s*=\s*"(?<version>\d+\.\d+)"')
+if (-not $sdkVersion.Success) { throw 'Unable to determine the committed SDK API version.' }
+$registry = [ordered]@{ schemaVersion = 1; sdkApiVersion = $sdkVersion.Groups['version'].Value; minimumHostVersion = '1.8.0-beta.1'; modules = $modules }
 Write-JsonFile -Value $registry -Path $OutputPath
 Write-Host "Generated $($modules.Count) modules from plugin.json into $OutputPath"

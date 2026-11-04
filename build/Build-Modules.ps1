@@ -44,6 +44,14 @@ foreach ($module in $modules) {
 
     if ($RunTests) {
         $testsRoot = Join-Path $root 'tests'
+        # Explicit module runners can supply isolated storage and candidate
+        # arguments required by offscreen UI tests; generic tests stay unchanged.
+        $validationRunner = Join-Path $testsRoot ($module.id + '/Validate-Module.ps1')
+        if (Test-Path -LiteralPath $validationRunner) {
+            & $validationRunner -Configuration $Configuration -ModuleOutputDirectory (Resolve-ModuleOutputDirectory -Module $module -Configuration $Configuration)
+            if (-not $?) { throw "Module validation failed for '$($module.id)'." }
+            continue
+        }
         $candidates = @()
         if (Test-Path -LiteralPath $testsRoot) {
             $candidates = @(Get-ChildItem -LiteralPath $testsRoot -Recurse -Filter '*.csproj' -File | Where-Object {

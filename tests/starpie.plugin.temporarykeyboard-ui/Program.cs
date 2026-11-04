@@ -19,6 +19,10 @@ internal static class Program
         if (args.Length != 2) throw new ArgumentException("plugin-dll sha256 required");
         string path = Path.GetFullPath(args[0]);
         Check(Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))) == args[1], "Candidate plugin hash");
+        string? sdkHash = Environment.GetEnvironmentVariable("KEYBOARD_EXPECTED_SDK_SHA256");
+        if (sdkHash != null)
+            Check(Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(IPluginContext).Assembly.Location))) == sdkHash,
+                "Loaded SDK matches the explicit validation candidate");
         Assembly assembly = Assembly.LoadFrom(path);
         _ = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         var panels = new PanelFake();
