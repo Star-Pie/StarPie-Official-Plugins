@@ -15,7 +15,10 @@ Assert-Condition ((Compare-CatalogVersions '1.8.0-beta.10' '1.8.0-beta.5') -gt 0
 Assert-Condition ((Compare-CatalogVersions '1.0.0-alpha.1' '1.0.0-alpha.beta') -lt 0) 'numeric identifiers must precede strings'
 Assert-Condition ((Compare-CatalogVersions '1.0.0+one' '1.0.0+two') -eq 0) 'build metadata changes priority'
 Assert-Fails { ConvertTo-CatalogVersion '1.0.0-beta.01' }
-& (Join-Path $root 'build\Import-ModuleRegistryFromSource.ps1') | Out-Null
+$previousRegistryOverride=$env:STARPIE_MODULE_REGISTRY
+try {
+$env:STARPIE_MODULE_REGISTRY=Join-Path $OutputRoot 'module-registry.json'
+& (Join-Path $root 'build\Import-ModuleRegistryFromSource.ps1') -OutputPath $env:STARPIE_MODULE_REGISTRY | Out-Null
 $registry = Get-ModuleRegistry
 $modules = @(Get-EnabledModules $registry)
 $records = @()
@@ -94,6 +97,81 @@ foreach($group in $second.modules){
     Assert-Condition ($retained.Count -eq 1 -and ($group.versions | ConvertTo-Json -Depth 100 -Compress) -ceq ($retained[0].versions | ConvertTo-Json -Depth 100 -Compress)) "stable promotion changed history for $($group.id)"
 }
 $args.ReleaseChannel='beta'
+# A selected release must retain old packages without publishing other pending source modules.
+$partialPrevious=$second | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
+$selectedId='starpie.plugin.temporarykeyboard'
+$unreleasedIds=@('starpie.plugin.qrscanner','starpie.plugin.selinga')
+$partialPrevious.modules=@($partialPrevious.modules | Where-Object { $_.id -ne $selectedId -and $_.id -notin $unreleasedIds })
+$partialLaunch=@($partialPrevious.modules | Where-Object id -EQ $launch.id)[0]
+$partialLaunch.versions=@($partialLaunch.versions | Where-Object version -EQ '1.0.1')
+$partialPreviousPath=Join-Path $OutputRoot 'partial-previous.json';Write-JsonFile $partialPrevious $partialPreviousPath
+$partialPackagesPath=Join-Path $OutputRoot 'partial-packages.json';Write-JsonFile @($records | Where-Object id -EQ $selectedId) $partialPackagesPath
+$partialArgs=@{ReleaseTag='partial-test';ReleaseChannel='beta';PackagesJson=$partialPackagesPath;PreviousCatalogPath=$partialPreviousPath;Repository='Star-Pie/StarPie-Official-Plugins';OutputPath=(Join-Path $OutputRoot 'partial.json');RequirePackageManifest=$true}
+Assert-Fails { & (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @partialArgs }
+$partialArgs.ReleasedModuleIds=@($selectedId)
+& (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @partialArgs | Out-Null
+$verifyPartial=@{CatalogPath=$partialArgs.OutputPath;ReleasedModuleIds=@($selectedId);PreviousCatalogPath=$partialPreviousPath}
+& (Join-Path $root 'build\Verify-Catalog.ps1') @verifyPartial
+$partial=Read-JsonFile $partialArgs.OutputPath
+Assert-Condition ($partial.modules.Count -eq $modules.Count-2) 'partial release included unrequested new modules or lost retained modules'
+Assert-Condition ((@($partial.modules | Where-Object id -EQ $selectedId)[0]).versions[0].releaseTag -eq 'partial-test') 'selected package was not included'
+foreach($group in $partialPrevious.modules){
+    $retained=@($partial.modules | Where-Object id -CEQ $group.id)[0]
+    Assert-Condition (($group.versions | ConvertTo-Json -Depth 100 -Compress) -ceq ($retained.versions | ConvertTo-Json -Depth 100 -Compress)) "partial release changed unselected history: $($group.id)"
+}
+Assert-Fails { & (Join-Path $root 'build\Verify-Catalog.ps1') -CatalogPath $partialArgs.OutputPath }
+Assert-Fails { & (Join-Path $root 'build\Verify-Catalog.ps1') -CatalogPath $partialArgs.OutputPath -ReleasedModuleIds $selectedId }
+$badPartial=$partial | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
+$badPartial.modules=@($badPartial.modules | Where-Object id -NE $launch.id)
+$badPath=Join-Path $OutputRoot 'partial-missing-history.json';Write-JsonFile $badPartial $badPath
+Assert-Fails { & (Join-Path $root 'build\Verify-Catalog.ps1') -CatalogPath $badPath -ReleasedModuleIds $selectedId -PreviousCatalogPath $partialPreviousPath }
+$badPartial=$partial | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
+(@($badPartial.modules | Where-Object id -EQ $launch.id)[0]).versions[0].minHostVersion='1.0.0'
+$badPath=Join-Path $OutputRoot 'partial-altered-history.json';Write-JsonFile $badPartial $badPath
+Assert-Fails { & (Join-Path $root 'build\Verify-Catalog.ps1') -CatalogPath $badPath -ReleasedModuleIds $selectedId -PreviousCatalogPath $partialPreviousPath }
+$partialArgs.PackagesJson=$emptyPath
+Assert-Fails { & (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @partialArgs }
+$partialArgs.PackagesJson=$packagesPath
+Assert-Fails { & (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @partialArgs }
+$partialArgs.PackagesJson=$partialPackagesPath;$partialArgs.ReleasedModuleIds=@('starpie.unknown')
+Assert-Fails { & (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @partialArgs }
+$partialArgs.ReleasedModuleIds=@()
+Assert-Fails { & (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @partialArgs }
+$partialArgs.ReleasedModuleIds=@($selectedId,$selectedId)
+Assert-Fails { & (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @partialArgs }
+$partialArgs.ReleasedModuleIds=@($selectedId)
+$duplicatePackagesPath=Join-Path $OutputRoot 'partial-duplicate-packages.json'
+$selectedRecord=@($records | Where-Object id -CEQ $selectedId)[0]
+Write-JsonFile @($selectedRecord,$selectedRecord) $duplicatePackagesPath
+$partialArgs.PackagesJson=$duplicatePackagesPath
+Assert-Fails { & (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @partialArgs }
+$partialArgs.PackagesJson=$partialPackagesPath
+$disabledRegistry=$registry | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
+(@($disabledRegistry.modules | Where-Object id -CEQ $selectedId)[0]).enabled=$false
+$disabledRegistryPath=Join-Path $OutputRoot 'disabled-registry.json';Write-JsonFile $disabledRegistry $disabledRegistryPath
+$savedRegistry=$env:STARPIE_MODULE_REGISTRY
+try {
+    $env:STARPIE_MODULE_REGISTRY=$disabledRegistryPath
+    Assert-Fails { & (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @partialArgs }
+} finally { $env:STARPIE_MODULE_REGISTRY=$savedRegistry }
+$extraVersion=$partial | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
+(@($extraVersion.modules | Where-Object id -CEQ $launch.id)[0]).versions += $launch.versions[0]
+$extraPath=Join-Path $OutputRoot 'partial-unrequested-version.json';Write-JsonFile $extraVersion $extraPath
+Assert-Fails { & (Join-Path $root 'build\Verify-Catalog.ps1') -CatalogPath $extraPath -ReleasedModuleIds $selectedId -PreviousCatalogPath $partialPreviousPath }
+# Historical modules survive source removal; only a separately approved withdrawal may drop them.
+$retired=$partialPrevious.modules[0] | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
+$retired.id='starpie.retired.fixture'
+$partialPrevious.modules += $retired;Write-JsonFile $partialPrevious $partialPreviousPath
+& (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @partialArgs | Out-Null
+& (Join-Path $root 'build\Verify-Catalog.ps1') @verifyPartial
+$retainedRetired=@((Read-JsonFile $partialArgs.OutputPath).modules | Where-Object id -CEQ $retired.id)
+Assert-Condition ($retainedRetired.Count -eq 1 -and ($retainedRetired[0].versions | ConvertTo-Json -Depth 100 -Compress) -ceq ($retired.versions | ConvertTo-Json -Depth 100 -Compress)) 'source-removed history lost or changed'
+$partialArgs.PreviousCatalogPath=Join-Path $OutputRoot 'missing-history.json'
+Assert-Fails { & (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @partialArgs }
+$partialArgs.PreviousCatalogPath=''
+& (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @partialArgs | Out-Null
+& (Join-Path $root 'build\Verify-Catalog.ps1') -CatalogPath $partialArgs.OutputPath -ReleasedModuleIds $selectedId -PreviousCatalogPath ''
+Assert-Condition (@((Read-JsonFile $partialArgs.OutputPath).modules).Count -eq 1) 'explicit initial release included unselected modules'
 # 移行 v1 输入，但 v2 输出绝不保留默认包。
 $v1=$first | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
 $v1.schemaVersion=1
@@ -126,12 +204,30 @@ $global:fixtureCatalogs['older']=$older
 function global:gh {
     $arguments=@($args);$global:LASTEXITCODE=0
     if($arguments[1] -eq 'list'){return '[{"tagName":"recent","publishedAt":"2026-09-30T00:00:00Z"},{"tagName":"older","publishedAt":"2026-09-29T00:00:00Z"}]'}
+    if($arguments[1] -eq 'view'){return 'module-catalog.json'}
     if($arguments[1] -eq 'download'){$directory=$arguments[[Array]::IndexOf($arguments,'--dir')+1];New-Item -ItemType Directory -Path $directory -Force | Out-Null;[IO.File]::WriteAllText((Join-Path $directory 'module-catalog.json'),($global:fixtureCatalogs[$arguments[2]] | ConvertTo-Json -Depth 100));return}
     throw 'Unexpected gh call in test.'
 }
 $previousResult=& (Join-Path $root 'build\Get-PreviousCatalog.ps1') -Channel beta -Repository Star-Pie/StarPie-Official-Plugins -OutputDirectory (Join-Path $OutputRoot 'bootstrap')
 $boot=Read-JsonFile $previousResult
 Assert-Condition ($boot.schemaVersion -eq 2 -and (@($boot.modules | Where-Object id -EQ $launch.id)[0]).versions.Count -eq 2) 'v1 bootstrap lost superseded versions'
+$global:fixtureCatalogs['recent'].releaseTag='wrong-tag'
+Assert-Fails { & (Join-Path $root 'build\Get-PreviousCatalog.ps1') -Channel beta -Repository Star-Pie/StarPie-Official-Plugins -OutputDirectory (Join-Path $OutputRoot 'invalid-tag') }
+$global:fixtureCatalogs['recent'].releaseTag='recent';$global:fixtureCatalogs['recent'].schemaVersion=99
+Assert-Fails { & (Join-Path $root 'build\Get-PreviousCatalog.ps1') -Channel beta -Repository Star-Pie/StarPie-Official-Plugins -OutputDirectory (Join-Path $OutputRoot 'unsupported-schema') }
 Remove-Item -LiteralPath Function:\gh
-& (Join-Path $PSScriptRoot 'Validate-ReleaseNotes.ps1')
+# Query and asset-download failures must not masquerade as an empty release history.
+function global:gh { $global:LASTEXITCODE=1;return '' }
+try { Assert-Fails { & (Join-Path $root 'build\Get-PreviousCatalog.ps1') -Channel beta -Repository Star-Pie/StarPie-Official-Plugins -OutputDirectory (Join-Path $OutputRoot 'query-failure') } }
+finally { Remove-Item -LiteralPath Function:\gh }
+function global:gh {
+    $global:LASTEXITCODE=0
+    if($args[1] -eq 'list'){return '[{"tagName":"recent","publishedAt":"2026-09-30T00:00:00Z"}]'}
+    if($args[1] -eq 'view'){return 'module-catalog.json'}
+    $global:LASTEXITCODE=1;return ''
+}
+try { Assert-Fails { & (Join-Path $root 'build\Get-PreviousCatalog.ps1') -Channel beta -Repository Star-Pie/StarPie-Official-Plugins -OutputDirectory (Join-Path $OutputRoot 'download-failure') } }
+finally { Remove-Item -LiteralPath Function:\gh }
+& (Join-Path $PSScriptRoot 'Validate-ReleaseNotes.ps1') -OutputRoot (Join-Path $OutputRoot 'release-notes')
 Write-Host "PASS: $script:checks catalog publisher/schema/history checks; all assets are local fixtures. Output: $OutputRoot"
+} finally { $env:STARPIE_MODULE_REGISTRY=$previousRegistryOverride }

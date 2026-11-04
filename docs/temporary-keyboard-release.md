@@ -18,3 +18,5 @@
 ```
 
 发行使用`Release Official Module Set`，选择`beta`、模块`starpie.plugin.temporarykeyboard`；首次先执行dry-run验证打包和目录合成。发布后须核对GitHub及AtomGit附件、SHA-256、实际目录兼容筛选和用户安装确认；不把本地验证或草稿当作已发布。
+
+首次小键盘发行以`stable`作为`catalog_base_channel`，继承该通道已发布的完整不可变历史，仅构建选定的小键盘。工作流向生成及校验器传递同一`ReleasedModuleIds`和显式历史路径：选中集合与新包精确一致，未选源码模块不补发；既有模块即使源码已禁用或移除也保留历史，不能借单插件发行下架。省略选择参数的本地工具调用保留原有全量严格检查。GitHub历史查询或目录下载失败时立即中止，不能退回空历史或本地bootstrap冒充可信线上基线。

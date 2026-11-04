@@ -10,16 +10,21 @@ $outputRoot=[IO.Path]::GetFullPath($OutputDirectory)
 New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
 $catalogPath=Join-Path $outputRoot 'module-catalog.json'
 $releasesJson=gh release list --repo $Repository --exclude-drafts --limit 1000 --json tagName,isPrerelease,publishedAt,createdAt
+if($LASTEXITCODE -ne 0){throw 'Unable to list released catalogs; do not treat a query failure as empty history.'}
 $latest=$null; $history=@{}
 if($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($releasesJson)){
     foreach($release in @($releasesJson | ConvertFrom-Json | Sort-Object publishedAt -Descending)){
         $tag=[string]$release.tagName;if(-not $tag){continue}
+        $assetNames=@(gh release view $tag --repo $Repository --json assets --jq '.assets[].name')
+        if($LASTEXITCODE -ne 0){throw "Unable to inspect released assets: $tag"}
+        if($assetNames -cnotcontains 'module-catalog.json'){continue}
         $rawDir=Join-Path $outputRoot ('raw-'+[guid]::NewGuid().ToString('N'))
         gh release download $tag --repo $Repository --pattern 'module-catalog.json' --dir $rawDir --clobber 2>$null
         $rawPath=Join-Path $rawDir 'module-catalog.json'
-        if($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $rawPath)){continue}
-        try{$catalog=Get-Content -LiteralPath $rawPath -Raw | ConvertFrom-Json -Depth 100}catch{Write-Warning "Skipping invalid catalog in $tag";continue}
-        if($catalog.releaseTag -ne $tag -or $catalog.releaseChannel -ne $Channel -or $catalog.schemaVersion -notin @(1,2)){continue}
+        if($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $rawPath)){throw "Unable to download released catalog: $tag"}
+        $catalog=Get-Content -LiteralPath $rawPath -Raw | ConvertFrom-Json -Depth 100
+        if($catalog.releaseTag -cne $tag -or $catalog.schemaVersion -notin @(1,2) -or $catalog.releaseChannel -notin @('stable','beta')){throw "Invalid released catalog identity or schema: $tag"}
+        if($catalog.releaseChannel -cne $Channel){continue}
         if($null -eq $latest){
             $latest=$catalog
             # v2 已携带累积历史，不必重复下载全部发布目录。
