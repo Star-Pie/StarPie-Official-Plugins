@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>test_temporary_keyboard_models</AssemblyName>
+    <RootNamespace>StarPie.Plugin.TemporaryKeyboard.Tests</RootNamespace>
+    <IsPluginRegressionTest>true</IsPluginRegressionTest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\src\StarPie.Plugin.TemporaryKeyboard\KeyboardModels.cs" Link="KeyboardModels.cs" />
+    <Compile Include="..\..\src\StarPie.Plugin.TemporaryKeyboard\KeyboardLayouts.cs" Link="KeyboardLayouts.cs" />
+    <Compile Include="..\..\src\StarPie.Plugin.TemporaryKeyboard\KeyboardSchemes.cs" Link="KeyboardSchemes.cs" />
+    <Compile Include="..\..\src\StarPie.Plugin.TemporaryKeyboard\KeyboardSchemeStorage.cs" Link="KeyboardSchemeStorage.cs" />
+  </ItemGroup>
+</Project>

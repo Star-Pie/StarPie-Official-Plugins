@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <IsPluginRegressionTest>true</IsPluginRegressionTest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="StarPie.Plugin.Abstractions"><HintPath>$(StarPieCandidateDir)\StarPie.Plugin.Abstractions.dll</HintPath><Private>true</Private></Reference>
+  </ItemGroup>
+  <Target Name="RequireCandidate" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="'$(StarPieCandidateDir)' == '' or !Exists('$(StarPieCandidateDir)\StarPie.dll')" Text="Explicit host candidate required." />
+  </Target>
+</Project>
