@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <AssemblyName>StarPie.Plugin.TemporaryKeyboard</AssemblyName>
+    <RootNamespace>StarPie.Plugin.TemporaryKeyboard</RootNamespace>
+    <Version>0.1.0</Version>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.WindowsDesktop.App.WPF" />
+    <ProjectReference Include="../../sdk/StarPie.Plugin.Abstractions/StarPie.Plugin.Abstractions.csproj"><Private>false</Private></ProjectReference>
+    <None Update="plugin.json" CopyToOutputDirectory="PreserveNewest" />
+    <AssemblyMetadata Include="StarPiePluginId" Value="starpie.plugin.temporarykeyboard" />
+    <AssemblyMetadata Include="StarPiePluginName" Value="临时小键盘" />
+    <AssemblyMetadata Include="StarPiePluginCapabilities" Value="Ui;InputSimulation" />
+    <AssemblyMetadata Include="StarPiePluginApiVersion" Value="1.15" />
+    <AssemblyMetadata Include="StarPiePluginMinHostVersion" Value="2.0.1-beta.4" />
+    <AssemblyMetadata Include="StarPiePluginLicense" Value="MIT" />
+  </ItemGroup>
+</Project>
