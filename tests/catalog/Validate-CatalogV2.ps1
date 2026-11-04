@@ -16,6 +16,8 @@ Assert-Condition ((Compare-CatalogVersions '1.0.0-alpha.1' '1.0.0-alpha.beta') -
 Assert-Condition ((Compare-CatalogVersions '1.0.0+one' '1.0.0+two') -eq 0) 'build metadata changes priority'
 Assert-Fails { ConvertTo-CatalogVersion '1.0.0-beta.01' }
 $previousRegistryOverride=$env:STARPIE_MODULE_REGISTRY
+$nativeExitVariable=Get-Variable LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue
+$previousNativeExit=if($null -eq $nativeExitVariable){0}else{$nativeExitVariable.Value}
 try {
 $env:STARPIE_MODULE_REGISTRY=Join-Path $OutputRoot 'module-registry.json'
 & (Join-Path $root 'build\Import-ModuleRegistryFromSource.ps1') -OutputPath $env:STARPIE_MODULE_REGISTRY | Out-Null
@@ -230,4 +232,8 @@ try { Assert-Fails { & (Join-Path $root 'build\Get-PreviousCatalog.ps1') -Channe
 finally { Remove-Item -LiteralPath Function:\gh }
 & (Join-Path $PSScriptRoot 'Validate-ReleaseNotes.ps1') -OutputRoot (Join-Path $OutputRoot 'release-notes')
 Write-Host "PASS: $script:checks catalog publisher/schema/history checks; all assets are local fixtures. Output: $OutputRoot"
-} finally { $env:STARPIE_MODULE_REGISTRY=$previousRegistryOverride }
+} finally {
+    $env:STARPIE_MODULE_REGISTRY=$previousRegistryOverride
+    # Mock gh failures are asserted above; do not leak their exit code to the Actions pwsh wrapper.
+    $global:LASTEXITCODE=$previousNativeExit
+}
