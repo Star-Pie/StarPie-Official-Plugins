@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <AssemblyName>StarPie.Plugin.QuickSearch</AssemblyName>
     <UseWPF>true</UseWPF>
     <Version>0.2.2</Version>
     <StarPieSdkProject Condition="'$(StarPieSdkProject)' == ''">$(MSBuildThisFileDirectory)..\..\sdk\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj</StarPieSdkProject>
