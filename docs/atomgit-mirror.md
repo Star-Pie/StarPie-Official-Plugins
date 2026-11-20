@@ -1,10 +1,14 @@
 # 官方插件 AtomGit 镜像
 
-目标仓库：https://gitcode.com/Star-Pie/StarPie-Official-Plugins 。代码已由用户导入；这不代表发行附件已同步。2026-11-04 的匿名 API 检查返回空 Release 列表。以下说明介绍代码镜像与发行附件同步的配置和首次验收；实际运行前需将工作流审核合并到 GitHub 默认分支。
+GitHub 主仓库和 AtomGit 镜像均提供源码。两端的插件安装包可在各自的发行页查看。[GitHub](https://github.com/Star-Pie/StarPie-Official-Plugins) · [AtomGit](https://atomgit.com/Star-Pie/StarPie-Official-Plugins)
 
 ## 一、保持代码和标签同步
 
-在 AtomGit 项目的设置中配置 GitHub URL 的 Pull 仓库镜像，源地址为 `https://github.com/Star-Pie/StarPie-Official-Plugins.git`。首次运行附件同步前，先同步代码及全部需要的 tag。
+AtomGit 的原生 Pull 镜像负责从 GitHub 拉取提交、分支和标签。可在 AtomGit 的「项目设置 → 仓库镜像 → Pull」查看来源与最近同步结果。两个平台的 `main` 指向同一提交时，README 与该提交的源码树也一致。
+
+GitHub Actions 的「Verify AtomGit mirror」每天运行一次，也可在 `main` 手动运行。源码检查通过公开 Git 引用读取两端的实时提交号；检测到差异时会短暂复查，并在日志中列出两端 SHA。若差异持续，请检查 Pull 镜像的状态，在拉取完成后复验。
+
+手动运行时勾选 `audit_releases` 可另外核对历史发行版、附件清单及元数据。该步骤单独使用 `ATOMGIT_TOKEN`。复制发行附件和校验文件内容沿用「Sync Release to AtomGit」工作流。
 
 附件工作流核对两边 tag 指向的 commit；标签未同步或 commit 不一致时停止，不创建或移动标签。
 
