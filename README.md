@@ -28,199 +28,52 @@ v2.0.0 通过客户端目录下载和校验官方插件。在 v2.0.1-beta.4 中�
 
 ## 模块一览
 
-**主线共有 22 个源码模块。** 下方图册展示 v2.0.0 的 19 个插件。另有[临时小键盘](src/StarPie.Plugin.TemporaryKeyboard)、[识图翻译](src/StarPie.Plugin.Selinga)和[快速搜索](src/StarPie.Plugin.QuickSearch)的源码。快速搜索 0.2.2 独立索引所选磁盘和目录，无需 Everything；当前发布目录尚未提供它的安装包。
+下列 19 个插件按用途分组。点击插件名，可查看它在 StarPie v2.0.0 中的配置入口、示例和完整截图。[浏览完整配置图册](docs/plugin-configuration-gallery.md)
 
-点击图册图片可查看对应插件的配置说明。
-截图来自 StarPie v2.0.0 的独立示例配置，未执行插件动作；窗口类功能共用「窗口管理」配置入口。
-
-[启动与文件](#启动与文件) · [窗口管理](#窗口管理) · [系统与识别](#系统与识别) · [输入与桌面扩展](#输入与桌面扩展) · [完整配置图册](docs/plugin-configuration-gallery.md)
+[启动与文件](#启动与文件) · [窗口管理](#窗口管理) · [系统与识别](#系统与识别) · [输入与桌面扩展](#输入与桌面扩展)
 
 ### 启动与文件
 
-<table>
-<tr>
-<td width="50%" valign="top">
-
-<b>启动程序</b> · <code>1.1.1</code>
-<p>一个方向，打开常用程序。</p>
-<a href="docs/plugin-configuration-gallery.md#launch"><img src="docs/media/screenshots/launch-preview.png" alt="启动程序：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#launch">查看配置 →</a></p>
-</td>
-<td width="50%" valign="top">
-
-<b>打开文件夹</b> · <code>1.0.1</code>
-<p>直达工作目录，少翻几层文件夹。</p>
-<a href="docs/plugin-configuration-gallery.md#folder"><img src="docs/media/screenshots/folder-preview.png" alt="打开文件夹：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#folder">查看配置 →</a></p>
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-<b>打开网址</b> · <code>1.0.1</code>
-<p>为常用网页留一个轮盘入口。</p>
-<a href="docs/plugin-configuration-gallery.md#weburl"><img src="docs/media/screenshots/weburl-preview.png" alt="打开网址：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#weburl">查看配置 →</a></p>
-</td>
-<td width="50%" valign="top">
-
-<b>运行命令</b> · <code>1.1.1</code>
-<p>把常用命令收进轮盘。</p>
-<a href="docs/plugin-configuration-gallery.md#command"><img src="docs/media/screenshots/command-preview.png" alt="运行命令：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#command">查看配置 →</a></p>
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-<b>系统与右键工具</b> · <code>1.1.1</code>
-<p>按分类查找系统工具与右键功能。</p>
-<a href="docs/plugin-configuration-gallery.md#shelltool"><img src="docs/media/screenshots/shelltool-preview.png" alt="系统与右键工具：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#shelltool">查看配置 →</a></p>
-</td>
-<td width="50%" valign="top">
-<p><b>按需安装，随时调整。</b></p>
-<p>在「插件与扩展」管理模块，在「手势动作」绑定到轮盘。</p>
-</td>
-</tr>
-</table>
+| 插件 | 用途 |
+| --- | --- |
+| [启动程序](docs/plugin-configuration-gallery.md#launch) | 从轮盘启动指定程序，可附带启动参数。 |
+| [打开文件夹](docs/plugin-configuration-gallery.md#folder) | 直接打开项目目录、下载目录等常用位置。 |
+| [打开网址](docs/plugin-configuration-gallery.md#weburl) | 用默认或指定的浏览器打开常用网页。 |
+| [运行命令](docs/plugin-configuration-gallery.md#command) | 在选定的终端中运行预设命令。 |
+| [系统与右键工具](docs/plugin-configuration-gallery.md#shelltool) | 从工具库中挑选系统工具或右键菜单功能，绑定到扇区。 |
 
 ### 窗口管理
 
-<table>
-<tr>
-<td width="50%" valign="top">
+在「手势动作 → 窗口管理」中选择对应模式。
 
-<b>切换窗口</b> · <code>1.0.1</code>
-<p>按任务栏位置切换窗口。</p>
-<a href="docs/plugin-configuration-gallery.md#switchwindow"><img src="docs/media/screenshots/switchwindow-preview.png" alt="切换窗口：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#switchwindow">查看配置 →</a></p>
-</td>
-<td width="50%" valign="top">
-
-<b>窗口移到下一屏</b> · <code>1.0.1</code>
-<p>把活动窗口移到下一台显示器。</p>
-<a href="docs/plugin-configuration-gallery.md#movemonitor"><img src="docs/media/screenshots/movemonitor-preview.png" alt="窗口移到下一屏：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#movemonitor">查看配置 →</a></p>
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-<b>平铺窗口</b> · <code>1.0.1</code>
-<p>给窗口安排更合适的位置。</p>
-<a href="docs/plugin-configuration-gallery.md#tile"><img src="docs/media/screenshots/tile-preview.png" alt="平铺窗口：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#tile">查看配置 →</a></p>
-</td>
-<td width="50%" valign="top">
-
-<b>窗口置顶/取消置顶</b> · <code>1.0.1</code>
-<p>让当前窗口保持在前。</p>
-<a href="docs/plugin-configuration-gallery.md#toggletopmost"><img src="docs/media/screenshots/toggletopmost-preview.png" alt="窗口置顶/取消置顶：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#toggletopmost">查看配置 →</a></p>
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-<b>窗口透明度</b> · <code>1.0.1</code>
-<p>用预设或滑块调整不透明度。</p>
-<a href="docs/plugin-configuration-gallery.md#windowopacity"><img src="docs/media/screenshots/windowopacity-preview.png" alt="窗口透明度：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#windowopacity">查看配置 →</a></p>
-</td>
-<td width="50%" valign="top">
-<p><b>按需安装，随时调整。</b></p>
-<p>在「插件与扩展」管理模块，在「手势动作」绑定到轮盘。</p>
-</td>
-</tr>
-</table>
+| 插件 | 用途 |
+| --- | --- |
+| [切换窗口](docs/plugin-configuration-gallery.md#switchwindow) | 切换到任务栏中指定序号的窗口。 |
+| [窗口移到下一屏](docs/plugin-configuration-gallery.md#movemonitor) | 把活动窗口移到下一台显示器。 |
+| [平铺窗口](docs/plugin-configuration-gallery.md#tile) | 按预设布局排列窗口，例如左右对半。 |
+| [窗口置顶/取消置顶](docs/plugin-configuration-gallery.md#toggletopmost) | 让当前窗口保持在前，再次触发可取消置顶。 |
+| [窗口透明度](docs/plugin-configuration-gallery.md#windowopacity) | 通过预设值或滑块调整窗口的不透明度。 |
 
 ### 系统与识别
 
-<table>
-<tr>
-<td width="50%" valign="top">
-
-<b>系统控制</b> · <code>1.0.1</code>
-<p>任务视图等系统入口，触手可及。</p>
-<a href="docs/plugin-configuration-gallery.md#system"><img src="docs/media/screenshots/system-preview.png" alt="系统控制：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#system">查看配置 →</a></p>
-</td>
-<td width="50%" valign="top">
-
-<b>截屏识字 (OCR)</b> · <code>1.0.1</code>
-<p>把屏幕里的文字变成可用文本。</p>
-<a href="docs/plugin-configuration-gallery.md#ocr"><img src="docs/media/screenshots/ocr-preview.png" alt="截屏识字 (OCR)：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#ocr">查看配置 →</a></p>
-</td>
-</tr>
-</table>
+| 插件 | 用途 |
+| --- | --- |
+| [系统控制](docs/plugin-configuration-gallery.md#system) | 从轮盘打开任务视图等系统功能。 |
+| [截屏识字（OCR）](docs/plugin-configuration-gallery.md#ocr) | 提取屏幕上的文字，可在「接口配置」中选择识别引擎。 |
+| [二维码扫描](docs/plugin-configuration-gallery.md#qrscanner) | 识别鼠标附近或框选区域内的二维码，先预览内容再选择操作。 |
 
 ### 输入与桌面扩展
 
-<table>
-<tr>
-<td width="50%" valign="top">
+| 插件 | 用途 |
+| --- | --- |
+| [按键宏与多步骤脚本](docs/plugin-configuration-gallery.md#macro) | 将按键、等待和文本输入编排成一个动作。 |
+| [按键映射](docs/plugin-configuration-gallery.md#keypadlayer) | 把左手键区映射成数字小键盘，例如用 Q、W、E 输入 7、8、9。 |
+| [CAD 模拟按键与命令输入](docs/plugin-configuration-gallery.md#cadcommand) | 向 CAD 输入命令，例如发送 `_LINE` 后按 Enter。 |
+| [桌宠](docs/plugin-configuration-gallery.md#desktoppet) | 从桌面伙伴唤出轮盘，可调整素材、动画和显示大小。 |
+| [悬浮球](docs/plugin-configuration-gallery.md#floatingball) | 用可拖动的悬浮球呼出轮盘，可调整大小、颜色和透明度。 |
+| [轮盘音效](docs/plugin-configuration-gallery.md#sound) | 为轮盘展开、选择、确认和取消等操作分别设置声音。 |
 
-<b>按键宏与多步骤脚本</b> · <code>1.0.0</code>
-<p>将多个输入步骤编排成一个动作。</p>
-<a href="docs/plugin-configuration-gallery.md#macro"><img src="docs/media/screenshots/macro-preview.png" alt="按键宏与多步骤脚本：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#macro">查看配置 →</a></p>
-</td>
-<td width="50%" valign="top">
-
-<b>按键映射</b> · <code>1.0.2</code>
-<p>让左手键区变成数字小键盘。</p>
-<a href="docs/plugin-configuration-gallery.md#keypadlayer"><img src="docs/media/screenshots/keypadlayer-preview.png" alt="按键映射：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#keypadlayer">查看配置 →</a></p>
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-<b>CAD 模拟按键与命令输入</b> · <code>1.0.3</code>
-<p>为 CAD 命令配置文本与提交方式。</p>
-<a href="docs/plugin-configuration-gallery.md#cadcommand"><img src="docs/media/screenshots/cadcommand-preview.png" alt="CAD 模拟按键与命令输入：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#cadcommand">查看配置 →</a></p>
-</td>
-<td width="50%" valign="top">
-
-<b>桌宠</b> · <code>0.1.6</code>
-<p>从桌面伙伴唤出你的轮盘。</p>
-<a href="docs/plugin-configuration-gallery.md#desktoppet"><img src="docs/media/screenshots/desktoppet-preview.png" alt="桌宠：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#desktoppet">查看配置 →</a></p>
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-<b>悬浮球</b> · <code>1.0.3</code>
-<p>给轮盘加一个可拖动的桌面入口。</p>
-<a href="docs/plugin-configuration-gallery.md#floatingball"><img src="docs/media/screenshots/floatingball-preview.png" alt="悬浮球：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#floatingball">查看配置 →</a></p>
-</td>
-<td width="50%" valign="top">
-
-<b>轮盘音效</b> · <code>1.0.0</code>
-<p>为轮盘交互加入声音反馈。</p>
-<a href="docs/plugin-configuration-gallery.md#sound"><img src="docs/media/screenshots/sound-preview.png" alt="轮盘音效：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#sound">查看配置 →</a></p>
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-<b>二维码扫描</b> · <code>0.1.0</code>
-<p>预览二维码内容，再选择后续操作。</p>
-<a href="docs/plugin-configuration-gallery.md#qrscanner"><img src="docs/media/screenshots/qrscanner-preview.png" alt="二维码扫描：StarPie 实机配置截图" width="100%" /></a>
-<p><a href="docs/plugin-configuration-gallery.md#qrscanner">查看配置 →</a></p>
-</td>
-<td width="50%" valign="top">
-<p><b>按需安装，随时调整。</b></p>
-<p>在「插件与扩展」管理模块，在「手势动作」绑定到轮盘。</p>
-</td>
-</tr>
-</table>
+主线另含[临时小键盘](src/StarPie.Plugin.TemporaryKeyboard)、[识图翻译](src/StarPie.Plugin.Selinga)和[快速搜索](src/StarPie.Plugin.QuickSearch)，共 22 个源码模块。快速搜索 0.2.2 可独立索引所选磁盘和目录，无需 Everything。当前发布目录尚未提供快速搜索安装包。
 
 ## 分发与加载方式
 
