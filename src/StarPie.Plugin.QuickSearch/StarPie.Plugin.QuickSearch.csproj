@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <UseWPF>true</UseWPF>
+    <Version>0.2.2</Version>
+    <StarPieSdkProject Condition="'$(StarPieSdkProject)' == ''">$(MSBuildThisFileDirectory)..\..\sdk\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj</StarPieSdkProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="QuickSearch.Index" />
+    <ProjectReference Include="$(StarPieSdkProject)" Private="false" />
+    <AssemblyMetadata Include="StarPiePluginId" Value="starpie.plugin.quicksearch" />
+    <AssemblyMetadata Include="StarPiePluginName" Value="快速搜索" />
+    <AssemblyMetadata Include="StarPiePluginCapabilities" Value="Ui;FileSystem;Process;Clipboard" />
+    <AssemblyMetadata Include="StarPiePluginApiVersion" Value="1.11" />
+    <AssemblyMetadata Include="StarPiePluginMinHostVersion" Value="1.8.0-beta.7" />
+    <AssemblyMetadata Include="StarPiePluginLicense" Value="MIT" />
+    <None Update="plugin.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

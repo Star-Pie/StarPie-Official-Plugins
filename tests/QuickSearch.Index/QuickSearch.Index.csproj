@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <IsPluginRegressionTest>true</IsPluginRegressionTest>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(QuickSearchCandidateDir)' == ''">
+    <Compile Include="../../src/StarPie.Plugin.QuickSearch/SearchContracts.cs" Link="SearchContracts.cs" />
+    <Compile Include="../../src/StarPie.Plugin.QuickSearch/Folder*.cs" Link="%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(QuickSearchCandidateDir)' != ''">
+    <Reference Include="StarPie.Plugin.QuickSearch" HintPath="$(QuickSearchCandidateDir)/StarPie.Plugin.QuickSearch.dll" />
+  </ItemGroup>
+</Project>
