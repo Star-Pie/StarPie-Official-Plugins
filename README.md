@@ -4,14 +4,16 @@
 
 # StarPie 官方插件
 
-[![Modules](https://img.shields.io/badge/Modules-19-7c6ee6?style=flat-square)](#模块一览)
+[![Modules](https://img.shields.io/badge/Modules-22-7c6ee6?style=flat-square)](#模块一览)
 [![Host](https://img.shields.io/badge/Host-StarPie_v2.0.0-547fea?style=flat-square)](https://github.com/Star-Pie/StarPie/releases/tag/v2.0.0)
 [![Packages](https://img.shields.io/badge/Packages-.spkg-29a99b?style=flat-square)](https://github.com/Star-Pie/StarPie-Official-Plugins/releases)
 [![License](https://img.shields.io/badge/License-MIT-8790a6?style=flat-square)](LICENSE)
 
 把常用的启动、窗口、输入和桌面功能放进你的轮盘。这里维护 StarPie 官方插件的源码、构建脚本和独立安装包；主程序见 [StarPie](https://github.com/Star-Pie/StarPie)。
 
-**第一次使用？** [下载主程序](https://github.com/Star-Pie/StarPie/releases/latest) · [查看安装步骤](#安装与使用) · [浏览最新插件发布](https://github.com/Star-Pie/StarPie-Official-Plugins/releases/latest)
+**插件源码**　[GitHub](https://github.com/Star-Pie/StarPie-Official-Plugins) · [AtomGit 镜像](https://atomgit.com/Star-Pie/StarPie-Official-Plugins)
+
+**第一次使用？** [下载主程序](https://github.com/Star-Pie/StarPie/releases/latest) · [查看安装步骤](#安装与使用) · [GitHub 正式版插件目录](https://github.com/Star-Pie/StarPie-Official-Plugins/releases/latest) · [AtomGit 插件发行页](https://atomgit.com/Star-Pie/StarPie-Official-Plugins/releases)
 
 ## 安装与使用
 
@@ -22,11 +24,13 @@
 3. 选择需要的模块，点击「**安装**」，再根据需要启用。
 4. 在轮盘动作配置中选择已启用插件提供的动作。轮盘音效等功能通过插件设置管理。
 
-官方插件通过客户端目录下载和校验。Release 中的 `.spkg` 用于归档或检查，社区 `.dll` 手动安装入口不接收这种格式；请通过客户端安装。
+v2.0.0 通过客户端目录下载和校验官方插件。在 v2.0.1-beta.4 中，也可用「导入插件文件」离线安装官方 `.spkg`。客户端会用内置或已获取的可信目录核验包大小和 SHA-256。[宿主预发布说明](https://github.com/Star-Pie/StarPie/releases/tag/v2.0.1-beta.4)
 
 ## 模块一览
 
-**19 个插件，19 张实机配置图。** 按场景浏览，点击图片可查看完整配置说明。
+**主线共有 22 个源码模块。** 下方图册展示 v2.0.0 的 19 个插件。另有[临时小键盘](src/StarPie.Plugin.TemporaryKeyboard)、[识图翻译](src/StarPie.Plugin.Selinga)和[快速搜索](src/StarPie.Plugin.QuickSearch)的源码。快速搜索 0.2.2 独立索引所选磁盘和目录，无需 Everything；当前发布目录尚未提供它的安装包。
+
+点击图册图片可查看对应插件的配置说明。
 截图来自 StarPie v2.0.0 的独立示例配置，未执行插件动作；窗口类功能共用「窗口管理」配置入口。
 
 [启动与文件](#启动与文件) · [窗口管理](#窗口管理) · [系统与识别](#系统与识别) · [输入与桌面扩展](#输入与桌面扩展) · [完整配置图册](docs/plugin-configuration-gallery.md)
