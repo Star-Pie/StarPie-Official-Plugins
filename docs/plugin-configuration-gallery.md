@@ -180,7 +180,7 @@
 
 ## 输入与桌面扩展
 
-[按键宏与多步骤脚本](#macro) · [按键映射](#keypadlayer) · [CAD 模拟按键与命令输入](#cadcommand) · [桌宠](#desktoppet) · [悬浮球](#floatingball) · [轮盘音效](#sound) · [二维码扫描](#qrscanner)
+[按键宏与多步骤脚本](#macro) · [按键映射](#keypadlayer) · [CAD 模拟按键与命令输入](#cadcommand) · [桌宠](#desktoppet) · [悬浮球](#floatingball) · [轮盘音效](#sound) · [二维码扫描](#qrscanner) · [表情浮窗](#emojipicker)
 
 <a id="macro"></a>
 
@@ -272,3 +272,33 @@
 ![二维码扫描实机配置界面](media/screenshots/qrscanner.png)
 
 图中配置鼠标附近扫描，半径为 `400` 个物理像素，可填范围为 64–1024。也提供框选扫码动作；本次没有读取屏幕或二维码内容。
+
+<a id="emojipicker"></a>
+
+### 表情浮窗
+
+通过轮盘快捷呼出表情、自定义贴纸与颜文字输入面板。
+
+**配置入口：** 手势动作 → 插件动作 → 展开表情浮窗 / 管理自定义表情（插件设置页可配置默认显示模式与输入偏好）<br>
+**插件版本：** `0.1.0` · **模块：** `starpie.plugin.emojipicker`（需 StarPie `2.0.1-beta.4+` / `API 1.15`）
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="media/screenshots/emojipicker-picker-dark.png" alt="表情浮窗默认视图（推荐、内置 Emoji 与拼音搜索）" width="260" /><br />
+      <sub>默认视图（深色主题）：推荐与内置 144 个 Emoji</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="media/screenshots/emojipicker-custom-dark.png" alt="自定义贴纸与钉住连发视图" width="260" /><br />
+      <sub>自定义视图：GIF/PNG 贴纸、🔗 外部挂载与 📌 连发模式</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
+      <img src="media/screenshots/emojipicker-manager.png" alt="独立自定义贴纸与颜文字管理窗口" width="720" /><br />
+      <sub>独立管理窗口：贴纸/颜文字/外部目录挂载管理与偏好配置</sub>
+    </td>
+  </tr>
+</table>
+
+支持拖图导入、`PNG / JPG / WebP / GIF`（≤ 4 MiB）、外部本地目录零复制挂载、无焦点拖动与钉住跨窗口连发。详见 [表情浮窗 0.1.0 发布说明](emoji-picker-release.md)。

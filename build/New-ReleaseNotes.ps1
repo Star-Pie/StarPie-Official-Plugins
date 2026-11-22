@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
   [Parameter(Mandatory)][string]$CatalogPath,
   [string[]]$ChangedModuleIds = @(),
@@ -50,14 +50,16 @@ function Format-FileSize {
     return "$Bytes B"
 }
 
-# Resolve the banner to an absolute HTTPS URL; publishing checks accessibility.
+# Resolve the raw content base and banner URL to absolute HTTPS URLs; publishing checks accessibility.
+$repoClean = $RepositoryUrl.AbsoluteUri.TrimEnd('/')
+if ($RepositoryUrl.Host -eq 'github.com') {
+    $rawBaseUrl = "https://raw.githubusercontent.com$($RepositoryUrl.AbsolutePath.TrimEnd('/'))/main"
+} else {
+    $rawBaseUrl = "$repoClean/raw/main"
+}
+Assert-HttpsUrl $rawBaseUrl
 if ([string]::IsNullOrWhiteSpace($BannerUrl)) {
-    $repoClean = $RepositoryUrl.AbsoluteUri.TrimEnd('/')
-    if ($RepositoryUrl.Host -eq 'github.com') {
-        $BannerUrl = "https://raw.githubusercontent.com$($RepositoryUrl.AbsolutePath.TrimEnd('/'))/main/docs/media/starpie-plugins-banner.svg"
-    } else {
-        $BannerUrl = "$repoClean/raw/main/docs/media/starpie-plugins-banner.svg"
-    }
+    $BannerUrl = "$rawBaseUrl/docs/media/starpie-plugins-banner.svg"
 }
 Assert-HttpsUrl $BannerUrl
 $bannerAttribute = [System.Security.SecurityElement]::Escape($BannerUrl)
@@ -122,6 +124,43 @@ if ($changed.ContainsKey('starpie.plugin.qrscanner')) {
     $lines.Add('### 本次看点：二维码扫描')
     $lines.Add('')
     $lines.Add('支持框选屏幕区域，或扫描鼠标附近的二维码。本地解码后先预览内容，再由你选择复制或打开网页链接；不会自动打开识别结果。')
+    $lines.Add('')
+}
+if ($changed.ContainsKey('starpie.plugin.emojipicker')) {
+    $pickerImgUrl = [System.Security.SecurityElement]::Escape("$rawBaseUrl/docs/media/screenshots/emojipicker-picker-dark.png")
+    $customImgUrl = [System.Security.SecurityElement]::Escape("$rawBaseUrl/docs/media/screenshots/emojipicker-custom-dark.png")
+    $managerImgUrl = [System.Security.SecurityElement]::Escape("$rawBaseUrl/docs/media/screenshots/emojipicker-manager.png")
+    $guideUrl = "$repoClean/blob/main/docs/emoji-picker-release.md"
+
+    $lines.Add('### 本次看点：表情浮窗 (Emoji Picker)')
+    $lines.Add('')
+    $lines.Add('通过轮盘直接唤出无焦点抢占的表情与贴纸输入面板（要求 `StarPie >= 2.0.1-beta.4` / `API 1.15`）：')
+    $lines.Add('')
+    $lines.Add('- **内置 144 个去重 Unicode Emoji**：支持中文、英文、拼音及多关键词搜索，最近使用自动置前到「推荐」；')
+    $lines.Add('- **自定义贴纸 / 动图**：支持 `PNG` / `JPG` / `WebP` / `GIF`（单张 ≤ 4 MiB，文件头 Magic Byte 校验），悬停 GIF 循环播放动图，贴纸经序列号保护剪贴板粘贴后安全还原纯文本；')
+    $lines.Add('- **四大导入与零复制挂载**：支持拖图到浮窗、多选文件、按文件夹批量导入、一键收藏剪贴板图片，以及**挂载外部本地目录（零复制索引，卸载不删磁盘原图）**；')
+    $lines.Add('- **颜文字与快捷短语 + 钉住跨窗口连发**：无焦点 Win32 拖动、点亮 `📌` 后切换应用或按外部 `Esc` 均不关闭并支持跨窗口继续输入，搭配独立分组管理窗口与宿主深/浅色主题同步。')
+    $lines.Add('')
+    $lines.Add('<table>')
+    $lines.Add('  <tr>')
+    $lines.Add('    <td align="center" width="50%">')
+    $lines.Add("      <img src=""$pickerImgUrl"" alt=""表情浮窗默认视图"" width=""260"" /><br />")
+    $lines.Add('      <sub>默认视图：推荐 · 内置 Emoji · 搜索筛选</sub>')
+    $lines.Add('    </td>')
+    $lines.Add('    <td align="center" width="50%">')
+    $lines.Add("      <img src=""$customImgUrl"" alt=""自定义贴纸与钉住跨窗口连发视图"" width=""260"" /><br />")
+    $lines.Add('      <sub>自定义视图：PNG/GIF 贴纸 · 外部挂载 · 📌 连发</sub>')
+    $lines.Add('    </td>')
+    $lines.Add('  </tr>')
+    $lines.Add('  <tr>')
+    $lines.Add('    <td align="center" colspan="2">')
+    $lines.Add("      <img src=""$managerImgUrl"" alt=""独立贴纸与颜文字管理窗口"" width=""760"" /><br />")
+    $lines.Add('      <sub>独立管理窗口：分组/挂载管理、行内编辑与偏好设置</sub>')
+    $lines.Add('    </td>')
+    $lines.Add('  </tr>')
+    $lines.Add('</table>')
+    $lines.Add('')
+    $lines.Add("更多操作说明与界面细节见：[表情浮窗 0.1.0 图文发布说明]($guideUrl)。")
     $lines.Add('')
 }
 

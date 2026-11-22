@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "starpie.plugin.emojipicker",
+  "name": "表情浮窗",
+  "description": "从轮盘扇区一键展开紧致表情浮窗，不抢焦点快速输入默认 Emoji、自定义图片/GIF 贴纸与颜文字，支持搜索、拖拽导入、剪贴板收藏与外部目录挂载。",
+  "author": "StarPie Studio",
+  "homepage": "https://github.com/Star-Pie/StarPie-Official-Plugins",
+  "license": "MIT",
+  "version": "0.1.0",
+  "apiVersion": "1.15",
+  "minHostVersion": "2.0.1-beta.4",
+  "targetFramework": "net8.0-windows",
+  "platform": "win-x64",
+  "assembly": "StarPie.Plugin.EmojiPicker.dll",
+  "entryType": "StarPie.Plugin.EmojiPicker.EmojiPickerPlugin",
+  "capabilities": [
+    "Ui",
+    "InputSimulation",
+    "Clipboard",
+    "FileSystem"
+  ],
+  "claimedTypes": [],
+  "contributions": {
+    "actions": true,
+    "icons": true,
+    "i18n": true,
+    "styles": false,
+    "presets": false
+  },
+  "dependencies": [],
+  "tags": [
+    "official",
+    "emoji",
+    "sticker",
+    "input"
+  ],
+  "features": [
+    {
+      "id": "show",
+      "name": "展开表情浮窗",
+      "description": "在当前光标旁打开不抢焦点的表情浮窗，支持默认 Emoji、自定义贴纸与颜文字检索及一键上屏。",
+      "category": "输入工具"
+    },
+    {
+      "id": "manage",
+      "name": "管理自定义表情库",
+      "description": "管理自定义贴纸分组、关键词别名、排序、外部挂载目录及浮窗交互偏好。",
+      "category": "配置"
+    }
+  ],
+  "nameTranslations": {
+    "zh-CN": "表情浮窗",
+    "zh-TW": "表情浮窗",
+    "en": "Emoji & Sticker Picker",
+    "ja": "絵文字・スタンプピッカー"
+  },
+  "descriptionTranslations": {
+    "zh-CN": "从轮盘扇区一键展开紧致表情浮窗，不抢焦点快速输入默认 Emoji、自定义图片/GIF 贴纸与颜文字，支持搜索、拖拽导入、剪贴板收藏与外部目录挂载。",
+    "zh-TW": "從輪盤扇區一鍵展開緊緻表情浮窗，不搶焦點快速輸入預設 Emoji、自訂圖片/GIF 貼圖與顏文字，支援搜尋、拖曳匯入、剪貼簿收藏與外部資料夾掛載。",
+    "en": "Pop up a compact non-activating Emoji, custom sticker (PNG/JPG/WebP/GIF) and kaomoji picker from any wheel sector with search, drag-drop import, clipboard save and mounted folders.",
+    "ja": "ホイールからフォーカスを奪わない絵文字・スタンプ（PNG/JPG/WebP/GIF）・顔文字ピッカーを開き、検索・ドラッグ追加・クリップボード保存・外部フォルダーマウントに対応します。"
+  },
+  "release": {
+    "enabled": true
+  }
+}
