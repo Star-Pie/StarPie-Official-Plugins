@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param([string]$OutputRoot)
 
 $ErrorActionPreference = 'Stop'
@@ -241,5 +241,60 @@ if (Test-Path -LiteralPath $realCatalogBootstrap) {
     $cmdRow = @($tableRows | Where-Object { $_ -match 'starpie\.builtin\.command' })[0]
     Assert-Condition ($cmdRow -match 'modules-2026\.10\.13\.1') 'Command row must reference modules-2026.10.13.1.'
 }
+
+# ============================================================
+# Test Case D: Emoji Picker Release Highlight + Visual Showcase URLs
+# ============================================================
+$emojiCatalogObj = [ordered]@{
+    schemaVersion = 2
+    catalogVersion = '2026.11.22.080000'
+    releaseTag = 'modules-emoji-test'
+    releaseChannel = 'beta'
+    sdkApiVersion = '1.15'
+    minimumHostVersion = '2.0.1-beta.4'
+    modules = @(
+        [ordered]@{
+            id = 'starpie.plugin.emojipicker'
+            versions = @(
+                [ordered]@{
+                    version = '0.1.0'
+                    name = '表情浮窗'
+                    releaseTag = 'modules-emoji-test'
+                    assetName = 'StarPie.Plugin.EmojiPicker-0.1.0.spkg'
+                    packageUrl = 'https://github.com/Star-Pie/StarPie-Official-Plugins/releases/download/modules-emoji-test/StarPie.Plugin.EmojiPicker-0.1.0.spkg'
+                    sha256 = ('d' * 64)
+                    size = 113649
+                    apiVersion = '1.15'
+                    targetFramework = 'net8.0-windows'
+                    minHostVersion = '2.0.1-beta.4'
+                    typeClaims = @()
+                    capabilities = @('Ui', 'InputSimulation', 'Clipboard', 'FileSystem')
+                }
+            )
+        }
+    )
+}
+$emojiCatalogPath = Join-Path $OutputRoot 'emoji-catalog.json'
+Write-JsonFile -Value $emojiCatalogObj -Path $emojiCatalogPath
+$emojiNotesPath = Join-Path $OutputRoot 'emoji-notes.md'
+
+& $scriptPath `
+    -CatalogPath $emojiCatalogPath `
+    -ChangedModuleIds @('starpie.plugin.emojipicker') `
+    -ReleaseTag 'modules-emoji-test' `
+    -ReleaseChannel 'beta' `
+    -RepositoryUrl 'https://github.com/Star-Pie/StarPie-Official-Plugins' `
+    -OutputPath $emojiNotesPath
+
+$emojiBytes = [System.IO.File]::ReadAllBytes($emojiNotesPath)
+$emojiBom = ($emojiBytes.Length -ge 3 -and $emojiBytes[0] -eq 0xEF -and $emojiBytes[1] -eq 0xBB -and $emojiBytes[2] -eq 0xBF)
+Assert-Condition (-not $emojiBom) 'Emoji Picker release notes must not contain UTF-8 BOM.'
+$emojiRaw = [System.IO.File]::ReadAllText($emojiNotesPath, [System.Text.Encoding]::UTF8)
+Assert-Condition ($emojiRaw.Contains('### 本次看点：表情浮窗 (Emoji Picker)')) 'Emoji Picker highlight heading missing.'
+foreach ($shot in @('emojipicker-picker-dark.png', 'emojipicker-custom-dark.png', 'emojipicker-manager.png')) {
+    $expectedUrl = "https://raw.githubusercontent.com/Star-Pie/StarPie-Official-Plugins/main/docs/media/screenshots/$shot"
+    Assert-Condition ($emojiRaw.Contains($expectedUrl)) "Emoji Picker release notes must embed absolute HTTPS screenshot URL: $shot"
+}
+Assert-Condition ($emojiRaw.Contains('2.0.1-beta.4') -and $emojiRaw.Contains('API 1.15')) 'Emoji Picker notes must state 2.0.1-beta.4 and API 1.15 compatibility.'
 
 Write-Host "PASS: $script:checks release notes behavioral checks passed. Output: $OutputRoot"

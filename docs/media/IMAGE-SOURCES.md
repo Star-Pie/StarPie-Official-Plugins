@@ -21,3 +21,10 @@
 - 示例目录、命令与进程名仅用于演示；真实界面的文字、布局会随宿主版本、主题和系统环境变化。
 
 以后更新某个插件的界面时，请重新截取对应面板，并同步配置图册、预览图与清单。旧流程示意 SVG 保留供历史发布说明使用，README 当前使用真实截图。
+
+## 表情浮窗 (`starpie.plugin.emojipicker`) 界面展示图
+
+- 文件：`screenshots/emojipicker-picker-dark.png`、`screenshots/emojipicker-custom-dark.png`、`screenshots/emojipicker-manager.png`。
+- 日期：2026-11-22。
+- 拍摄 / 渲染方式：通过离线验证入口 [`Program.cs`](../../tests/starpie.plugin.emojipicker/Program.cs) 的 `STARPIE_EMOJI_UI_PREVIEW` 开关，直接调用真实 WPF 窗口控件（`EmojiPickerWindow` 与 `EmojiManagerWindow`）在 `144 DPI`（`1.5x`）下无损渲染为 PNG；使用独立示例贴纸与挂载目录数据，无 AI 生成控件。
+- 说明：WPF 离屏 `RenderTargetBitmap` 将 Unicode Emoji 渲染为单色线框轮廓；实际 Windows 桌面硬件渲染环境下显示彩色 `Segoe UI Emoji`。

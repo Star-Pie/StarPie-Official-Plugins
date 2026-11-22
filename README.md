@@ -4,7 +4,7 @@
 
 # StarPie 官方插件
 
-[![Modules](https://img.shields.io/badge/Modules-22-7c6ee6?style=flat-square)](#模块一览)
+[![Modules](https://img.shields.io/badge/Modules-23-7c6ee6?style=flat-square)](#模块一览)
 [![Host](https://img.shields.io/badge/Host-StarPie_v2.0.0-547fea?style=flat-square)](https://github.com/Star-Pie/StarPie/releases/tag/v2.0.0)
 [![Packages](https://img.shields.io/badge/Packages-.spkg-29a99b?style=flat-square)](https://github.com/Star-Pie/StarPie-Official-Plugins/releases)
 [![License](https://img.shields.io/badge/License-MIT-8790a6?style=flat-square)](LICENSE)
@@ -28,7 +28,7 @@ v2.0.0 通过客户端目录下载和校验官方插件。在 v2.0.1-beta.4 中�
 
 ## 模块一览
 
-下列 19 个插件按用途分组。点击插件名，可查看它在 StarPie v2.0.0 中的配置入口、示例和完整截图。[浏览完整配置图册](docs/plugin-configuration-gallery.md)
+下列 20 个插件按用途分组。点击插件名，可查看它在 StarPie 中的配置入口、示例和完整截图。[浏览完整配置图册](docs/plugin-configuration-gallery.md)
 
 [启动与文件](#启动与文件) · [窗口管理](#窗口管理) · [系统与识别](#系统与识别) · [输入与桌面扩展](#输入与桌面扩展)
 
@@ -72,8 +72,9 @@ v2.0.0 通过客户端目录下载和校验官方插件。在 v2.0.1-beta.4 中�
 | [桌宠](docs/plugin-configuration-gallery.md#desktoppet) | 从桌面伙伴唤出轮盘，可调整素材、动画和显示大小。 |
 | [悬浮球](docs/plugin-configuration-gallery.md#floatingball) | 用可拖动的悬浮球呼出轮盘，可调整大小、颜色和透明度。 |
 | [轮盘音效](docs/plugin-configuration-gallery.md#sound) | 为轮盘展开、选择、确认和取消等操作分别设置声音。 |
+| [表情浮窗](docs/plugin-configuration-gallery.md#emojipicker) | 轮盘呼出表情、自定义贴纸/GIF 悬停预览与颜文字浮窗；支持拼音检索、外部目录零复制挂载及钉住跨窗口连发（需 `2.0.1-beta.4+`）。 |
 
-主线另含[临时小键盘](src/StarPie.Plugin.TemporaryKeyboard)、[识图翻译](src/StarPie.Plugin.Selinga)和[快速搜索](src/StarPie.Plugin.QuickSearch)，共 22 个源码模块。快速搜索 0.2.2 可独立索引所选磁盘和目录，无需 Everything。当前发布目录尚未提供快速搜索安装包。
+主线另含[临时小键盘](src/StarPie.Plugin.TemporaryKeyboard)、[识图翻译](src/StarPie.Plugin.Selinga)和[快速搜索](src/StarPie.Plugin.QuickSearch)，共 23 个源码模块。快速搜索 0.2.2 可独立索引所选磁盘和目录，无需 Everything。当前发布目录尚未提供快速搜索安装包。
 
 ## 分发与加载方式
 
@@ -106,7 +107,7 @@ pwsh -NoProfile -File tests/catalog/Validate-ReleaseNotes.ps1
 | `build/` | 构建、打包、目录与发布说明生成 |
 | `tests/` | 契约、行为与目录验证 |
 | `docs/media/` | 品牌封面与实机配置截图 |
-| `docs/plugin-configuration-gallery.md` | 19 个插件的配置入口、截图与示例 |
+| `docs/plugin-configuration-gallery.md` | 20 个插件的配置入口、截图与示例 |
 | `.github/workflows/` | PR 验证、全量检查与模块集发布 |
 
 共享构建或发布脚本的变动会触发全量模块验证。发布工作流支持 stable/beta 通道与目录基线选择；已有历史包和签名目录不得通过改写来替换。详见 [发布模型](docs/release-model.md)、[安全模型](docs/security-model.md) 与 [贡献指南](CONTRIBUTING.md)。
