@@ -7,7 +7,8 @@ param(
   [Parameter(Mandatory)][string]$Repository,
   [Parameter(Mandatory)][string]$OutputPath,
   [switch]$RequirePackageManifest,
-  [AllowEmptyCollection()][string[]]$ReleasedModuleIds
+  [AllowEmptyCollection()][string[]]$ReleasedModuleIds,
+  [switch]$CatalogOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -17,8 +18,9 @@ Import-Module (Join-Path $PSScriptRoot 'StarPie.Catalog.psm1') -Force
 $root = Get-RepositoryRoot
 $registry = Get-ModuleRegistry
 $enabled = @(Get-EnabledModules -Registry $registry)
-$scopedRelease = $PSBoundParameters.ContainsKey('ReleasedModuleIds')
-$selected = if ($scopedRelease) { Get-CatalogReleaseSelection -ModuleIds $ReleasedModuleIds -EnabledModules $enabled }
+if ($CatalogOnly -and $PSBoundParameters.ContainsKey('ReleasedModuleIds')) { throw 'Catalog-only releases cannot select new module packages.' }
+$scopedRelease = $CatalogOnly -or $PSBoundParameters.ContainsKey('ReleasedModuleIds')
+$selected = if ($scopedRelease) { Get-CatalogReleaseSelection -ModuleIds $ReleasedModuleIds -EnabledModules $enabled -CatalogOnly:$CatalogOnly }
 if ($scopedRelease -and -not $PSBoundParameters.ContainsKey('PreviousCatalogPath')) { throw 'Selected releases require an explicit history path (empty only when no history exists).' }
 if ($PreviousCatalogPath -and $PSBoundParameters.ContainsKey('PreviousCatalogPath') -and -not (Test-Path -LiteralPath $PreviousCatalogPath -PathType Leaf)) { throw "Previous catalog not found: $PreviousCatalogPath" }
 
@@ -37,6 +39,9 @@ if ($PreviousCatalogPath -and (Test-Path -LiteralPath $PreviousCatalogPath)) {
         if ($previousModules.ContainsKey($item.id)) { throw "Duplicate previous module: $($item.id)" }
         $previousModules[$item.id] = $item
     }
+}
+if ($CatalogOnly -and ($previousCatalog.schemaVersion -ne 2 -or $previousCatalog.releaseChannel -cne $ReleaseChannel -or $previousModules.Count -eq 0)) {
+    throw 'Catalog-only releases require a nonempty v2 base in the release channel.'
 }
 
 function Read-PackagePluginManifest {

@@ -19,3 +19,7 @@ schemaVersion 为 2，modules 中每个 ID 只出现一次，结构为 { id, ver
 模块包格式与 SDK 契约不因目录格式版本而提升；本次不发布或修改模块版本号。
 
 首次从 v1 发布目录迁移时，Get-PreviousCatalog 回溯同通道已发布目录（最多读取最近 1000 个 Release）并合并历史；已有完整 v2 目录则直接复用，不再重复回溯。相同 ID/版本的历史包哈希或大小冲突会阻断发布，不静默选取其中一枚。
+
+跨通道发布时，`catalog_base_channel` 补充指定通道的历史，同时保留 `release_channel` 的现有历史。通道取自目录内的 `releaseChannel`。GitHub 上将预发布转为正式发布不会改写已签名目录。
+
+如果已发布插件从目录中漏掉，可在 **Release Official Module Set** 中填写 `restore_catalog_from_tag`（含该版本的原发行标签）、`module_ids`（需恢复的模块 ID）及对应的 `release_channel`，并保持 `catalog_base_channel=same`。先使用 `dry_run=true` 确认恢复结果。该模式只接受同通道已发布的 v2 目录和当前启用的模块，下载待恢复记录指向的历史安装包，核对字节数和 SHA-256。通过正常签名流程发布新目录时，继续引用通过检查的原始安装包。
