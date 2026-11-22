@@ -230,6 +230,102 @@ function global:gh {
 }
 try { Assert-Fails { & (Join-Path $root 'build\Get-PreviousCatalog.ps1') -Channel beta -Repository Star-Pie/StarPie-Official-Plugins -OutputDirectory (Join-Path $OutputRoot 'download-failure') } }
 finally { Remove-Item -LiteralPath Function:\gh }
+
+# Model the QR loss: a promoted beta catalog had QR, the stable base did not,
+# and a later beta release published from the stable base alone.
+$qrId = 'starpie.plugin.qrscanner'
+$restoreTag = 'modules-2026.10.15.1'
+$latestTag = 'modules-2026.11.21.1'
+$stableTag = 'modules-2026.10.13.1'
+$olderBeta = $first | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
+$olderBeta.releaseTag = $restoreTag
+$stable = $partialPrevious | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
+$stable.releaseTag = $stableTag
+$stable.releaseChannel = 'stable'
+$latestBeta = $partial | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
+$latestBeta.releaseTag = $latestTag
+$expectedQr = ($olderBeta.modules | Where-Object id -CEQ $qrId).versions
+$expectedQr[0].releaseTag = $restoreTag
+$expectedQr[0].packageUrl = "https://github.com/Star-Pie/StarPie-Official-Plugins/releases/download/$restoreTag/$($expectedQr[0].assetName)"
+$global:fixtureQrTag = $restoreTag
+$global:fixtureQrAsset = $expectedQr[0].assetName
+$global:fixtureQrPackage = ($records | Where-Object id -CEQ $qrId).packagePath
+$global:fixtureCatalogs = @{ $restoreTag = $olderBeta; $stableTag = $stable; $latestTag = $latestBeta }
+$global:fixtureReleases = @(
+    @{ tagName = $stableTag; publishedAt = '2026-10-13T00:00:00Z'; isPrerelease = $false }
+    @{ tagName = $restoreTag; publishedAt = '2026-10-15T00:00:00Z'; isPrerelease = $false }
+)
+$global:fixtureDownloads = [Collections.Generic.List[string]]::new()
+function global:gh {
+    $global:LASTEXITCODE = 0
+    if ($args[1] -eq 'list') { return (ConvertTo-Json -InputObject $global:fixtureReleases -Compress) }
+    if ($args[1] -eq 'view') { return 'module-catalog.json' }
+    if ($args[1] -ne 'download' -or -not $global:fixtureCatalogs.ContainsKey($args[2])) { throw 'Unexpected gh call in test.' }
+    $global:fixtureDownloads.Add($args[2])
+    $directory = $args[[Array]::IndexOf($args, '--dir') + 1]
+    $pattern = $args[[Array]::IndexOf($args, '--pattern') + 1]
+    New-Item -ItemType Directory -Path $directory -Force | Out-Null
+    if ($pattern -ceq $global:fixtureQrAsset) {
+        if ($args[2] -cne $global:fixtureQrTag) { throw 'The QR package must be read from its original release.' }
+        if (-not $global:fixtureQrPackage) { $global:LASTEXITCODE = 1; return }
+        Copy-Item -LiteralPath $global:fixtureQrPackage -Destination (Join-Path $directory $pattern)
+        return
+    }
+    if ($pattern -cne 'module-catalog.json') { throw "Unexpected asset requested: $pattern" }
+    [IO.File]::WriteAllText((Join-Path $directory 'module-catalog.json'), ($global:fixtureCatalogs[$args[2]] | ConvertTo-Json -Depth 100))
+}
+try {
+    $previousScript = Join-Path $root 'build\Get-PreviousCatalog.ps1'
+    $repo = 'Star-Pie/StarPie-Official-Plugins'
+    $stableOnly = & $previousScript -Channel stable -Repository $repo -OutputDirectory (Join-Path $OutputRoot 'stable-only')
+    Assert-Condition ((Read-JsonFile $stableOnly).modules.id -cnotcontains $qrId) 'fixture does not reproduce the stable-only base omission'
+    $crossPath = & $previousScript -Channel stable -TargetChannel beta -Repository $repo -OutputDirectory (Join-Path $OutputRoot 'cross-channel')
+    $cross = Read-JsonFile $crossPath
+    Assert-Condition ($cross.releaseTag -ceq $restoreTag -and $cross.modules.id -ccontains $qrId -and $cross.modules.id -ccontains $retired.id) 'cross-channel release lost the target QR or the source-only history'
+    Assert-Condition (((($cross.modules | Where-Object id -CEQ $qrId).versions) | ConvertTo-Json -Depth 100 -Compress) -ceq ($expectedQr | ConvertTo-Json -Depth 100 -Compress)) 'cross-channel merge changed original QR metadata'
+    $global:fixtureReleases += @{ tagName = $latestTag; publishedAt = '2026-11-21T00:00:00Z'; isPrerelease = $true }
+    $global:fixtureDownloads.Clear()
+    $brokenPath = & $previousScript -Channel beta -Repository $repo -OutputDirectory (Join-Path $OutputRoot 'unchanged-v2-fast-path')
+    Assert-Condition ((Read-JsonFile $brokenPath).modules.id -cnotcontains $qrId -and ($global:fixtureDownloads -join ',') -ceq $latestTag) 'normal same-channel v2 resolution unexpectedly read older catalogs'
+
+    $restoreArgs = @{ Channel = 'beta'; Repository = $repo; RestoreFromTag = $restoreTag; RestoreModuleIds = $qrId; OutputDirectory = (Join-Path $OutputRoot 'restore') }
+    $restoredPath = & $previousScript @restoreArgs
+    $repairArgs = @{ ReleaseTag = 'repaired-catalog'; ReleaseChannel = 'beta'; PackagesJson = $emptyPath; PreviousCatalogPath = $restoredPath; Repository = $repo; OutputPath = (Join-Path $OutputRoot 'repaired.json'); CatalogOnly = $true }
+    & (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @repairArgs | Out-Null
+    & (Join-Path $root 'build\Verify-Catalog.ps1') -CatalogPath $repairArgs.OutputPath -PreviousCatalogPath $restoredPath -CatalogOnly
+    $repaired = Read-JsonFile $repairArgs.OutputPath
+    Assert-Condition ($repaired.modules.Count -eq ($latestBeta.modules.Count + 1) -and $repaired.modules.id -cnotcontains 'starpie.plugin.selinga') 'repair restored more than the selected module'
+    Assert-Condition (((($repaired.modules | Where-Object id -CEQ $qrId).versions) | ConvertTo-Json -Depth 100 -Compress) -ceq ($expectedQr | ConvertTo-Json -Depth 100 -Compress)) 'repair changed the historical QR package record'
+    foreach ($group in $latestBeta.modules) {
+        $retained = $repaired.modules | Where-Object id -CEQ $group.id
+        Assert-Condition (($retained.versions | ConvertTo-Json -Depth 100 -Compress) -ceq ($group.versions | ConvertTo-Json -Depth 100 -Compress)) "repair changed current history for $($group.id)"
+    }
+    # Restoring the existing version must not select it for a rebuild.
+    $changes = & (Join-Path $root 'build\Get-VersionChanges.ps1') -ModuleIds $qrId -PreviousCatalogPath $restoredPath
+    Assert-Condition (-not ($changes | ConvertFrom-Json).hasModules) 'restored QR was selected for rebuilding'
+    $repairArgs.PackagesJson = $packagesPath
+    Assert-Fails { & (Join-Path $root 'build\Generate-ModuleCatalog.ps1') @repairArgs }
+    $restoreArgs.RestoreModuleIds = @()
+    Assert-Fails { & $previousScript @restoreArgs }
+    $restoreArgs.RestoreModuleIds = $qrId
+    $restoreArgs.RestoreFromTag = $stableTag
+    Assert-Fails { & $previousScript @restoreArgs }
+    $restoreArgs.RestoreFromTag = $restoreTag
+    $correctQrPath = $global:fixtureQrPackage
+    $global:fixtureQrPackage = $null
+    Assert-Fails { & $previousScript @restoreArgs }
+    $wrongBytes = [IO.File]::ReadAllBytes($correctQrPath)
+    $wrongBytes[0] = $wrongBytes[0] -bxor 1
+    $global:fixtureQrPackage = Join-Path $OutputRoot 'bad-qr-bytes.spkg'
+    [IO.File]::WriteAllBytes($global:fixtureQrPackage, $wrongBytes)
+    Assert-Fails { & $previousScript @restoreArgs } # Same length, wrong SHA-256.
+    $global:fixtureQrPackage = $correctQrPath
+    $latestBeta.modules += $olderBeta.modules | Where-Object id -CEQ $qrId | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
+    Assert-Fails { & $previousScript @restoreArgs } # Already present.
+    ($latestBeta.modules | Where-Object id -CEQ $qrId).versions[0].sha256 = 'a' * 64
+    Assert-Fails { & $previousScript @restoreArgs } # Conflicting bytes for the same version.
+} finally { Remove-Item -LiteralPath Function:\gh }
+
 & (Join-Path $PSScriptRoot 'Validate-ReleaseNotes.ps1') -OutputRoot (Join-Path $OutputRoot 'release-notes')
 Write-Host "PASS: $script:checks catalog publisher/schema/history checks; all assets are local fixtures. Output: $OutputRoot"
 } finally {

@@ -1,5 +1,10 @@
 [CmdletBinding()]
-param([Parameter(Mandatory)][string]$CatalogPath,[AllowEmptyCollection()][string[]]$ReleasedModuleIds,[AllowEmptyString()][string]$PreviousCatalogPath)
+param(
+    [Parameter(Mandatory)][string]$CatalogPath,
+    [AllowEmptyCollection()][string[]]$ReleasedModuleIds,
+    [AllowEmptyString()][string]$PreviousCatalogPath,
+    [switch]$CatalogOnly
+)
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'StarPie.Modules.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'StarPie.Catalog.psm1') -Force
@@ -7,14 +12,18 @@ $catalog = Read-JsonFile $CatalogPath
 if ($catalog.schemaVersion -ne 2) { throw 'Catalog schemaVersion must be 2.' }
 $registry = Get-ModuleRegistry
 $enabled = @(Get-EnabledModules $registry)
-$scopedRelease = $PSBoundParameters.ContainsKey('ReleasedModuleIds')
-$selected = if ($scopedRelease) { Get-CatalogReleaseSelection -ModuleIds $ReleasedModuleIds -EnabledModules $enabled }
+if ($CatalogOnly -and $PSBoundParameters.ContainsKey('ReleasedModuleIds')) { throw 'Catalog-only releases cannot select new module packages.' }
+$scopedRelease = $CatalogOnly -or $PSBoundParameters.ContainsKey('ReleasedModuleIds')
+$selected = if ($scopedRelease) { Get-CatalogReleaseSelection -ModuleIds $ReleasedModuleIds -EnabledModules $enabled -CatalogOnly:$CatalogOnly }
 $previous = $null
 if ($scopedRelease) {
     if (-not $PSBoundParameters.ContainsKey('PreviousCatalogPath')) { throw 'Selected releases require the same explicit history path as generation.' }
     if ($PreviousCatalogPath) {
         $previous = Read-JsonFile $PreviousCatalogPath
         if ($previous.schemaVersion -notin @(1,2)) { throw 'Unsupported previous catalog schema.' }
+    }
+    if ($CatalogOnly -and ($previous.schemaVersion -ne 2 -or $previous.releaseChannel -cne $catalog.releaseChannel -or -not $previous.modules)) {
+        throw 'Catalog-only releases require a nonempty v2 base in the release channel.'
     }
     Assert-CatalogHistoryPreserved -Catalog $catalog -PreviousCatalog $previous -Selected $selected -EnabledModules $enabled
 }

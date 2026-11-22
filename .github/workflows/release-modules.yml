@@ -12,7 +12,7 @@ on:
           - stable
           - beta
       catalog_base_channel:
-        description: 'Catalog history source; use beta when promoting tested modules to stable'
+        description: 'Extra catalog history source; the release channel history is always retained'
         required: true
         default: same
         type: choice
@@ -21,7 +21,12 @@ on:
           - stable
           - beta
       module_ids:
-        description: 'Optional comma-separated module IDs to consider; empty means all version changes'
+        description: 'Comma-separated module IDs to release or restore; empty means all version changes'
+        required: false
+        default: ''
+        type: string
+      restore_catalog_from_tag:
+        description: 'Optional published tag to restore the specified module IDs from, without building packages'
         required: false
         default: ''
         type: string
@@ -65,23 +70,33 @@ jobs:
         shell: pwsh
         run: ./build/Import-ModuleRegistryFromSource.ps1 -OutputPath 'artifacts/generated/module-registry.json'
 
-      - name: Download latest released catalog when available
+      - name: Resolve published catalog history
         id: previous
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
           CATALOG_BASE_CHANNEL: ${{ inputs.catalog_base_channel }}
+          RESTORE_FROM_TAG: ${{ inputs.restore_catalog_from_tag }}
+          MODULE_IDS: ${{ inputs.module_ids }}
         run: |
+          $targetChannel = '${{ inputs.release_channel }}'
           $baseChannel = $env:CATALOG_BASE_CHANNEL
-          if (-not $baseChannel -or $baseChannel -eq 'same') { $baseChannel = '${{ inputs.release_channel }}' }
-          $catalogPath = [string](& ./build/Get-PreviousCatalog.ps1 `
-            -Channel $baseChannel `
-            -Repository '${{ github.repository }}')
+          if (-not $baseChannel -or $baseChannel -eq 'same') { $baseChannel = $targetChannel }
+          $historyArgs = @{
+            Channel = $baseChannel
+            TargetChannel = $targetChannel
+            Repository = '${{ github.repository }}'
+          }
+          if ($env:RESTORE_FROM_TAG) {
+            $historyArgs.RestoreFromTag = $env:RESTORE_FROM_TAG
+            $historyArgs.RestoreModuleIds = $env:MODULE_IDS
+          }
+          $catalogPath = [string](& ./build/Get-PreviousCatalog.ps1 @historyArgs)
           $catalogPath = $catalogPath.Trim()
 
           "catalog_path=$catalogPath" | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
           if ($catalogPath) {
-            Write-Host "Using previous catalog from '$baseChannel' for '${{ inputs.release_channel }}': $catalogPath"
+            Write-Host "Using catalog history for '$targetChannel' with '$baseChannel' as the history source: $catalogPath"
           }
           else {
             Write-Host "No previous catalog found for channel '${{ inputs.release_channel }}'; all registered modules are eligible."
@@ -129,7 +144,12 @@ jobs:
         env:
           MODULE_IDS: ${{ inputs.module_ids }}
           PREVIOUS_CATALOG: ${{ steps.previous.outputs.catalog_path }}
+          RESTORE_FROM_TAG: ${{ inputs.restore_catalog_from_tag }}
         run: |
+          if ($env:RESTORE_FROM_TAG) {
+            'has_modules=false', 'matrix=[]', 'changed_ids=' | Out-File -LiteralPath $env:GITHUB_OUTPUT -Append -Encoding utf8
+            return
+          }
           $ids = @($env:MODULE_IDS -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
           $selectArgs = @{}
           if ($ids.Count -gt 0) { $selectArgs.ModuleIds = ($ids -join ',') }
@@ -161,6 +181,7 @@ jobs:
   build:
     name: Build / ${{ matrix.module.name }}
     needs: select
+    if: ${{ needs.select.outputs.has_modules == 'true' }}
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -211,6 +232,7 @@ jobs:
   compose:
     name: Compose release
     needs: [select, build]
+    if: ${{ !cancelled() && needs.select.result == 'success' && (needs.build.result == 'success' || (inputs.restore_catalog_from_tag != '' && needs.build.result == 'skipped')) }}
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -228,6 +250,7 @@ jobs:
         run: ./build/Import-ModuleRegistryFromSource.ps1 -OutputPath 'artifacts/generated/module-registry.json'
 
       - name: Download module release inputs
+        if: ${{ needs.build.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           pattern: release-module-*-${{ github.run_number }}
@@ -241,6 +264,7 @@ jobs:
           path: artifacts/previous-catalog
 
       - name: Merge package metadata
+        if: ${{ needs.build.result == 'success' }}
         shell: pwsh
         run: |
           ./build/Merge-PackageMetadata.ps1 `
@@ -252,6 +276,7 @@ jobs:
         env:
           PREVIOUS_CATALOG: ${{ needs.select.outputs.previous_catalog }}
           CHANGED_IDS: ${{ needs.select.outputs.changed_ids }}
+          RESTORE_FROM_TAG: ${{ inputs.restore_catalog_from_tag }}
         run: |
           $catalogArgs = @{
             ReleaseTag = '${{ needs.select.outputs.release_tag }}'
@@ -260,12 +285,23 @@ jobs:
             Repository = '${{ github.repository }}'
             OutputPath = 'release-metadata/module-catalog.json'
             RequirePackageManifest = $true
-            ReleasedModuleIds = @($env:CHANGED_IDS -split ',')
             PreviousCatalogPath = $env:PREVIOUS_CATALOG
           }
+          $verifyArgs = @{
+            CatalogPath = $catalogArgs.OutputPath
+            PreviousCatalogPath = $env:PREVIOUS_CATALOG
+          }
+          if ($env:RESTORE_FROM_TAG) {
+            $catalogArgs.PackagesJson = '[]'
+            $catalogArgs.CatalogOnly = $true
+            $verifyArgs.CatalogOnly = $true
+          }
+          else {
+            $catalogArgs.ReleasedModuleIds = @($env:CHANGED_IDS -split ',')
+            $verifyArgs.ReleasedModuleIds = $catalogArgs.ReleasedModuleIds
+          }
           ./build/Generate-ModuleCatalog.ps1 @catalogArgs
-          ./build/Verify-Catalog.ps1 -CatalogPath 'release-metadata/module-catalog.json' `
-            -ReleasedModuleIds $catalogArgs.ReleasedModuleIds -PreviousCatalogPath $env:PREVIOUS_CATALOG
+          ./build/Verify-Catalog.ps1 @verifyArgs
 
       - name: Generate release notes
         shell: pwsh
@@ -315,7 +351,7 @@ jobs:
           throw 'Non-dry-run releases require repository variable SIGNING_ENABLED=true and a configured cosign identity.'
 
       - name: Attest package provenance
-        if: ${{ !inputs.dry_run }}
+        if: ${{ !inputs.dry_run && needs.build.result == 'success' }}
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: artifacts/packages/*.spkg
@@ -325,9 +361,13 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          RESTORE_FROM_TAG: ${{ inputs.restore_catalog_from_tag }}
         run: |
-          $assets = @(Get-ChildItem -LiteralPath 'artifacts/packages' -Filter '*.spkg' -File | ForEach-Object FullName)
-          if ($assets.Count -eq 0) { throw 'No module packages were produced.' }
+          $assets = @()
+          if (-not $env:RESTORE_FROM_TAG) {
+            $assets = @(Get-ChildItem -LiteralPath 'artifacts/packages' -Filter '*.spkg' -File | ForEach-Object FullName)
+            if ($assets.Count -eq 0) { throw 'No module packages were produced.' }
+          }
           $existingTag = @(git ls-remote origin 'refs/tags/${{ needs.select.outputs.release_tag }}')
           if ($LASTEXITCODE -ne 0 -or $existingTag.Count -ne 0) { throw 'Release tag lookup failed or tag already exists; do not overwrite history.' }
 
@@ -383,7 +423,7 @@ jobs:
   sync-atomgit:
     name: Mirror published module release to AtomGit
     needs: [select, compose]
-    if: ${{ !inputs.dry_run && vars.ATOMGIT_MIRROR_ENABLED == 'true' }}
+    if: ${{ !cancelled() && needs.select.result == 'success' && needs.compose.result == 'success' && !inputs.dry_run && vars.ATOMGIT_MIRROR_ENABLED == 'true' }}
     permissions:
       contents: read
     uses: ./.github/workflows/atomgit-release.yml

@@ -189,6 +189,21 @@ test('catalog uploads last even when GitHub returns it first', async () => {
   assert.equal(writes(f).filter(call => call.method === 'PUT').at(-1).path, '/module-catalog.json');
 });
 
+test('a catalog-only repair mirrors its signature and catalog without requiring a new package', async () => {
+  const catalog = Buffer.from('{"modules":[{"id":"starpie.plugin.qrscanner"}]}');
+  const signature = Buffer.from('fixture signature');
+  const files = [
+    { id: 11, name: 'module-catalog.json', content: catalog },
+    { id: 12, name: 'module-catalog.sigstore.json', content: signature },
+  ];
+  const f = fixture({ files });
+  assert.equal((await f.run()).uploaded, 2);
+  assert.deepEqual(f.stored.get('module-catalog.sigstore.json'), signature);
+  assert.deepEqual(f.stored.get('module-catalog.json'), catalog);
+  assert.deepEqual(writes(f).filter(call => call.method === 'PUT').map(call => call.path),
+    ['/module-catalog.sigstore.json', '/module-catalog.json']);
+});
+
 test('failed package upload never exposes a new catalog', async () => {
   const files = [{ id: 11, name: 'module-catalog.json', content: Buffer.from('{}') },
     { id: 12, name: 'a.spkg', content: Buffer.from('a') }];

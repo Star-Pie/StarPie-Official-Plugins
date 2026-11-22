@@ -88,7 +88,7 @@ function Merge-CatalogVersions {
 }
 
 function Get-CatalogReleaseSelection {
-    param([AllowEmptyCollection()][string[]]$ModuleIds,[object[]]$EnabledModules)
+    param([AllowEmptyCollection()][string[]]$ModuleIds,[object[]]$EnabledModules,[switch]$CatalogOnly)
     $selected = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     foreach ($value in $ModuleIds) {
         foreach ($part in @($value -split ',')) {
@@ -98,7 +98,7 @@ function Get-CatalogReleaseSelection {
             }
         }
     }
-    if ($selected.Count -eq 0) { throw 'An explicit release selection must not be empty.' }
+    if ($selected.Count -eq 0 -and -not $CatalogOnly) { throw 'An explicit release selection must not be empty.' }
     return ,$selected
 }
 
