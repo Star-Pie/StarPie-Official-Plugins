@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using StarPie.Plugin;
@@ -13,6 +14,7 @@ internal sealed class WebUrlAction : IActionContribution
 {
     /// <summary>选了「自定义浏览器」时 <see cref="HostActionFields.BrowserChoice"/> 的取值。</summary>
     private const string BrowserChoiceCustom = "Custom";
+    private const string SelectionPlaceholder = "%s";
 
     private readonly IPluginContext _context;
 
@@ -48,7 +50,8 @@ internal sealed class WebUrlAction : IActionContribution
             LabelKey = "weburl.url",
             Type = ParameterFieldType.Text,
             Required = true,
-            Placeholder = "https://github.com",
+            Placeholder = "https://www.bing.com/search?q=%s",
+            HelpText = T("weburl.urlHelp", Texts.WebUrlUrlHelp),
 
             // 不填协议时执行体会自动补 https://，所以这里不做正则强校验，
             // 只挡住纯空白与明显非网址的输入（例如误填了本地路径）。
@@ -117,13 +120,21 @@ internal sealed class WebUrlAction : IActionContribution
         return url.Length <= 48 ? url : url.Substring(0, 47) + "…";
     }
 
-    public Task<ActionResult> ExecuteAsync(PluginActionInput input, CancellationToken cancellationToken)
+    public async Task<ActionResult> ExecuteAsync(PluginActionInput input, CancellationToken cancellationToken)
     {
         string url = input?.Parameter(HostActionFields.Parameter) ?? "";
 
         if (string.IsNullOrWhiteSpace(url))
         {
-            return Task.FromResult(ActionResult.Fail(Texts.WebUrlEmpty));
+            return ActionResult.Fail(Texts.WebUrlEmpty);
+        }
+
+        if (url.Contains(SelectionPlaceholder, StringComparison.Ordinal))
+        {
+            string selected = await GetSelectedTextViaHostCopyAsync(cancellationToken);
+            // EscapeDataString 把空格编成 %20，在 query 和 path 中都合法；
+            // UrlEncode 编成 '+'，放在路径段里会被当作字面加号。
+            url = url.Replace(SelectionPlaceholder, Uri.EscapeDataString(selected));
         }
 
         string browser = input?.Parameter(HostActionFields.BrowserChoice) ?? "Default";
@@ -131,14 +142,66 @@ internal sealed class WebUrlAction : IActionContribution
 
         if (!_context.Host.OpenUrl(url, browser, customBrowserPath))
         {
-            return Task.FromResult(ActionResult.Fail(
-                $"未能打开网址「{url}」。若选了自定义浏览器，请确认其可执行文件路径有效；详情见插件日志。"));
+            return ActionResult.Fail(
+                $"未能打开网址「{url}」。若选了自定义浏览器，请确认其可执行文件路径有效；详情见插件日志。");
         }
 
-        return Task.FromResult(ActionResult.Empty);
+        return ActionResult.Empty;
     }
 
     /// <summary>取参数，缺失时给空串。抽出来是因为下面三处都要做同一套「缺键 / 值为 null」的折叠。</summary>
     private static string Read(IReadOnlyDictionary<string, string> parameters, string key) =>
         parameters != null && parameters.TryGetValue(key, out string? value) ? value ?? "" : "";
+
+    #region Ctrl+C + 剪贴板
+    private async Task<string> GetSelectedTextViaHostCopyAsync(CancellationToken cancellationToken)
+    {
+        var host = _context.Host;
+
+        string? oldClip;
+        try { oldClip = host.GetClipboardText(); }
+        catch { oldClip = null; }
+
+        // 先写入唯一哨兵再发 Ctrl+C。即使选中的文字和原剪贴板内容相同，
+        // 也能据此判断 Ctrl+C 是否生效。
+        string sentinel = "__StarPieSel_" + Guid.NewGuid().ToString("N") + "__";
+        try { host.SetClipboardText(sentinel); }
+        catch { return ""; }
+
+        try
+        {
+            host.SendHotkey("Ctrl+C");
+
+            // 轮询至多 800ms，直到剪贴板不再是哨兵
+            var deadline = DateTime.UtcNow.AddMilliseconds(800);
+            string captured = "";
+            while (DateTime.UtcNow < deadline)
+            {
+                await Task.Delay(25, cancellationToken);
+                string current = host.GetClipboardText() ?? "";
+                if (!string.Equals(current, sentinel, StringComparison.Ordinal))
+                {
+                    captured = current;
+                    break;
+                }
+            }
+
+            return captured.Trim();
+        }
+        catch
+        {
+            return "";
+        }
+        finally
+        {
+            // 无论 Ctrl+C 是否成功都恢复原剪贴板，避免残留哨兵。
+            // 原内容为空或读取失败（如图片）时不恢复，避免把剪贴板清空。
+            // 代价：约 800ms 内用户自行复制的内容会被覆盖。
+            if (!string.IsNullOrEmpty(oldClip))
+            {
+                try { host.SetClipboardText(oldClip); } catch { /* 剪贴板被别的进程占着就放弃 */ }
+            }
+        }
+    }
+    #endregion
 }

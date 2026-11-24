@@ -21,6 +21,7 @@ internal static class Texts
 
     internal const string WebUrlTitle = "打开网址";
     internal const string WebUrlUrl = "网址";
+    internal const string WebUrlUrlHelp = "网址中的 %s 会被替换为当前选中的文字（URL 编码）。";
     internal const string WebUrlBrowser = "打开方式";
     internal const string WebUrlBrowserDefault = "系统默认";
     internal const string WebUrlBrowserCustom = "自定义浏览器...";
@@ -36,6 +37,7 @@ internal static class Texts
     {
         ("weburl.title", WebUrlTitle, "Open URL"),
         ("weburl.url", WebUrlUrl, "URL"),
+        ("weburl.urlHelp", WebUrlUrlHelp, "The %s in the URL will be replaced by the currently selected text (URL encoded)."),
         ("weburl.browser", WebUrlBrowser, "Open with"),
         ("weburl.browser.default", WebUrlBrowserDefault, "System default"),
         ("weburl.browser.custom", WebUrlBrowserCustom, "Custom browser..."),

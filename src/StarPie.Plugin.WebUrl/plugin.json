@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "id": "starpie.builtin.weburl",
   "name": "打开网址",
-  "description": "随 StarPie 分发的内置动作：用默认或指定浏览器打开网址。可在「插件」页单独停用。",
+  "description": "随 StarPie 分发的内置动作：用默认或指定浏览器打开网址，网址中的 %s 会被替换为当前选中的文字。可在「插件」页单独停用。",
   "author": "StarPie Studio",
   "homepage": "https://github.com/SoftBlack42/StarPie",
   "license": "MIT",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "apiVersion": "1.4",
   "minHostVersion": "1.8.0-beta.1",
   "maxHostVersion": null,
@@ -15,7 +15,8 @@
   "assembly": "StarPie.Plugin.WebUrl.dll",
   "entryType": "StarPie.Plugin.WebUrl.WebUrlPlugin",
   "capabilities": [
-    "Process"
+    "Process",
+    "Clipboard"
   ],
   "claimedTypes": [
     {
@@ -44,7 +45,7 @@
     {
       "id": "webUrl",
       "name": "打开网址",
-      "description": "使用默认或指定浏览器打开网址。",
+      "description": "使用默认或指定浏览器打开网址，网址中的 %s 会被替换为当前选中的文字。",
       "category": "网络工具"
     }
   ],

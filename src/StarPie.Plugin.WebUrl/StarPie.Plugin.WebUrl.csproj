@@ -28,12 +28,12 @@
     <AssemblyName>StarPie.Plugin.WebUrl</AssemblyName>
     <RootNamespace>StarPie.Plugin.WebUrl</RootNamespace>
 
-    <Version>1.0.1</Version>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
+    <Version>1.0.2</Version>
+    <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <FileVersion>1.0.2.0</FileVersion>
     <Product>StarPie 打开网址</Product>
     <Company>StarPie Studio</Company>
-    <Description>随 StarPie 分发的内置动作：用默认或指定浏览器打开网址。可在「插件」页单独停用。</Description>
+    <Description>随 StarPie 分发的内置动作：用默认或指定浏览器打开网址，网址中的 %s 会被替换为当前选中的文字。可在「插件」页单独停用。</Description>
 
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
