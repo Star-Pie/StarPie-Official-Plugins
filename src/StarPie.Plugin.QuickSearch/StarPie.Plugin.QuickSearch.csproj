@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>StarPie.Plugin.QuickSearch</AssemblyName>
     <UseWPF>true</UseWPF>
-    <Version>0.2.2</Version>
+    <Version>0.3.0</Version>
     <StarPieSdkProject Condition="'$(StarPieSdkProject)' == ''">$(MSBuildThisFileDirectory)..\..\sdk\StarPie.Plugin.Abstractions\StarPie.Plugin.Abstractions.csproj</StarPieSdkProject>
   </PropertyGroup>
   <ItemGroup>

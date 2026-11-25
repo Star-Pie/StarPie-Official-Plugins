@@ -99,6 +99,92 @@ internal sealed partial class QuickSearchWindow
     private const string StyleMarkup = """
         <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+          <Style x:Key="QuickSearch.FilterInput" TargetType="TextBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+              <Setter.Value><ControlTemplate TargetType="TextBox">
+                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                  <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center" Focusable="False"/>
+                </Border>
+              </ControlTemplate></Setter.Value>
+            </Setter>
+          </Style>
+          <Style x:Key="QuickSearch.ComboItem" TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Template">
+              <Setter.Value><ControlTemplate TargetType="ComboBoxItem">
+                <Border x:Name="Shell" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}" Margin="2,1">
+                  <ContentPresenter VerticalAlignment="Center"/>
+                </Border>
+                <ControlTemplate.Triggers>
+                  <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="Shell" Property="Background" Value="{DynamicResource ItemHoverBrush}"/>
+                  </Trigger>
+                  <Trigger Property="IsSelected" Value="True">
+                    <Setter TargetName="Shell" Property="Background" Value="{DynamicResource NavTabActiveBgBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource NavTabActiveFgBrush}"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                  </Trigger>
+                </ControlTemplate.Triggers>
+              </ControlTemplate></Setter.Value>
+            </Setter>
+          </Style>
+          <Style x:Key="QuickSearch.Combo" TargetType="ComboBox">
+            <Setter Property="Background" Value="{DynamicResource ButtonDefaultBgBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="MinHeight" Value="27"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="ItemContainerStyle" Value="{StaticResource QuickSearch.ComboItem}"/>
+            <Setter Property="Template">
+              <Setter.Value><ControlTemplate TargetType="ComboBox">
+                <Grid>
+                  <ToggleButton x:Name="ToggleButton" Focusable="False" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" ClickMode="Press">
+                    <ToggleButton.Template><ControlTemplate TargetType="ToggleButton">
+                      <Border x:Name="Shell" CornerRadius="10" Background="{Binding Background, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                              BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                              BorderThickness="{Binding BorderThickness, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                              Padding="8,3,24,3" MinHeight="27" SnapsToDevicePixels="True">
+                        <Grid>
+                          <Path Data="M7,10 L12,15 L17,10" Stroke="{DynamicResource TextSecondaryBrush}" StrokeThickness="1.7"
+                                StrokeStartLineCap="Round" StrokeEndLineCap="Round" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                Margin="0,0,-17,0" Width="10" Height="10" Stretch="Uniform"/>
+                        </Grid>
+                      </Border>
+                      <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                          <Setter TargetName="Shell" Property="Background" Value="{DynamicResource ItemHoverBrush}"/>
+                          <Setter TargetName="Shell" Property="BorderBrush" Value="{DynamicResource AccentPrimaryBrush}"/>
+                        </Trigger>
+                      </ControlTemplate.Triggers>
+                    </ControlTemplate></ToggleButton.Template>
+                  </ToggleButton>
+                  <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}"
+                                    ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" Margin="9,3,24,3"
+                                    VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                  <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                    <Border MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}" Margin="0,3,0,0"
+                            Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource CardBorderBrush}"
+                            BorderThickness="1" CornerRadius="10" Padding="3">
+                      <ScrollViewer SnapsToDevicePixels="True">
+                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                      </ScrollViewer>
+                    </Border>
+                  </Popup>
+                </Grid>
+              </ControlTemplate></Setter.Value>
+            </Setter>
+          </Style>
           <Style x:Key="QuickSearch.Input" TargetType="TextBox">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>

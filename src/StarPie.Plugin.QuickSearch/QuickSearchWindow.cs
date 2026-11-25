@@ -19,12 +19,21 @@ internal sealed partial class QuickSearchWindow : Window
     private CancellationTokenSource? _scopeWait;
     private HwndSource? _source;
     private string _category = SearchCategories.All;
+    private SearchMatchMode _matchMode;
+    private SearchSortField _sortField;
+    private bool _sortDescending;
+    private string _pathFilter = "";
+    private SearchSizeFilter _sizeFilter = SearchSizeFilter.Any;
+    private SearchTimeFilter _timeFilter = SearchTimeFilter.Any;
     private bool _pinned, _closed, _choosingFolder, _ready, _resizing;
     private int _page;
     private long _searchRevision = -1;
     private readonly DispatcherTimer _healthTimer = new() { Interval = TimeSpan.FromSeconds(2) };
     private string _statusLine = "";
     private const int PageSize = 40;
+
+    internal SearchQueryOptions CurrentQueryOptions => new(
+        _matchMode, _sortField, _sortDescending, _pathFilter, _sizeFilter, _timeFilter);
 
     internal QuickSearchWindow(IPluginContext context, PluginActionInput input, SearchResults search)
     {
@@ -33,6 +42,9 @@ internal sealed partial class QuickSearchWindow : Window
         _roots = _preferences.Roots().ToList();
         _search = search;
         _pinned = _preferences.Pinned;
+        _matchMode = _preferences.MatchMode;
+        _sortField = _preferences.SortField;
+        _sortDescending = _preferences.SortDescending;
         _healthTimer.Tick += RefreshHealth;
         ShowInTaskbar = false;
         Topmost = true;
@@ -71,6 +83,10 @@ internal sealed partial class QuickSearchWindow : Window
         _category = SearchCategories.All;
         foreach (var (key, button) in _categoryButtons) MarkCategory(key, button);
         _input.Clear();
+        ResetTransientFilters();
+        RefreshMatchModeControls();
+        RefreshSortControls();
+        RefreshFilterControls();
         _scope.Visibility = _roots.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         SearchWindowPlacement.AtPointer(this, x, y, _preferences.Width, _preferences.Height);
         Show();
@@ -79,6 +95,65 @@ internal sealed partial class QuickSearchWindow : Window
         Keyboard.Focus(_input);
         _ready = true;
         ConfigureScope();
+    }
+
+    internal void SetMatchMode(SearchMatchMode mode)
+    {
+        if (_matchMode == mode) return;
+        if (!TryUserAction(() => { _preferences.SetMatchMode(mode); return true; })) return;
+        _matchMode = mode;
+        RefreshMatchModeControls();
+        _input.Focus();
+        RequestPage(0);
+    }
+
+    internal void ChangeSortField(SearchSortField field)
+    {
+        bool descending = field != SearchSortField.Path;
+        if (!TryUserAction(() => { _preferences.SetSort(field, descending); return true; })) return;
+        _sortField = field;
+        _sortDescending = descending;
+        RefreshSortControls();
+        RequestPage(0);
+    }
+
+    internal void ToggleSortDirection()
+    {
+        bool descending = !_sortDescending;
+        if (!TryUserAction(() => { _preferences.SetSort(_sortField, descending); return true; })) return;
+        _sortDescending = descending;
+        RefreshSortControls();
+        RequestPage(0);
+    }
+
+    private void ToggleFilterBar()
+    {
+        bool show = _filterBar.Visibility != Visibility.Visible;
+        _filterBar.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        RefreshFilterToggleCaption();
+        if (show) _pathFilterInput.Focus();
+        else _input.Focus();
+    }
+
+    private void ResetFilters()
+    {
+        ResetTransientFilters();
+        RefreshFilterControls();
+        RequestPage(0);
+    }
+
+    private void ResetTransientFilters()
+    {
+        _suppressControlEvents = true;
+        try
+        {
+            _pathFilter = "";
+            _sizeFilter = SearchSizeFilter.Any;
+            _timeFilter = SearchTimeFilter.Any;
+            _pathFilterInput.Clear();
+            _filterBar.Visibility = Visibility.Collapsed;
+        }
+        finally { _suppressControlEvents = false; }
     }
 
     internal void RefreshLanguage()
@@ -148,7 +223,7 @@ internal sealed partial class QuickSearchWindow : Window
             if (debounce) await Task.Delay(180, token);
             _searchRevision = _search.FolderStatus?.Revision ?? -1;
             var result = await _search.QueryAsync(_input.Text.Trim(), _category, checked(page * PageSize), PageSize,
-                token);
+                CurrentQueryOptions, token);
             if (token.IsCancellationRequested || _closed) return;
             foreach (var row in result.Items) AddResult(row);
             if (_list.Items.Count != 0)
@@ -229,7 +304,24 @@ internal sealed partial class QuickSearchWindow : Window
         if (e.Key == Key.Escape)
         {
             e.Handled = true;
+            if (_pathFilterInput.IsKeyboardFocusWithin)
+            {
+                if (_pathFilterInput.Text.Length > 0) _pathFilterInput.Clear();
+                else
+                {
+                    _filterBar.Visibility = Visibility.Collapsed;
+                    RefreshFilterToggleCaption();
+                }
+                _input.Focus();
+                return;
+            }
             Close();
+            return;
+        }
+        if (_pathFilterInput.IsKeyboardFocusWithin && e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            RequestPage(0);
             return;
         }
         if (!_input.IsKeyboardFocusWithin && !_list.IsKeyboardFocusWithin) return;

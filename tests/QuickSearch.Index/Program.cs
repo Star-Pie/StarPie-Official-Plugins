@@ -143,9 +143,12 @@ static async Task Run(string fixture)
         await Task.Delay(400);
         Check(index.Status.Revision == revision, "Polling an unchanged scope leaves its revision stable");
         var drift = Directory.CreateDirectory(Path.Combine(root, "incoming")).FullName;
-        File.WriteAllText(Path.Combine(drift, "watch-entry.sldasm"), "");
-        await Eventually(async () => (await Query(index, "watch-entry")).Items.Count == 1 &&
-            index.Status.Revision > revision, "create advances visible revision");
+        string watchFile = Path.Combine(drift, "watch-entry.sldasm");
+        File.WriteAllBytes(watchFile, new byte[4096]);
+        await Eventually(async () =>
+            (await index.SearchAsync("watch-entry", "all", 0, 10, new SearchQueryOptions(SortField: SearchSortField.Size, SortDescending: true), token))
+            .Items.FirstOrDefault() is { Size: 4096, LastWriteUtcTicks: > 0 } &&
+            index.Status.Revision > revision, "create advances visible revision and captures metadata");
         var moved = Path.Combine(root, "renamed-folder");
         Directory.Move(drift, moved);
         await Eventually(async () => (await Query(index, "watch-entry")).Items.SingleOrDefault()?.FullPath ==
@@ -156,14 +159,16 @@ static async Task Run(string fixture)
     }
     File.Delete(target);
     string newTarget = Path.Combine(deep, "changed-while-closed.dwg");
-    File.WriteAllText(newTarget, "");
+    File.WriteAllBytes(newTarget, new byte[150_000]);
     using (var reopened = new FolderSearchIndex(cache, TimeSpan.FromMilliseconds(150)))
     {
         var timer = Stopwatch.StartNew();
         await reopened.SetRootsAsync([root, deep], token);
         Console.WriteLine($"Restart ready with persisted index: {timer.Elapsed.TotalMilliseconds:F1} ms.");
-        await Eventually(async () => (await Query(reopened, "changed-while-closed")).Items.SingleOrDefault()?.FullPath == newTarget &&
-            (await Query(reopened, "最终件")).Items.Count == 0, "offline reconciliation");
+        await Eventually(async () =>
+            (await reopened.SearchAsync("changed-while-closed", "all", 0, 10, new SearchQueryOptions(SizeFilter: SearchSizeFilter.Small), token))
+            .Items.SingleOrDefault()?.Size == 150_000 &&
+            (await Query(reopened, "最终件")).Items.Count == 0, "offline reconciliation updates size and filters");
         await reopened.SetRootsAsync([other], token);
         Check((await Query(reopened, "outside-only")).Items.Single().FullPath == outside, "New scope");
         Check((await Query(reopened, "corpus-")).Items.Count == 0, "Old scope removed");

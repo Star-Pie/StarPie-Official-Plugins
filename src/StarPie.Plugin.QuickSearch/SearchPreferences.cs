@@ -10,6 +10,47 @@ internal sealed class SearchPreferences(IPluginSettings settings, PluginActionIn
     internal double Height => Dimension("QuickSearchHeight", 530, 380);
     internal bool Pinned => settings.GetBool("QuickSearchPinned", legacy.Bool("QuickSearchPinned"));
 
+    internal SearchMatchMode MatchMode => (settings.Get("QuickSearchMatchMode") ?? "").Trim().ToLowerInvariant() switch
+    {
+        "exact" => SearchMatchMode.Exact,
+        "substring" => SearchMatchMode.Substring,
+        _ => SearchMatchMode.Related
+    };
+
+    internal SearchSortField SortField => (settings.Get("QuickSearchSortField") ?? "").Trim().ToLowerInvariant() switch
+    {
+        "size" => SearchSortField.Size,
+        "modified" => SearchSortField.ModifiedTime,
+        _ => SearchSortField.Path
+    };
+
+    internal bool SortDescending => settings.GetBool("QuickSearchSortDescending", false);
+
+    internal void SetMatchMode(SearchMatchMode mode)
+    {
+        string value = mode switch
+        {
+            SearchMatchMode.Exact => "exact",
+            SearchMatchMode.Substring => "substring",
+            _ => "related"
+        };
+        settings.Set("QuickSearchMatchMode", value);
+        settings.Save();
+    }
+
+    internal void SetSort(SearchSortField field, bool descending)
+    {
+        string fieldValue = field switch
+        {
+            SearchSortField.Size => "size",
+            SearchSortField.ModifiedTime => "modified",
+            _ => "path"
+        };
+        settings.Set("QuickSearchSortField", fieldValue);
+        settings.Set("QuickSearchSortDescending", descending.ToString());
+        settings.Save();
+    }
+
     private double Dimension(string key, double standard, double minimum)
     {
         double value = settings.GetDouble(key, legacy.Double(key, standard));
