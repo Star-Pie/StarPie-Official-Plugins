@@ -208,7 +208,7 @@ internal sealed class EmojiLibraryStorage
             }
 
             var fileInfo = new FileInfo(rawPath);
-            if ((fileInfo.Attributes & FileAttributes.ReparsePoint) != 0 ||
+            if (IsSymbolicLinkOrJunction(fileInfo) ||
                 fileInfo.Length <= 0 || fileInfo.Length > MaxStickerBytes)
             {
                 skipped++;
@@ -267,7 +267,7 @@ internal sealed class EmojiLibraryStorage
             return (null, new ImportSummary(0, 0, Array.Empty<CustomSticker>()));
 
         var dirInfo = new DirectoryInfo(folderPath);
-        if ((dirInfo.Attributes & FileAttributes.ReparsePoint) != 0)
+        if (IsSymbolicLinkOrJunction(dirInfo))
             return (null, new ImportSummary(0, 1, Array.Empty<CustomSticker>()));
 
         string groupName = string.IsNullOrWhiteSpace(dirInfo.Name) ? "Imported" : dirInfo.Name;
@@ -327,7 +327,7 @@ internal sealed class EmojiLibraryStorage
             return null;
 
         var dirInfo = new DirectoryInfo(folderPath);
-        if ((dirInfo.Attributes & FileAttributes.ReparsePoint) != 0)
+        if (IsSymbolicLinkOrJunction(dirInfo))
             return null;
 
         string normalized = Path.GetFullPath(dirInfo.FullName);
@@ -378,7 +378,7 @@ internal sealed class EmojiLibraryStorage
         foreach (string path in EnumerateSupportedImagePaths(group.SourcePath, MaxStickersPerMount))
         {
             var fi = new FileInfo(path);
-            if ((fi.Attributes & FileAttributes.ReparsePoint) != 0 || fi.Length <= 0 || fi.Length > MaxStickerBytes)
+            if (IsSymbolicLinkOrJunction(fi) || fi.Length <= 0 || fi.Length > MaxStickerBytes)
                 continue;
 
             string? format = DetectImageFormatFromFileHeader(fi.FullName, fi.Extension);
@@ -449,6 +449,20 @@ internal sealed class EmojiLibraryStorage
             }
         }
         return removed;
+    }
+
+    internal static bool IsSymbolicLinkOrJunction(FileSystemInfo info)
+    {
+        if ((info.Attributes & FileAttributes.ReparsePoint) == 0)
+            return false;
+        try
+        {
+            return info.LinkTarget != null;
+        }
+        catch
+        {
+            return true;
+        }
     }
 
     internal static string? DetectImageFormat(ReadOnlySpan<byte> bytes, string? extension)

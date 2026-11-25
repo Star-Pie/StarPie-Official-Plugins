@@ -28,6 +28,7 @@ internal sealed class EmojiManagerWindow : Window
     private string _section = "all"; // all | fav | kaomoji | prefs | grp:<id>
     private string _filter = "";
     private bool _closed;
+    private IDisposable? _fileDropAttachment;
 
     internal EmojiManagerWindow(
         IPluginContext context,
@@ -124,9 +125,13 @@ internal sealed class EmojiManagerWindow : Window
         Grid.SetColumn(rightGrid, 1);
         root.Children.Add(rightGrid);
 
-        AllowDrop = true;
-        Drop += OnManagerDrop;
-        Closed += (_, _) => _closed = true;
+        _fileDropAttachment = ElevatedFileDropBridge.Attach(this, HandleManagerDroppedPaths);
+        Closed += (_, _) =>
+        {
+            _closed = true;
+            _fileDropAttachment?.Dispose();
+            _fileDropAttachment = null;
+        };
 
         Content = root;
         RenderNav();
@@ -923,16 +928,31 @@ internal sealed class EmojiManagerWindow : Window
         }
     }
 
-    private void OnManagerDrop(object sender, DragEventArgs e)
+    private void HandleManagerDroppedPaths(string[] paths)
     {
-        if (_section == "prefs" || !e.Data.GetDataPresent(DataFormats.FileDrop)) return;
-        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths || paths.Length == 0) return;
+        if (_section == "prefs" || paths == null || paths.Length == 0) return;
 
-        string gid = TargetManagedGroupId();
-        var summary = _storage.ImportFiles(_doc, paths.Where(File.Exists), gid);
-        if (summary.ImportedCount > 0)
+        var (files, folders) = ElevatedFileDropBridge.PartitionDroppedPaths(paths);
+        if (files.Count == 0 && folders.Count == 0) return;
+
+        int imported = 0;
+        string? targetSection = null;
+        if (files.Count > 0)
         {
-            _section = "grp:" + gid;
+            string gid = TargetManagedGroupId();
+            var summary = _storage.ImportFiles(_doc, files, gid);
+            imported += summary.ImportedCount;
+            if (summary.ImportedCount > 0) targetSection = "grp:" + gid;
+        }
+        foreach (string folder in folders)
+        {
+            var (grp, folderSummary) = _storage.ImportFolder(_doc, folder);
+            imported += folderSummary.ImportedCount;
+            if (grp != null && folderSummary.ImportedCount > 0) targetSection ??= "grp:" + grp.Id;
+        }
+        if (imported > 0)
+        {
+            if (targetSection != null) _section = targetSection;
             CommitChange();
             RenderContent();
         }
