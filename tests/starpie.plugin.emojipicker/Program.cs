@@ -773,6 +773,41 @@ public static class Program
         {
             if (!picker2.IsClosedForTest) picker2.Close();
         }
+
+        // Regression tests for Emoji Picker file & folder drop handling (elevated + non-elevated + OneDrive attribute safety)
+        string dropDir = Path.Combine(root, "drop-batch");
+        string dropFolder = Path.Combine(dropDir, "FolderStickers");
+        Directory.CreateDirectory(dropFolder);
+        string dropImg1 = Path.Combine(dropDir, "dropped_one.png");
+        string dropImg2 = Path.Combine(dropFolder, "dropped_folder_gif.gif");
+        File.WriteAllBytes(dropImg1, CreateValidPngBytes());
+        File.WriteAllBytes(dropImg2, CreateAnimatedGifBytes());
+
+        var (partFiles, partFolders) = ElevatedFileDropBridge.PartitionDroppedPaths(new[] { dropImg1, dropFolder, dropImg1, Path.Combine(dropDir, "missing.png") });
+        Assert(partFiles.Count == 1 && partFolders.Count == 1,
+            $"ElevatedFileDropBridge partitions dropped files & folders cleanly ({partFiles.Count} files, {partFolders.Count} folders)");
+
+        var dropDoc = EmojiLibraryStorage.CreateDefault("Stickers");
+        var dropPicker = new EmojiPickerWindow(ctx, ctx.MockPanels, storage, dropDoc, imageCache, dispatcher, target, EmojiPickerMode.All, _ => { }, () => { });
+        try
+        {
+            Assert(((FrameworkElement)dropPicker.Content).ReadLocalValue(UIElement.AllowDropProperty) == DependencyProperty.UnsetValue,
+                "cardBorder does not bind bubbling AllowDrop directly (delegates to ElevatedFileDropBridge)");
+            using var elevatedHook = ElevatedFileDropBridge.Attach(dropPicker, _ => { }, isElevatedOverride: true);
+            Assert(!dropPicker.AllowDrop, "Elevated drop bridge keeps WPF OLE IDropTarget disabled for UIPI WM_DROPFILES");
+            using var standardHook = ElevatedFileDropBridge.Attach(dropPicker, _ => { }, isElevatedOverride: false);
+            Assert(dropPicker.AllowDrop, "Non-elevated drop bridge enables WPF tunneling PreviewDrop");
+
+            int imported = dropPicker.HandleDroppedPathsForTest(new[] { dropImg1, dropFolder });
+            Assert(imported == 2 && dropDoc.Stickers.Count == 2,
+                $"HandleDroppedPaths imports both dropped image files and folders (imported={imported}, stickers={dropDoc.Stickers.Count})");
+            Assert(!EmojiLibraryStorage.IsSymbolicLinkOrJunction(new FileInfo(dropImg1)),
+                "Regular / OneDrive non-symlink files are accepted by IsSymbolicLinkOrJunction");
+        }
+        finally
+        {
+            if (!dropPicker.IsClosedForTest) dropPicker.Close();
+        }
     }
 
     private static void TestPluginLifecycleAndActionValidation(string root)
@@ -1045,7 +1080,7 @@ public static class Program
 
     private sealed class MockInputPanelPluginContext : IInputPanelPluginContext
     {
-        public PluginMetadata Me { get; } = new() { Id = "starpie.plugin.emojipicker", Version = "0.1.0" };
+        public PluginMetadata Me { get; } = new() { Id = "starpie.plugin.emojipicker", Version = "0.1.1" };
         public string PluginDirectory => AppContext.BaseDirectory;
         public string DataDirectory { get; }
         public IPluginLogger Log { get; } = new MockLogger();

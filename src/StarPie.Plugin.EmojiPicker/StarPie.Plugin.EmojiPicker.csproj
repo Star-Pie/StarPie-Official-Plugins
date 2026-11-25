@@ -3,9 +3,9 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <AssemblyName>StarPie.Plugin.EmojiPicker</AssemblyName>
     <RootNamespace>StarPie.Plugin.EmojiPicker</RootNamespace>
-    <Version>0.1.0</Version>
-    <AssemblyVersion>0.1.0.0</AssemblyVersion>
-    <FileVersion>0.1.0.0</FileVersion>
+    <Version>0.1.1</Version>
+    <AssemblyVersion>0.1.1.0</AssemblyVersion>
+    <FileVersion>0.1.1.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

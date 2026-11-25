@@ -76,6 +76,7 @@ internal sealed class EmojiPickerWindow : Window
     private int _sessionGeneration;
     private nint _activeTargetHwnd;
     private HwndSource? _hwndSource;
+    private IDisposable? _fileDropAttachment;
     private EmojiPickerMode _mode;
     private string _activeCatId = "recent";
     private string _activeCustomGroupId = "__all__";
@@ -149,8 +150,7 @@ internal sealed class EmojiPickerWindow : Window
             BorderBrush = _theme.Border,
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(14),
-            Margin = new Thickness(8),
-            AllowDrop = true
+            Margin = new Thickness(8)
         };
         var shadow = new DropShadowEffect { BlurRadius = 18, ShadowDepth = 2, Opacity = _theme.IsDark ? 0.5 : 0.22, Color = Colors.Black };
         shadow.Freeze();
@@ -444,13 +444,13 @@ internal sealed class EmojiPickerWindow : Window
         Grid.SetRow(_footerBorder, 5);
         rootGrid.Children.Add(_footerBorder);
 
-        cardBorder.DragEnter += OnDragEnterOver;
-        cardBorder.DragOver += OnDragEnterOver;
-        cardBorder.DragLeave += (_, _) => _dropOverlay.Visibility = Visibility.Collapsed;
-        cardBorder.Drop += OnDropFiles;
-
         cardBorder.Child = rootGrid;
         Content = cardBorder;
+
+        _fileDropAttachment = ElevatedFileDropBridge.Attach(
+            this,
+            HandleDroppedPaths,
+            hovering => _dropOverlay.Visibility = hovering ? Visibility.Visible : Visibility.Collapsed);
 
         SourceInitialized += (_, _) =>
         {
@@ -467,6 +467,8 @@ internal sealed class EmojiPickerWindow : Window
         Closed += (_, _) =>
         {
             _closed = true;
+            _fileDropAttachment?.Dispose();
+            _fileDropAttachment = null;
             EndNonActivatingDrag();
             _gifController.Dispose();
             _hwndSource?.RemoveHook(WndProc);
@@ -1804,44 +1806,49 @@ internal sealed class EmojiPickerWindow : Window
         RenderAll();
     }
 
-    private void OnDragEnterOver(object sender, DragEventArgs e)
-    {
-        if (e.Data.GetDataPresent(DataFormats.FileDrop))
-        {
-            e.Effects = DragDropEffects.Copy;
-            _dropOverlay.Visibility = Visibility.Visible;
-        }
-        else
-        {
-            e.Effects = DragDropEffects.None;
-        }
-        e.Handled = true;
-    }
+    internal int HandleDroppedPathsForTest(string[] paths) => HandleDroppedPathsCore(paths);
 
-    private void OnDropFiles(object sender, DragEventArgs e)
+    private void HandleDroppedPaths(string[] paths) => _ = HandleDroppedPathsCore(paths);
+
+    private int HandleDroppedPathsCore(string[] paths)
     {
         _dropOverlay.Visibility = Visibility.Collapsed;
-        if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
-        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths || paths.Length == 0) return;
+        if (paths == null || paths.Length == 0) return 0;
 
-        var fileList = new List<string>();
-        foreach (string p in paths)
+        var (files, folders) = ElevatedFileDropBridge.PartitionDroppedPaths(paths);
+        if (files.Count == 0 && folders.Count == 0) return 0;
+
+        int imported = 0;
+        int skipped = 0;
+        string? targetGroupId = null;
+
+        if (files.Count > 0)
         {
-            if (File.Exists(p)) fileList.Add(p);
+            string grpId = TargetManagedGroupId();
+            ImportSummary summary = _storage.ImportFiles(_doc, files, grpId);
+            imported += summary.ImportedCount;
+            skipped += summary.SkippedCount;
+            if (summary.ImportedCount > 0) targetGroupId = grpId;
         }
-        if (fileList.Count == 0) return;
 
-        string grpId = TargetManagedGroupId();
-        ImportSummary summary = _storage.ImportFiles(_doc, fileList, grpId);
-        if (summary.ImportedCount > 0)
+        foreach (string folder in folders)
+        {
+            var (grp, folderSummary) = _storage.ImportFolder(_doc, folder);
+            imported += folderSummary.ImportedCount;
+            skipped += folderSummary.SkippedCount;
+            if (grp != null && folderSummary.ImportedCount > 0) targetGroupId ??= grp.Id;
+        }
+
+        if (imported > 0)
         {
             _mode = EmojiPickerMode.Custom;
-            _activeCustomGroupId = grpId;
+            if (!string.IsNullOrEmpty(targetGroupId))
+                _activeCustomGroupId = targetGroupId;
             _onSaveLibrary(true);
             RenderAll();
         }
-        ReportImportNote(summary);
-        e.Handled = true;
+        ReportImportNote(new ImportSummary(imported, skipped, Array.Empty<CustomSticker>()));
+        return imported;
     }
 
     private void ReportImportNote(ImportSummary summary)
