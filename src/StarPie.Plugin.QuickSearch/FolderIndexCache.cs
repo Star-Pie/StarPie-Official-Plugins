@@ -10,7 +10,7 @@ namespace StarPie.Plugin.QuickSearch;
 internal static class FolderIndexCache
 {
     private const string FileName = "folder-index-v1.bin";
-    private const int FormatVersion = 1;
+    private const int FormatVersion = 2;
 
     public static ImmutableSortedSet<FolderEntry>? Read(string directory, string[] roots,
         HashSet<string> online, CancellationToken token,
@@ -21,7 +21,8 @@ internal static class FolderIndexCache
             using var stream = new FileStream(Path.Combine(directory, FileName), FileMode.Open, FileAccess.Read,
                 FileShare.Read | FileShare.Delete, 65536, FileOptions.SequentialScan);
             using var reader = new BinaryReader(stream, Encoding.UTF8);
-            if (reader.ReadInt32() != FormatVersion || reader.ReadInt32() != roots.Length) return null;
+            int version = reader.ReadInt32();
+            if ((version != 1 && version != FormatVersion) || reader.ReadInt32() != roots.Length) return null;
             foreach (string root in roots)
                 if (!string.Equals(reader.ReadString(), root, StringComparison.OrdinalIgnoreCase)) return null;
             var entries = ImmutableSortedSet.CreateBuilder<FolderEntry>(FolderPathComparer.Instance);
@@ -39,6 +40,14 @@ internal static class FolderIndexCache
                 token.ThrowIfCancellationRequested();
                 string path = reader.ReadString();
                 bool isDirectory = reader.ReadBoolean();
+                long size = 0;
+                long lastWriteUtcTicks = 0;
+                if (version == FormatVersion)
+                {
+                    size = reader.ReadInt64();
+                    lastWriteUtcTicks = reader.ReadInt64();
+                    if (size < 0 || lastWriteUtcTicks < 0) return null;
+                }
                 if (!Path.IsPathFullyQualified(path) ||
                     !string.Equals(path, Path.GetFullPath(path), StringComparison.OrdinalIgnoreCase)) return null;
                 if (FolderIndexSession.AtOrBelow(path, directory) || !online.Any(root => FolderIndexSession.AtOrBelow(path, root))) continue;
@@ -56,7 +65,7 @@ internal static class FolderIndexCache
                     if (!prefixes.TryGetValue(prefix, out var shared)) prefixes.Add(prefix, shared = prefix);
                     priorPrefix = shared;
                 }
-                entries.Add(new FolderEntry(priorPrefix, path[split..], isDirectory));
+                entries.Add(new FolderEntry(priorPrefix, path[split..], isDirectory, size, lastWriteUtcTicks));
                 if (publish != null && entries.Count > publishedCount && (entries.Count & 63) == 0 &&
                     (publishedCount == 0 || Stopwatch.GetElapsedTime(lastPublish) >= TimeSpan.FromMilliseconds(120)))
                 {
@@ -159,6 +168,8 @@ internal static class FolderIndexCache
                     }
                     WritePath(writer, prefix, entry.Name);
                     writer.Write(entry.IsDirectory);
+                    writer.Write(entry.Size);
+                    writer.Write(entry.LastWriteUtcTicks);
                 }
             }
             commit(temporary, Path.Combine(directory, FileName));

@@ -253,7 +253,7 @@ internal sealed class FolderIndexSession
                 watcher = new FileSystemWatcher(root)
                 {
                     IncludeSubdirectories = true,
-                    NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.Security,
+                    NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.Size | NotifyFilters.LastWrite | NotifyFilters.Security,
                     InternalBufferSize = 32 * 1024
                 };
                 watcher.Created += (_, e) => Signal(e.FullPath);
@@ -361,7 +361,8 @@ internal sealed class FolderIndexSession
                 bool directory = (attributes & FileAttributes.Directory) != 0;
                 if (!directory)
                 {
-                    var file = FolderEntry.Split(current, false);
+                    var info = new FileInfo(current);
+                    var file = FolderEntry.Split(current, false, info.Length, info.LastWriteTimeUtc.Ticks);
                     Record(file with { Prefix = SharePrefix(file.Prefix) });
                     continue;
                 }
@@ -370,11 +371,12 @@ internal sealed class FolderIndexSession
                     _skippedDirectories.Add(current);
                     continue;
                 }
-                var folder = FolderEntry.Split(current, true);
+                var folder = FolderEntry.Split(current, true, 0L, Directory.GetLastWriteTimeUtc(current).Ticks);
                 Record(folder with { Prefix = SharePrefix(folder.Prefix) });
                 string prefix = SharePrefix(Path.EndsInDirectorySeparator(current) ? current : current + Path.DirectorySeparatorChar);
                 var children = new FileSystemEnumerable<FolderEntry>(current,
-                    (ref FileSystemEntry entry) => new FolderEntry(prefix, entry.FileName.ToString(), entry.IsDirectory), Options);
+                    (ref FileSystemEntry entry) => new FolderEntry(prefix, entry.FileName.ToString(), entry.IsDirectory,
+                        entry.IsDirectory ? 0L : entry.Length, entry.LastWriteTimeUtc.UtcTicks), Options);
                 int visited = 0;
                 foreach (var entry in children)
                 {

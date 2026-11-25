@@ -2,9 +2,85 @@ using System.IO;
 
 namespace StarPie.Plugin.QuickSearch;
 
-internal sealed record SearchHit(string FullPath, bool IsDirectory)
+internal sealed record SearchHit(string FullPath, bool IsDirectory, long Size = 0, long LastWriteUtcTicks = 0)
 {
     public string Name => Path.GetFileName(FullPath);
+}
+
+internal enum SearchMatchMode
+{
+    Substring = 0,
+    Related = 1,
+    Exact = 2
+}
+
+internal enum SearchSortField
+{
+    Path = 0,
+    Size = 1,
+    ModifiedTime = 2
+}
+
+internal enum SearchSizeFilter
+{
+    Any = 0,
+    Tiny = 1,
+    Small = 2,
+    Medium = 3,
+    Large = 4,
+    Huge = 5
+}
+
+internal enum SearchTimeFilter
+{
+    Any = 0,
+    Today = 1,
+    Last7Days = 2,
+    Last30Days = 3,
+    LastYear = 4
+}
+
+internal sealed record SearchQueryOptions(
+    SearchMatchMode MatchMode = SearchMatchMode.Related,
+    SearchSortField SortField = SearchSortField.Path,
+    bool SortDescending = false,
+    string PathFilter = "",
+    SearchSizeFilter SizeFilter = SearchSizeFilter.Any,
+    SearchTimeFilter TimeFilter = SearchTimeFilter.Any)
+{
+    public static SearchQueryOptions Default { get; } = new();
+    public static SearchQueryOptions LegacyDefault { get; } = new(SearchMatchMode.Substring, SearchSortField.Path, false);
+    public bool HasActiveFilters => !string.IsNullOrWhiteSpace(PathFilter) || SizeFilter != SearchSizeFilter.Any || TimeFilter != SearchTimeFilter.Any;
+    public int ActiveFilterCount =>
+        (!string.IsNullOrWhiteSpace(PathFilter) ? 1 : 0) +
+        (SizeFilter != SearchSizeFilter.Any ? 1 : 0) +
+        (TimeFilter != SearchTimeFilter.Any ? 1 : 0);
+}
+
+internal static class SearchMetadataFilter
+{
+    public static bool MatchesSize(SearchSizeFilter filter, bool isDirectory, long size) => filter switch
+    {
+        SearchSizeFilter.Any => true,
+        SearchSizeFilter.Tiny => !isDirectory && size < 102_400L,
+        SearchSizeFilter.Small => !isDirectory && size is >= 102_400L and < 1_048_576L,
+        SearchSizeFilter.Medium => !isDirectory && size is >= 1_048_576L and < 10_485_760L,
+        SearchSizeFilter.Large => !isDirectory && size is >= 10_485_760L and < 104_857_600L,
+        SearchSizeFilter.Huge => !isDirectory && size >= 104_857_600L,
+        _ => true
+    };
+
+    public static long GetMinUtcTicks(SearchTimeFilter filter) => filter switch
+    {
+        SearchTimeFilter.Today => DateTime.Today.ToUniversalTime().Ticks,
+        SearchTimeFilter.Last7Days => DateTime.UtcNow.AddDays(-7).Ticks,
+        SearchTimeFilter.Last30Days => DateTime.UtcNow.AddDays(-30).Ticks,
+        SearchTimeFilter.LastYear => DateTime.UtcNow.AddYears(-1).Ticks,
+        _ => 0L
+    };
+
+    public static bool MatchesTime(long lastWriteUtcTicks, long minUtcTicks) =>
+        minUtcTicks <= 0L || (lastWriteUtcTicks > 0L && lastWriteUtcTicks >= minUtcTicks);
 }
 
 internal sealed record SearchPage(IReadOnlyList<SearchHit> Items, bool HasMore)

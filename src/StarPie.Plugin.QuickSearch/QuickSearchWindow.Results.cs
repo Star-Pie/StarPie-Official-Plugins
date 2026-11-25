@@ -34,7 +34,12 @@ internal sealed partial class QuickSearchWindow
         ["copyPath"] = "M9,6 H20 V21 H9 Z M15,3 H5 V16",
         ["copyName"] = "M4,5 H20 V19 H4 Z M7,9 H17 M7,13 H13",
         ["previous"] = "M15,5 L8,12 15,19",
-        ["next"] = "M9,5 L16,12 9,19"
+        ["next"] = "M9,5 L16,12 9,19",
+        ["matchRelated"] = "M4,7 H13 M4,12 H11 M4,17 H9 M17,11 V19 M13,15 H21",
+        ["matchExact"] = "M5,5 H19 V19 H5 Z M8,12 L11,15 L16,9",
+        ["sortAsc"] = "M12,19 V5 M7,10 L12,5 L17,10",
+        ["sortDesc"] = "M12,5 V19 M7,14 L12,19 L17,14",
+        ["filter"] = "M4,5 H20 L14,12 V19 L10,17 V12 Z"
     }.ToDictionary(pair => pair.Key, pair =>
     {
         var drawing = Geometry.Parse(pair.Value);
@@ -81,28 +86,77 @@ internal sealed partial class QuickSearchWindow
         };
     }
 
-    private static TextBlock MatchText(string text, string query, double size)
+    private static TextBlock MatchText(string text, string query, SearchMatchMode mode, double size)
     {
         var line = new TextBlock { TextTrimming = TextTrimming.CharacterEllipsis, FontSize = size };
-        if (string.IsNullOrEmpty(query))
+        if (string.IsNullOrEmpty(query) || string.IsNullOrEmpty(text))
         {
             line.Text = text;
             return line;
         }
-        int start = 0;
-        int match;
-        while ((match = text.IndexOf(query, start, StringComparison.OrdinalIgnoreCase)) >= 0)
+        var ranges = new List<(int Start, int Length)>();
+        if (mode == SearchMatchMode.Related)
         {
-            if (match > start) line.Inlines.Add(new Run(text[start..match]));
-            line.Inlines.Add(new Run(text.Substring(match, query.Length))
+            foreach (string token in query.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                CollectRanges(text, token, ranges);
+        }
+        else
+        {
+            CollectRanges(text, query, ranges);
+        }
+        if (ranges.Count == 0)
+        {
+            line.Text = text;
+            return line;
+        }
+        ranges.Sort((a, b) => a.Start != b.Start ? a.Start.CompareTo(b.Start) : b.Length.CompareTo(a.Length));
+        int cursor = 0;
+        foreach (var (matchStart, matchLength) in ranges)
+        {
+            int start = Math.Max(cursor, matchStart);
+            int end = matchStart + matchLength;
+            if (end <= start) continue;
+            if (start > cursor) line.Inlines.Add(new Run(text[cursor..start]));
+            line.Inlines.Add(new Run(text[start..end])
             {
                 FontWeight = FontWeights.Bold,
                 TextDecorations = TextDecorations.Underline
             });
-            start = match + query.Length;
+            cursor = end;
         }
-        if (start < text.Length) line.Inlines.Add(new Run(text[start..]));
+        if (cursor < text.Length) line.Inlines.Add(new Run(text[cursor..]));
         return line;
+    }
+
+    private static void CollectRanges(string text, string term, List<(int Start, int Length)> ranges)
+    {
+        if (string.IsNullOrEmpty(term)) return;
+        int start = 0;
+        int match;
+        while ((match = text.IndexOf(term, start, StringComparison.OrdinalIgnoreCase)) >= 0)
+        {
+            ranges.Add((match, term.Length));
+            start = match + term.Length;
+        }
+    }
+
+    internal static string FormatMetadata(SearchRow row)
+    {
+        string time = row.LastWriteUtcTicks > 0
+            ? new DateTime(row.LastWriteUtcTicks, DateTimeKind.Utc).ToLocalTime().ToString("yyyy-MM-dd HH:mm",
+                System.Globalization.CultureInfo.CurrentCulture)
+            : "";
+        if (row.IsDirectory) return time;
+        string size = FormatSize(row.Size);
+        return string.IsNullOrEmpty(time) ? size : $"{size} · {time}";
+    }
+
+    internal static string FormatSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        if (bytes < 1024L * 1024 * 1024) return $"{bytes / (1024.0 * 1024.0):F1} MB";
+        return $"{bytes / (1024.0 * 1024.0 * 1024.0):F2} GB";
     }
 
     private void AddResult(SearchRow row)
@@ -133,11 +187,27 @@ internal sealed partial class QuickSearchWindow
         badge.SetResourceReference(TextElement.ForegroundProperty, "QuickSearch.Ink." + category);
         DockPanel.SetDock(badge, Dock.Right);
         body.Children.Add(badge);
+
+        string metaText = FormatMetadata(row);
+        if (!string.IsNullOrEmpty(metaText))
+        {
+            var meta = new TextBlock
+            {
+                Text = metaText,
+                FontSize = 11,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(8, 0, 6, 0),
+                Style = (Style)FindResource("QuickSearch.PathText")
+            };
+            DockPanel.SetDock(meta, Dock.Right);
+            body.Children.Add(meta);
+        }
+
         var lines = new StackPanel { VerticalAlignment = VerticalAlignment.Center, ToolTip = row.Path };
         string query = _input.Text.Trim();
-        var name = MatchText(row.Name, query, 14);
+        var name = MatchText(row.Name, query, _matchMode, 14);
         name.FontWeight = FontWeights.SemiBold;
-        var path = MatchText(row.Path, query, 11);
+        var path = MatchText(row.Path, query, _matchMode, 11);
         path.Margin = new Thickness(0, 2, 0, 0);
         path.Style = (Style)FindResource("QuickSearch.PathText");
         lines.Children.Add(name);

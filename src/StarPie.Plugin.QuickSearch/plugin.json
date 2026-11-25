@@ -6,7 +6,7 @@
   "author": "StarPie Studio",
   "homepage": "https://github.com/Star-Pie/StarPie-Official-Plugins",
   "license": "MIT",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "apiVersion": "1.11",
   "minHostVersion": "1.8.0-beta.7",
   "targetFramework": "net8.0-windows",
